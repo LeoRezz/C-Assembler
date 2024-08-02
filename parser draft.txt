@@ -1,0 +1,128 @@
+void parse_line(char *line) {
+    char *token;
+    char label[MAX_LABEL_LENGTH] = {0};
+    int tokenLength = 0;
+
+    if (line == NULL) {
+        printf("Error in parse_line: NULL line passed\n");
+        return;
+    }
+
+    printf("Parsing line: %s\n", line);
+
+    token = strtok(line, " \t\n");
+    if (token != NULL) {
+        tokenLength = strlen(token);
+    } else
+        return;
+
+    /* Check if the line starts with a label */
+    if (token != NULL && token[tokenLength - 1] == ':') {
+        strncpy(label, token, tokenLength - 1);
+        label[tokenLength - 1] = '\0'; // Remove the ':'
+        token = strtok(NULL, " \t\n"); // Move to next token
+        printf("Label is: %s\n", label);
+    }
+
+    // Now token is either an instruction or a directive
+    if (token == NULL) {
+        // Line only contained a label or was empty
+        printf("Line is empty or contains only a label\n");
+        return;
+    }
+
+    printf("Token is: %s\n", token);
+    /*
+    if (is_instruction(token)) {
+        handle_instruction(token, label);
+    } else if (is_directive(token)) {
+        handle_directive(token, label);
+    } else {
+        printf("Error in line %d: Unknown token '%s'\n", current_line, token);
+    }*/
+}
+
+void handle_instruction(char *token, char *label) {
+    if (token == NULL || label == NULL) {
+        // Handle error: null pointer passed
+        printf("Error in handle_instruction: null pointer passed\n");
+        return;
+    }
+
+    if (label[0] != '\0') {
+        addSymbol(label, IC, SYMBOL_CODE);
+    }
+
+    int instruction_length = get_instruction_length(token);
+    if (instruction_length == -1) {
+        // Handle error: invalid instruction
+        printf("Error in handle_instruction: invalid instruction '%s'\n", token);
+        return;
+    }
+
+    // Parse operands and do any necessary processing
+    IC += instruction_length;
+}
+
+void handle_directive(char *token, char *label) {
+    if (strcmp(token, ".data") == 0) {
+        if (label[0] != '\0') {
+            addSymbol(label, DC, SYMBOL_DATA);
+        }
+        handle_data_directive();
+    } else if (strcmp(token, ".string") == 0) {
+        if (label[0] != '\0') {
+            addSymbol(label, DC, SYMBOL_DATA);
+        }
+        handle_string_directive();
+    } else if (strcmp(token, ".entry") == 0) {
+        handle_entry_directive();
+    } else if (strcmp(token, ".extern") == 0) {
+        handle_extern_directive();
+    }
+}
+
+void handle_data_directive() {
+    char *token;
+    while ((token = strtok(NULL, " ,\t\n")) != NULL) {
+        // Convert token to integer and store in data array
+        // Increment DC
+    }
+}
+
+void handle_string_directive() {
+    char *token = strtok(NULL, "\"\n"); // Get the string content
+    if (token) {
+        // Store each character in data array
+        // Increment DC for each character plus null terminator
+    }
+}
+
+void handle_entry_directive() {
+    // This might be handled in the second pass
+    // For now, just note that this symbol is an entry point
+}
+
+void handle_extern_directive() {
+    char *token = strtok(NULL, " \t\n");
+    if (token) {
+        addSymbol(token, 0, SYMBOL_EXTERNAL);
+    }
+}
+
+int is_instruction(char *token) {
+
+    return find_opcode(token) != NULL;
+}
+
+int get_instruction_length(char *token) {
+    const Opcode *op = find_opcode(token);
+    if (op) {
+        return op->operands + 1; // Number of operands plus the instruction itself
+    }
+    return -1; // Invalid instruction
+}
+
+int is_directive(char *token) {
+    return 1;
+}
