@@ -12,7 +12,7 @@ int IC = 0;
 int DC = 0;
 int current_line = 0;
 
-/* prototypes */
+/* prototypes: should be in header file*/
 void first_pass(FILE *input_file);
 
 int main(int argc, char *argv[]) {
