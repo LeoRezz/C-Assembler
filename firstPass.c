@@ -30,7 +30,6 @@ int main(int argc, char *argv[]) {
   initTokenizer();
   first_pass(input_file);
   updateDataSymbols(IC);
-
   printSymbolTable();
   freeSymbolTable();
 }
