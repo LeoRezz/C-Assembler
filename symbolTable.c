@@ -55,6 +55,20 @@ symbol *findSymbol(char *name) {
     return NULL;
 }
 
+void updateDataSymbols(int IC) {
+    printf("Updating data symbols...\n");
+    for (int i = 0; i < symbolCount; i++) {
+        if (symbolTable[i].type == SYMBOL_DATA) {
+            printf("Updating symbol %s with value %d\n", symbolTable[i].name,
+                   symbolTable[i].value);
+            symbolTable[i].value += IC + 100;
+            printf("Updated symbol %s with value %d\n", symbolTable[i].name,
+                   symbolTable[i].value);
+        }
+    }
+    printf("Data symbols updated.\n");
+}
+
 void printSymbolTable() {
     printf("\nSymbol Table:\n");
     printf("%-32s %-10s %-10s\n", "Name", "Value", "Type");

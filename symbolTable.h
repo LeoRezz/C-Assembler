@@ -22,6 +22,7 @@ typedef struct {
 void initSymbolTable();
 int addSymbol(char *name, int *value, SymbolType type);
 symbol *findSymbol(char *name);
+void updateDataSymbols(int IC);
 void printSymbolTable();
 void freeSymbolTable();
 #endif
