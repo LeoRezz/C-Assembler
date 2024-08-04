@@ -1,5 +1,5 @@
-#include "macroExp.h"
-
+#include "preprocessor.h"
+#define STRCPY_MALLOC(dst, src) ((dst) = (char *)malloc(strlen(src) + 1)) ? strcpy(dst, src) : NULL
 // Macro structure
 typedef struct macro {
     char name[MAX_MACRO_NAME];   // Name of the macro
@@ -37,7 +37,9 @@ void cleanupMacros();
 int main(int argc, char *argv[]) {
     FILE *input_file = NULL;
     FILE *output_file = NULL;
-    char *file_name = NULL;
+    char *input_name = NULL;
+    char *output_name = NULL;
+
     char line[MAX_LINE];
 
     if (argc != 2) {
@@ -45,10 +47,12 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     /* Open files*/
-    file_name = strdup(argv[1]);
-    strcat(file_name, ".as");
-    input_file = fopen(file_name, "r");
-    output_file = fopen("temp.am", "w");
+    STRCPY_MALLOC(input_name, argv[1]);
+    STRCPY_MALLOC(output_name, argv[1]);
+    strcat(input_name, ".as");
+    strcat(output_name, ".am");
+    input_file = fopen(input_name, "r");
+    output_file = fopen(output_name, "w");
 
     /* fopen() return NULL if unable to open file in given mode. */
     if (!input_file) {
@@ -83,7 +87,9 @@ int main(int argc, char *argv[]) {
     fclose(input_file);
     fclose(output_file);
     cleanupMacros();
-    free(file_name);
+    free(input_name);
+    free(output_name);
+
     return 0;
 }
 /*

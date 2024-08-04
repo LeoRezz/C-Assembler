@@ -6,19 +6,22 @@
 
 typedef enum {
     TOKEN_UNKNOWN,
-    TOKEN_LABEL,
-    TOKEN_INSTRUCTION,
-    TOKEN_DIRECTIVE,
-    TOKEN_OPERAND,
-    TOKEN_STRING,
-    TOKEN_NUMBER
+    TOKEN_LABEL, /* LABEL:*/
+    TOKEN_INSTRUCTION, /* mov , add , cmp */
+    TOKEN_DIRECTIVE, /* .data , .string , .extern , .entry */
+    TOKEN_OPERAND, /* r0 , *r5 , #-2 , LABEL , ... */
+    TOKEN_STRING, /* "hello" */
+    TOKEN_NUMBER /* 0 , 1 , 2 , 3 , ... */
 } TokenType;
 
 typedef enum {
+    ERROR = -1,
+    DATA,
     INSTRUCTION,
-    DIRECTIVE,
-    LABEL_CODE,
-    LABEL_DATA
+    LABEL_INSTRUCTION,
+    LABEL_DATA,
+    EXTERN,
+    ENTRY
 } LineType;
 
 typedef struct {
@@ -33,10 +36,6 @@ typedef struct {
     int line_number;
     LineType type;
 } TokenizedLine;
-
-
-
-
 
 typedef struct {
     TokenizedLine *lines;
