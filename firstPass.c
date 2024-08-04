@@ -3,12 +3,12 @@
 #include "parser.h"
 #include "symbolTable.h"
 #include "tokenizer.h"
-
+#define INITIAL_ADDRESS 100
 #define MAX_LINE 82
 #define MAX_LABEL_LENGTH 31
 
 /* Global state, Instruction and Data count*/
-int IC = 0;
+int IC = INITIAL_ADDRESS;
 int DC = 0;
 int current_line = 0;
 

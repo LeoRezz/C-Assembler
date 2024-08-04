@@ -1,5 +1,6 @@
 #include "tokenizer.h"
 #include "symbolTable.h"
+#include "opcodeTable.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -114,8 +115,12 @@ TokenizedLine *tokenize_line(char *line) {
 
 // You'll need to implement this function
 static int is_valid_instruction(const char *token) {
-    // Check if the token is a valid instruction
-    // Return 1 if it is, 0 otherwise
-    // This will depend on your specific instruction set
-    return 0; // Placeholder
+  // Check if the token is a valid instruction
+  if (find_opcode(token) != NULL) {
+    return 1;
+  }
+
+  // Return 1 if it is, 0 otherwise
+  // This will depend on your specific instruction set
+  return 0; // Placeholder
 }
