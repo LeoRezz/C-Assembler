@@ -125,49 +125,45 @@ TokenizedLine *tokenize_line(char *line) {
     int token_count;
     char *token;
     char temp[MAX_TOKEN_LENGTH];
+    char *label;
+    char *opcode;
+    char *operand1;
+    char *operand2;
     int len;
+    int type;
     char *p;
     TokenizedLine *tok_line;
     TRY(tok_line = (TokenizedLine *)malloc(sizeof(TokenizedLine)));
-    /* Skip whitespace */
-    while (isspace(*line)) {
-        line++;
-    }
 
-    /* Determine line type */    
-    tok_line->type = determine_line_type(line);
+    /* Initialize line */
+    tok_line->num_of_tokens = 0;
+    tok_line->line_number = 0;
+    tok_line->type = ERROR;
+
     
-    if (tok_line->type == ERROR) {
+
+    /* Determine line type */
+    type = tok_line->type = determine_line_type(line);
+    if (type == ERROR) {
         printf("Invalid line: %s\n", line);
         free(tok_line);
         return NULL;
     }
 
+
     /* Tokenize line */
     token_count = 0;
-    printf("Tokenizing line: %s\n", line);
-    char *current = line;
-    token_count = 0;
-    while (token_count < MAX_TOKENS) {
-        char temp[MAX_TOKEN_LENGTH] = {0};
-        my_getword(temp, MAX_TOKEN_LENGTH, &current);
-        
-        printf("Token: %s\n", temp);
-
-        int token_len = strlen(temp);
-        if (token_len <= 0) break;  // End of line or error
-
-        strncpy(tok_line->tokens[token_count].value, temp, MAX_TOKEN_LENGTH - 1);
-        tok_line->tokens[token_count].type = determine_token_type(temp, tok_line->type);
-        tok_line->line_number = current_line;
+    if (type == LABEL_INSTRUCTION) {
+        label = strtok(line, " \t\n"); /* LABEL: */
+        strncpy(tok_line->tokens[token_count].value, token, MAX_TOKEN_LENGTH - 1);
+        tok_line->tokens[token_count].type = TOKEN_LABEL;
         token_count++;
-
-        // Skip whitespace
-        while (isspace(*(current))) {
-            printf("Skipping whitespace: %c\n", *(current));
-            current++;
-        }
+        opcode = strtok(NULL, " \t\n");
+        find_opcode(opcode);
+        strncpy(tok_line->tokens[token_count].value, opcode, MAX_TOKEN_LENGTH - 1);
     }
+
+
     tok_line->num_of_tokens = token_count;
 
     printf("Tokenized line: %s\n", line);
