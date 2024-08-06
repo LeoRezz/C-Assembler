@@ -26,6 +26,7 @@ void skip_spaces(char *s);
 
 /* getword: get next word or character from input */
 int my_getword_file(char *word, int lim , FILE *fp);
+/* getword: get next word or character from line */
 int my_getword(char *word, int lim, char **line);
 
 

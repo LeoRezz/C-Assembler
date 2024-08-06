@@ -124,7 +124,7 @@ TokenizedLine *tokenize_line(char *line) {
     Token tok_temp;
     int token_count;
     char *token;
-    char *temp;
+    char temp[MAX_TOKEN_LENGTH];
     int len;
     char *p;
     TokenizedLine *tok_line;
@@ -145,21 +145,30 @@ TokenizedLine *tokenize_line(char *line) {
 
     /* Tokenize line */
     token_count = 0;
-    if (tok_line->type == LABEL_INSTRUCTION) {
-      addSymbol(line, &IC, SYMBOL_CODE);
-    }
+    printf("Tokenizing line: %s\n", line);
+    char *current = line;
+    token_count = 0;
+    while (token_count < MAX_TOKENS) {
+        char temp[MAX_TOKEN_LENGTH] = {0};
+        my_getword(temp, MAX_TOKEN_LENGTH, &current);
+        
+        printf("Token: %s\n", temp);
 
-    token = strtok(line, " \t\n");
-    while (token != NULL && token_count < MAX_TOKENS) {
-        len = strlen(token) + 1; /* +1 for null terminator */
-        strncpy(tok_line->tokens[token_count].value, token, MAX_TOKEN_LENGTH - 1);
-        tok_line->tokens[token_count].value[MAX_TOKEN_LENGTH - 1] = '\0'; // Ensure null-termination
-        tok_line->tokens[token_count].type = determine_token_type(token, tok_line->type);
+        int token_len = strlen(temp);
+        if (token_len <= 0) break;  // End of line or error
+
+        strncpy(tok_line->tokens[token_count].value, temp, MAX_TOKEN_LENGTH - 1);
+        tok_line->tokens[token_count].type = determine_token_type(temp, tok_line->type);
+        tok_line->line_number = current_line;
         token_count++;
-        token = strtok(NULL, " \t\n");
+
+        // Skip whitespace
+        while (isspace(*(current))) {
+            printf("Skipping whitespace: %c\n", *(current));
+            current++;
+        }
     }
     tok_line->num_of_tokens = token_count;
-
 
     printf("Tokenized line: %s\n", line);
 

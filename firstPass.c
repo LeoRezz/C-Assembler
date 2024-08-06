@@ -63,12 +63,12 @@ void first_pass(FILE *file) {
   char line[MAX_LINE];
   TokenizedLine *tokenized_line;
   /* Read each line from the source file */
-  while (fgets(line, sizeof(line), file)) {
+  while (fgets(line, MAX_LINE, file)) {
     current_line++; /* Increment line number for error reporting */
     tokenized_line = tokenize_line(line);      /* Tokenize the line */
-    // parse_tokenized_line(tokenized_line, &IC, &DC); /* Parse the line */
-    // printf("IC in firstPass: %d\n", IC);
-    // printf("DC in firstPass: %d\n", DC);
+    parse_tokenized_line(tokenized_line, &IC, &DC); /* Parse the line */
+    printf("IC in firstPass: %d\n", IC);
+    printf("DC in firstPass: %d\n", DC);
     free(tokenized_line);
   }
 }
