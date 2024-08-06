@@ -1,0 +1,27 @@
+#ifndef UTIL_H
+#define UTIL_H
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TRY(a)       \
+    if (!(a)) {      \
+        perror(#a);  \
+        return NULL; \
+    }
+
+
+/* Add any common utility function declarations here */
+
+/* trim: remove trailing blanks, tabs, newlines */
+int trim(char s[]);
+
+/* make a duplicate of s */
+char *my_strdup(char *s);
+
+char *skipSpaces(char *s);
+
+void skip_spaces(char *s);
+
+#endif /* UTIL_H */

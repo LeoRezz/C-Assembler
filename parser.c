@@ -34,15 +34,15 @@ static void handle_label(TokenizedLine *tokenized_line, int *IC, int *DC) {
   int length = strlen(label);
 
   if (label[0] == '.' || tokenized_line->tokens[1].value[0] == '.') {
-    tokenized_line->type = DIRECTIVE;
+    tokenized_line->type = DATA; /* TO DO: change this */
   }
 
   if (label[length - 1] == ':') {
     label[length - 1] = '\0';
     tokenized_line->type =
-        (tokenized_line->tokens[1].value[0] == '.') ? LABEL_DATA : LABEL_CODE;
+        (tokenized_line->tokens[1].value[0] == '.') ? LABEL_DATA : LABEL_INSTRUCTION;
 
-    if (tokenized_line->type == LABEL_CODE) {
+    if (tokenized_line->type == LABEL_INSTRUCTION) {
       if (!addSymbol(label, IC, SYMBOL_CODE)) {
         printf("Error: Failed to add code symbol '%s' at line %d\n", label,
                current_line);
@@ -59,15 +59,15 @@ static void handle_label(TokenizedLine *tokenized_line, int *IC, int *DC) {
 
 static void handle_directive(TokenizedLine *tokenized_line, int *DC) {
   int opcode_index =
-      (tokenized_line->type == LABEL_CODE || tokenized_line->type == LABEL_DATA)
+      (tokenized_line->type == LABEL_INSTRUCTION || tokenized_line->type == LABEL_DATA)
           ? 1
           : 0;
   const char *directive =
       tokenized_line->tokens[opcode_index]
           .value; // Assuming Token has a 'value' field of type char*
   if (strcmp(directive, ".data") == 0) {
-    tokenized_line->type = DIRECTIVE;
-    *DC += tokenized_line->num_tokens -
+    tokenized_line->type = DATA;
+    *DC += tokenized_line->num_of_tokens -
            1; // Assuming TokenizedLine has a 'num_tokens' field
   } else if (strcmp(directive, ".string") == 0) {
     *DC += strlen(tokenized_line->tokens[opcode_index + 1].value) -

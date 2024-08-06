@@ -1,8 +1,5 @@
 #include "firstPass.h"
-#include "opcodeTable.h"
-#include "parser.h"
-#include "symbolTable.h"
-#include "tokenizer.h"
+
 #define INITIAL_ADDRESS 100
 #define MAX_LINE 82
 #define MAX_LABEL_LENGTH 31
@@ -16,10 +13,9 @@ int current_line = 0;
 void first_pass(FILE *input_file);
 
 int main(int argc, char *argv[]) {
-  FILE *input_file = NULL;
-  char *file_name = NULL;
+  FILE *input_file;
+  char *file_name;
   input_file = fopen("temp.am", "r"); /* TODO: change later to argv[1] */
-
   /* fopen() return NULL if unable to open file in given mode. */
   if (!input_file) {
     printf("Failed to open input file: %s\n", argv[1]);
@@ -27,7 +23,6 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
   initSymbolTable(); /* Initialize symbol table */
-  initTokenizer();
   first_pass(input_file);
   updateDataSymbols(IC);
   printSymbolTable();
@@ -71,8 +66,10 @@ void first_pass(FILE *file) {
   while (fgets(line, sizeof(line), file)) {
     current_line++; /* Increment line number for error reporting */
     tokenized_line = tokenize_line(line);      /* Tokenize the line */
-    parse_tokenized_line(tokenized_line, &IC, &DC); /* Parse the line */
-    printf("IC in firstPass: %d\n", IC);
-    printf("DC in firstPass: %d\n", DC);
+    // parse_tokenized_line(tokenized_line, &IC, &DC); /* Parse the line */
+    // printf("IC in firstPass: %d\n", IC);
+    // printf("DC in firstPass: %d\n", DC);
+    free(tokenized_line);
   }
 }
+

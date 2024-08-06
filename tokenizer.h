@@ -15,35 +15,31 @@ typedef enum {
 } TokenType;
 
 typedef enum {
-    ERROR = -1,
-    DATA,
-    INSTRUCTION,
+    ERROR,
+    LABEL_DEFINITION,
     LABEL_INSTRUCTION,
     LABEL_DATA,
+    DATA,
+    INSTRUCTION,
     EXTERN,
     ENTRY
 } LineType;
 
 typedef struct {
     char value[MAX_TOKEN_LENGTH];
-    int position;
     TokenType type;
 } Token;
 
 typedef struct {
     Token tokens[MAX_TOKENS];
-    int num_tokens;
+    int num_of_tokens;
     int line_number;
     LineType type;
 } TokenizedLine;
 
-typedef struct {
-    TokenizedLine *lines;
-    int capacity;
-    int size;
-} TokenizedProgram;
 
 TokenizedLine *tokenize_line(char *line);
 void initTokenizer();
+
 
 #endif

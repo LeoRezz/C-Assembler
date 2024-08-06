@@ -1,6 +1,8 @@
 #include "preprocessor.h"
+#include "util.h"
 #define STRCPY_MALLOC(dst, src) ((dst) = (char *)malloc(strlen(src) + 1)) ? strcpy(dst, src) : NULL
-// Macro structure
+
+/* Macro structure */
 typedef struct macro {
     char name[MAX_MACRO_NAME];   // Name of the macro
     char *body[MAX_MACRO_LINES]; // max lines to be defined in a single macro
@@ -29,11 +31,11 @@ Mode current_mode = NORMAL;
 int setMacroName(char *macroName, macro *macro_table);
 int findMacroIndex(char *line);
 void addMacroLines(char *line);
-char *skipSpaces(char *line);
 int isValidName(char *line);
 int hasExtraChar(char *line);
 void cleanupMacros();
 
+/* Main function to be changed to: int preprocess(char *input_filename, char *am_filename) */
 int main(int argc, char *argv[]) {
     FILE *input_file = NULL;
     FILE *output_file = NULL;
@@ -47,10 +49,10 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     /* Open files*/
-    STRCPY_MALLOC(input_name, argv[1]);
-    STRCPY_MALLOC(output_name, argv[1]);
-    strcat(input_name, ".as");
-    strcat(output_name, ".am");
+    input_name = my_strdup(argv[1]);
+    output_name = my_strdup(argv[1]);
+    TRY(strcat(input_name, ".as"));
+    TRY(strcat(output_name, ".am"));
     input_file = fopen(input_name, "r");
     output_file = fopen(output_name, "w");
 
@@ -157,14 +159,7 @@ int setMacroName(char *macroName, macro *macro_table) {
     printf("Macro name is: %s\n", macro_table[macro_count].name);
     return 0; // Success
 }
-char *skipSpaces(char *line) {
-    char *ptr = line;
-    // Skip whitespace and tabs characters
-    while (isspace(*ptr)) {
-        ptr++;
-    }
-    return ptr;
-}
+
 
 /* Recives a char pointer of the name declration after "macr " */
 /* Checks for extra characters on the macro definition line */

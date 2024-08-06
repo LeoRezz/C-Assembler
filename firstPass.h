@@ -1,15 +1,9 @@
 #ifndef FIRST_PASS_H
 #define FIRST_PASS_H
-
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#define TRY(a)      \
-    if (!(a)) {     \
-        perror(#a); \
-        exit(1);    \
-    }
-
+#include "util.h"
+#include "opcodeTable.h"
+#include "parser.h"
+#include "symbolTable.h"
+#include "tokenizer.h"
 
 #endif
