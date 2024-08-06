@@ -5,17 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TRY(a)       \
-    if (!(a)) {      \
-        perror(#a);  \
-        return NULL; \
-    }
-
+#define TRY(a)                                                                 \
+  if (!(a)) {                                                                  \
+    perror(#a);                                                                \
+    return NULL;                                                               \
+  }
 
 /* Add any common utility function declarations here */
 
+
 /* trim: remove trailing blanks, tabs, newlines */
-int trim(char s[]);
+int trim_trailing_spaces(char s[]);
 
 /* make a duplicate of s */
 char *my_strdup(char *s);
@@ -23,5 +23,10 @@ char *my_strdup(char *s);
 char *skipSpaces(char *s);
 
 void skip_spaces(char *s);
+
+/* getword: get next word or character from input */
+int my_getword_file(char *word, int lim , FILE *fp);
+int my_getword(char *word, int lim, char **line);
+
 
 #endif /* UTIL_H */

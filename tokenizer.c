@@ -6,7 +6,7 @@
 #define INITIAL_TOKEN_LINES_SIZE 20
 
 static int is_valid_instruction(const char *token);
-static TokenType determine_token_type(const char *token);
+static TokenType determine_token_type(const char *token, LineType line_type);
 static LineType determine_line_type(char *line);
 /* Global state, Instruction and Data count*/
 extern int IC;
@@ -43,20 +43,20 @@ static LineType determine_line_type(char *line) {
     if (p) {
         len = strlen(p);
         fprintf(stderr, "determine_line_type: checking for entry/extern\n");
-        if (strncmp(p, ".entry ", len) == 0) {
+        if (strncmp(p, ".entry ", 7) == 0) {
             fprintf(stderr, "determine_line_type: line is entry\n");
             return ENTRY;
         }
-        if (strncmp(p, ".extern ", len) == 0) {
+        if (strncmp(p, ".extern ", 8) == 0) {
             fprintf(stderr, "determine_line_type: line is extern\n");
             return EXTERN;
         }
         fprintf(stderr, "determine_line_type: checking for data/string\n");
-        if (strncmp(p, ".data ", 5) == 0) {
+        if (strncmp(p, ".data ", 6) == 0) {
             fprintf(stderr, "determine_line_type: line is data/string\n");
             return label_definition ? LABEL_DATA : DATA;
         }
-        if (strncmp(p, ".string ", 7) == 0) {
+        if (strncmp(p, ".string ", 8) == 0) {
             fprintf(stderr, "determine_line_type: line is data/string\n");
             return label_definition ? LABEL_DATA : DATA;
         }
@@ -66,35 +66,51 @@ static LineType determine_line_type(char *line) {
     return label_definition ? LABEL_INSTRUCTION : INSTRUCTION;
 }
 
-static TokenType determine_token_type(const char *token)
-{
-    if (token[0] == '.') {
-        printf("Token is a directive\n");
-        return TOKEN_DIRECTIVE;
+static TokenType determine_token_type(const char *token, LineType line_type) {
+    printf("\tToken: '%s'\n", token);
+    switch (line_type) {
+        case LABEL_INSTRUCTION:
+            printf("Token is a label or instruction\n");
+            if (is_valid_instruction(token)) {
+                printf("Token is an instruction\n");
+                return TOKEN_INSTRUCTION;
+            }
+            printf("Token is a label\n");
+            return TOKEN_LABEL;
+        case LABEL_DATA:
+            printf("Token is a label\n");
+            return TOKEN_LABEL;
+        case INSTRUCTION:
+            printf("Token is a label or instruction\n");
+            if (is_valid_instruction(token)) {
+                printf("Token is an instruction\n");
+                return TOKEN_INSTRUCTION;
+            }
+            printf("Token is a label\n");
+            return TOKEN_LABEL;
+        case DATA:
+            printf("Token is a number, string, or register\n");
+            if (token[0] == '"') {
+                printf("Token is a string\n");
+                return TOKEN_STRING;
+            }
+            if (isdigit((int)token[0]) || token[0] == '-' || token[0] == '+') {
+                printf("Token is a number\n");
+                return TOKEN_NUMBER;
+            }
+            if (token[0] == 'r' && strlen(token) == 2 && token[1] >= '0' && token[1] <= '7') {
+                printf("Token is a register\n");
+                return TOKEN_OPERAND;
+            }
+            printf("Token is an operand\n");
+            return TOKEN_OPERAND;
+        case EXTERN || ENTRY:
+            printf("Token is a directive\n");
+            return TOKEN_DIRECTIVE;
+        default:
+            printf("Invalid line type\n");
+            return ERROR;
     }
-    if (token[0] == 'r' && strlen(token) == 2 && token[1] >= '0' && token[1] <= '7') {
-        printf("Token is a register\n");
-        return TOKEN_OPERAND;
-    }
-    if (isalnum((int)token[0])) {
-        printf("Token is a label or instruction\n");
-        if (is_valid_instruction(token)) {
-            printf("Token is an instruction\n");
-            return TOKEN_INSTRUCTION;
-        }
-        printf("Token is a label\n");
-        return TOKEN_LABEL;
-    }
-    if (token[0] == '"') {
-        printf("Token is a string\n");
-        return TOKEN_STRING;
-    }
-    if (isdigit((int)token[0]) || token[0] == '-' || token[0] == '+') {
-        printf("Token is a number\n");
-        return TOKEN_NUMBER;
-    }
-    printf("Token is an operand\n");
-    return TOKEN_OPERAND;
 }
 
 static int is_valid_instruction(const char *token)
@@ -120,6 +136,7 @@ TokenizedLine *tokenize_line(char *line) {
 
     /* Determine line type */    
     tok_line->type = determine_line_type(line);
+    
     if (tok_line->type == ERROR) {
         printf("Invalid line: %s\n", line);
         free(tok_line);
@@ -128,11 +145,16 @@ TokenizedLine *tokenize_line(char *line) {
 
     /* Tokenize line */
     token_count = 0;
+    if (tok_line->type == LABEL_INSTRUCTION) {
+      addSymbol(line, &IC, SYMBOL_CODE);
+    }
+
     token = strtok(line, " \t\n");
     while (token != NULL && token_count < MAX_TOKENS) {
         len = strlen(token) + 1; /* +1 for null terminator */
         strncpy(tok_line->tokens[token_count].value, token, MAX_TOKEN_LENGTH - 1);
         tok_line->tokens[token_count].value[MAX_TOKEN_LENGTH - 1] = '\0'; // Ensure null-termination
+        tok_line->tokens[token_count].type = determine_token_type(token, tok_line->type);
         token_count++;
         token = strtok(NULL, " \t\n");
     }
