@@ -61,11 +61,16 @@ int main(int argc, char *argv[]) {
 void first_pass(FILE *file) {
   /* Implement Pass 1 algorithm here */
   char line[MAX_LINE];
-  TokenizedLine *tokenized_line;
+  TokenizedLine **tokenized_line;
   /* Read each line from the source file */
   while (fgets(line, MAX_LINE, file)) {
     current_line++; /* Increment line number for error reporting */
-    tokenized_line = tokenize_line(line);      /* Tokenize the line */
+    tokenized_line = tokenize_line(line);     /* Tokenize the line */
+    if (tokenized_line == NULL) {
+      fprintf(stderr, "Error tokenizing line %d\n", current_line);
+      free(tokenized_line);
+      return;
+    }
     parse_tokenized_line(tokenized_line, &IC, &DC); /* Parse the line */
     printf("IC in firstPass: %d\n", IC);
     printf("DC in firstPass: %d\n", DC);

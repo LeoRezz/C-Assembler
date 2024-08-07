@@ -1,6 +1,6 @@
 #include "tokenizer.h"
-#include "symbolTable.h"
 #include "opcodeTable.h"
+#include "symbolTable.h"
 #include "util.h"
 
 #define INITIAL_TOKEN_LINES_SIZE 20
@@ -13,160 +13,204 @@ extern int IC;
 extern int DC;
 extern int current_line;
 
-
 static LineType determine_line_type(char *line) {
-    /*  A line can be of five types:
-    1.  LABEL: OPCODE OPERAND, OPERAND, LABEL_INSTRUCTION.
-    2.  OPCODE OPERAND, OPERAND, INSTRUCTION
-    3.  LABEL: .data OR .string, LABEL_DATA
-    4.  .data OR .string, DATA
-    5.  .extern OR .entry, EXTERN OR ENTRY */
+  /*  A line can be of five types:
+  1.  LABEL: OPCODE OPERAND, OPERAND, LABEL_INSTRUCTION.
+  2.  OPCODE OPERAND, OPERAND, INSTRUCTION
+  3.  LABEL: .data OR .string, LABEL_DATA
+  4.  .data OR .string, DATA
+  5.  .extern OR .entry, EXTERN OR ENTRY */
 
-    int label_definition;
-    int len;
-    char *p;
-    label_definition = 0;
-    len = strlen(line) + 1; /* + 1 for \0 */
+  int label_definition;
+  int len;
+  char *p;
+  label_definition = 0;
+  len = strlen(line) + 1; /* + 1 for \0 */
 
-    /* MAIN:	add  r3, LIST 
-           ^                   */
-    fprintf(stderr, "in determine_line_type, line: '%s'\n", line);
-    if (p = strchr(line, ':')) { /* LABEL: */
-        fprintf(stderr, "determine_line_type: line contains label\n");
-        label_definition = 1;
-        p++;
-        while (isspace(*p)) {
-            p++;
-        }
+  /* MAIN:	add  r3, LIST
+         ^                   */
+  fprintf(stderr, "in determine_line_type, line: '%s'\n", line);
+  if (p = strchr(line, ':')) { /* LABEL: */
+    fprintf(stderr, "determine_line_type: line contains label\n");
+    label_definition = 1;
+    p++;
+    while (isspace(*p)) {
+      p++;
     }
+  }
 
-    if (p) {
-        len = strlen(p);
-        fprintf(stderr, "determine_line_type: checking for entry/extern\n");
-        if (strncmp(p, ".entry ", 7) == 0) {
-            fprintf(stderr, "determine_line_type: line is entry\n");
-            return ENTRY;
-        }
-        if (strncmp(p, ".extern ", 8) == 0) {
-            fprintf(stderr, "determine_line_type: line is extern\n");
-            return EXTERN;
-        }
-        fprintf(stderr, "determine_line_type: checking for data/string\n");
-        if (strncmp(p, ".data ", 6) == 0) {
-            fprintf(stderr, "determine_line_type: line is data/string\n");
-            return label_definition ? LABEL_DATA : DATA;
-        }
-        if (strncmp(p, ".string ", 8) == 0) {
-            fprintf(stderr, "determine_line_type: line is data/string\n");
-            return label_definition ? LABEL_DATA : DATA;
-        }
-        
+  if (p) {
+    len = strlen(p);
+    fprintf(stderr, "determine_line_type: checking for entry/extern\n");
+    if (strncmp(p, ".entry ", 7) == 0) {
+      fprintf(stderr, "determine_line_type: line is entry\n");
+      return ENTRY;
     }
-    fprintf(stderr, "determine_line_type: line is label_instruction or instruction\n");
-    return label_definition ? LABEL_INSTRUCTION : INSTRUCTION;
+    if (strncmp(p, ".extern ", 8) == 0) {
+      fprintf(stderr, "determine_line_type: line is extern\n");
+      return EXTERN;
+    }
+    fprintf(stderr, "determine_line_type: checking for data/string\n");
+    if (strncmp(p, ".data ", 6) == 0) {
+      fprintf(stderr, "determine_line_type: line is data/string\n");
+      return label_definition ? LABEL_DATA : DATA;
+    }
+    if (strncmp(p, ".string ", 8) == 0) {
+      fprintf(stderr, "determine_line_type: line is data/string\n");
+      return label_definition ? LABEL_DATA : DATA;
+    }
+  }
+  fprintf(stderr,
+          "determine_line_type: line is label_instruction or instruction\n");
+  return label_definition ? LABEL_INSTRUCTION : INSTRUCTION;
 }
 
-static TokenType determine_token_type(const char *token, LineType line_type) {
-    printf("\tToken: '%s'\n", token);
-    switch (line_type) {
-        case LABEL_INSTRUCTION:
-            printf("Token is a label or instruction\n");
-            if (is_valid_instruction(token)) {
-                printf("Token is an instruction\n");
-                return TOKEN_INSTRUCTION;
-            }
-            printf("Token is a label\n");
-            return TOKEN_LABEL;
-        case LABEL_DATA:
-            printf("Token is a label\n");
-            return TOKEN_LABEL;
-        case INSTRUCTION:
-            printf("Token is a label or instruction\n");
-            if (is_valid_instruction(token)) {
-                printf("Token is an instruction\n");
-                return TOKEN_INSTRUCTION;
-            }
-            printf("Token is a label\n");
-            return TOKEN_LABEL;
-        case DATA:
-            printf("Token is a number, string, or register\n");
-            if (token[0] == '"') {
-                printf("Token is a string\n");
-                return TOKEN_STRING;
-            }
-            if (isdigit((int)token[0]) || token[0] == '-' || token[0] == '+') {
-                printf("Token is a number\n");
-                return TOKEN_NUMBER;
-            }
-            if (token[0] == 'r' && strlen(token) == 2 && token[1] >= '0' && token[1] <= '7') {
-                printf("Token is a register\n");
-                return TOKEN_OPERAND;
-            }
-            printf("Token is an operand\n");
-            return TOKEN_OPERAND;
-        case EXTERN || ENTRY:
-            printf("Token is a directive\n");
-            return TOKEN_DIRECTIVE;
-        default:
-            printf("Invalid line type\n");
-            return ERROR;
-    }
+int is_register(const char *str) {
+  return (str[0] == 'r' && str[1] >= '0' && str[1] <= '7');
 }
 
-static int is_valid_instruction(const char *token)
-{
-    if (find_opcode(token) != NULL) {
-        return 1;
+int is_number(const char *str) {
+  int i = 0;
+  if (str[i] == '#') {
+    i++;
+  }
+
+  if (str[i] == '+' || str[i] == '-') {
+    i++;
+  }
+  for (; str[i] != '\0'; i++) {
+    if (!isdigit(str[i])) {
+      return 0;
     }
-    return 0;
+  }
+  return i > 0;
 }
+
+TokenType get_token_type(const char *token) {
+  if (token[strlen(token) - 1] == ':') {
+    return TOKEN_LABEL;
+  }
+  if (token[0] == '.') {
+    return TOKEN_DIRECTIVE;
+  }
+  if (is_register(token)) {
+    return TOKEN_REGISTER;
+  }
+  if (is_number(token)) {
+    return TOKEN_NUMBER;
+  }
+  if (token[0] == '"' && token[strlen(token) - 1] == '"') {
+    return TOKEN_STRING;
+  }
+  if (strcmp(token, ",") == 0) {
+    return TOKEN_COMMA;
+  }
+  /* Check if it's a valid instruction (you'd need to implement this) */
+  if (is_valid_instruction(token)) {
+    return TOKEN_OPCODE;
+  }
+  return TOKEN_UNKNOWN;
+}
+static int is_valid_instruction(const char *token) {
+  if (find_opcode(token) != NULL) {
+    return 1;
+  }
+  return 0;
+}
+
 TokenizedLine *tokenize_line(char *line) {
-    Token tok_temp;
-    int token_count;
-    char *token;
-    char temp[MAX_TOKEN_LENGTH];
-    char *label;
-    char *opcode;
-    char *operand1;
-    char *operand2;
-    int len;
-    int type;
-    char *p;
-    TokenizedLine *tok_line;
-    TRY(tok_line = (TokenizedLine *)malloc(sizeof(TokenizedLine)));
+  TokenizedLine *result;
+  TRY(result = (TokenizedLine *)malloc(sizeof(TokenizedLine)));
+  char buffer[MAX_LINE];
+  char *token;
+  int in_string = 0;
+  int i, j;
+  int type, token_count;
+  /* Add line to buffer, without the newline */
+  for (i = 0; line[i] != '\0' && line[i] != '\n'; i++) {
+    buffer[i] = line[i];
+  }
+  buffer[i] = '\0';
+  /* Initialize line */
+  result->num_of_tokens = 0;
+  result->line_number = current_line;
+  result->type = ERROR;
 
-    /* Initialize line */
-    tok_line->num_of_tokens = 0;
-    tok_line->line_number = 0;
-    tok_line->type = ERROR;
+  /* Determine line type by analyzing the first and second token */
+  type = result->type = determine_line_type(line);
+  if (type == ERROR) {
+    printf("Invalid line: %s\n", line);
+    free(result);
+    return NULL;
+  }
 
-    
+  /* Tokenize line */
+  /* Tokenizing the line by it's type */
+  token_count = 0;
+  switch (type) {
+  case LABEL_INSTRUCTION: /* LABEL: OPCODE OPERAND, OPERAND  max tokens = 4 +
+                             comma*/
+    i = 0;
+    while (i < strlen(buffer) && result->num_of_tokens < MAX_TOKENS) {
+      /* Skip whitespace */
+      while (isspace(buffer[i]))
+        i++;
+      if (buffer[i] == '\0')
+        break;
 
-    /* Determine line type */
-    type = tok_line->type = determine_line_type(line);
-    if (type == ERROR) {
-        printf("Invalid line: %s\n", line);
-        free(tok_line);
-        return NULL;
+      /* Handle other tokens */
+      j = i;
+      while (!isspace(buffer[j]) && buffer[j] != ',' && buffer[j] != '\0')
+        j++;
+      if (buffer[j] == ',')
+        j++;
+
+      /* Store token */
+      strncpy(result->tokens[result->num_of_tokens].value, buffer + i, j - i);
+      result->tokens[result->num_of_tokens].value[j - i] = '\0';
+      result->tokens[result->num_of_tokens].type =
+          get_token_type(result->tokens[result->num_of_tokens].value);
+      result->num_of_tokens++;
+
+      i = j;
+    }
+    break;
+  case LABEL_DATA: /* LABEL: .data/.string  max tokens = */
+    break;
+  case INSTRUCTION:
+    /* code */
+    break;
+  case DATA:
+    /* Skip whitespace */
+    while (isspace(buffer[i]))
+      i++;
+    if (buffer[i] == '\0')
+      break;
+
+    /* Handle strings */
+    if (buffer[i] == '"') {
+      in_string = 1;
+      j = i + 1;
+      while (buffer[j] != '"' && buffer[j] != '\0')
+        j++;
+      if (buffer[j] == '"') {
+        j++;
+        in_string = 0;
+      }
+      break;
+    case EXTERN:
+      break;
+    case ENTRY:
+      break;
+
+    default:
+      break;
     }
 
-
-    /* Tokenize line */
-    token_count = 0;
-    if (type == LABEL_INSTRUCTION) {
-        label = strtok(line, " \t\n"); /* LABEL: */
-        strncpy(tok_line->tokens[token_count].value, token, MAX_TOKEN_LENGTH - 1);
-        tok_line->tokens[token_count].type = TOKEN_LABEL;
-        token_count++;
-        opcode = strtok(NULL, " \t\n");
-        find_opcode(opcode);
-        strncpy(tok_line->tokens[token_count].value, opcode, MAX_TOKEN_LENGTH - 1);
-    }
-
-
-    tok_line->num_of_tokens = token_count;
+    result->num_of_tokens = token_count;
 
     printf("Tokenized line: %s\n", line);
 
-    return tok_line;
+    return result;
+  }
 }

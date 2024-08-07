@@ -7,9 +7,11 @@
 typedef enum {
     TOKEN_UNKNOWN,
     TOKEN_LABEL, /* LABEL:*/
-    TOKEN_INSTRUCTION, /* mov , add , cmp */
+    TOKEN_OPCODE, /* mov , add , cmp */
     TOKEN_DIRECTIVE, /* .data , .string , .extern , .entry */
-    TOKEN_OPERAND, /* r0 , *r5 , #-2 , LABEL , ... */
+    TOKEN_OPERAND, /**/
+    TOKEN_COMMA,
+    TOKEN_REGISTER,
     TOKEN_STRING, /* "hello" */
     TOKEN_NUMBER /* 0 , 1 , 2 , 3 , ... */
 } TokenType;
