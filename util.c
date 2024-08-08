@@ -98,5 +98,5 @@ int my_getword(char *word, int lim, char **line) {
   }
 
   *w = '\0';
-  return word[0];
+  return *word;
 }

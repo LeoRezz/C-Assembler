@@ -5,33 +5,74 @@ static void handle_label(TokenizedLine *tokenized_line, int *IC, int *DC);
 static void handle_directive(TokenizedLine *tokenized_line, int *DC);
 static void handle_instruction(TokenizedLine *tokenized_line, int *IC);
 int calculate_instruction_words(TokenizedLine *tokenized_line);
-void parse_tokenized_line(TokenizedLine *tokenized_line, int *IC, int *DC) {
+void parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
+    int i, instruction_length, label_definition = 0;
+    const Opcode *opcode;
+    i = 0;
 
-    if (tokenized_line->type == LABEL_INSTRUCTION) {
-        handle_label(tokenized_line, IC, DC);
-        handle_instruction(tokenized_line, IC);
+    printf("Parsing line %d\n", tok_line->line_number);
+
+    /* Is there a label definition ? */
+    if (tok_line->tokens[1][0] == ':') {
+        printf("Label definition detected\n");
+        tok_line->type = LABEL_DEFINITION;
+        label_definition = 1;
+        i = 2;
     }
-    if (tokenized_line->type == LABEL_DATA) {
-        handle_label(tokenized_line, IC, DC);
-        handle_directive(tokenized_line, DC);
+
+    /* Is this an instruction line? */
+    if ((opcode = find_opcode(tok_line->tokens[i])) != NULL) {
+        printf("Instruction detected\n");
+        if (label_definition) {
+            tok_line->type = LABEL_INSTRUCTION;
+        } else {
+            tok_line->type = INSTRUCTION;
+        }
+        /* Calculate the number of words for this instruction */
+        instruction_length = opcode->operands;
+        printf("Instruction '%s' has %d operands\n", tok_line->tokens[i], instruction_length);
+        /* Add instruction length to IC */
+        if (label_definition) {
+            addSymbol(tok_line->tokens[0], IC, SYMBOL_CODE);
+            /* code */
+        }
+
+        *IC += instruction_length + 1;
+        i++;
     }
-    if (tokenized_line->type == INSTRUCTION) {
-        handle_instruction(tokenized_line, IC);
+
+    if (tok_line->tokens[i][0] == '.') {
+        printf("Directive detected\n");
+        handle_directive(tok_line, DC);
+        if (label_definition) {
+            addSymbol(tok_line->tokens[0], DC, SYMBOL_DATA);
+            *DC = *DC + tok_line->num_of_tokens - 4;
+        }        
     }
-    if (tokenized_line->type == DATA) {
-        handle_directive(tokenized_line, DC);
+    if (tok_line->type == LABEL_DATA) {
+        printf("Label data detected\n");
+        handle_label(tok_line, IC, DC);
+        handle_directive(tok_line, DC);
     }
-    if (tokenized_line->type == EXTERN || tokenized_line->type == ENTRY) {
-        handle_directive(tokenized_line, DC);
+    if (tok_line->type == INSTRUCTION) {
+        printf("Instruction detected\n");
+        handle_instruction(tok_line, IC);
+    }
+    if (tok_line->type == DATA) {
+        printf("Data detected\n");
+        handle_directive(tok_line, DC);
+    }
+    if (tok_line->type == EXTERN || tok_line->type == ENTRY) {
+        printf("External or entry detected\n");
+        handle_directive(tok_line, DC);
     }
 }
 
 static void handle_instruction(TokenizedLine *tokenized_line, int *IC) {
-    Token *token = &tokenized_line->tokens[0];
-    const Opcode *op = find_opcode(token->value);
+    const Opcode *op = find_opcode(tokenized_line->tokens[0]);
 
     if (!op) {
-        printf("Error: Unknown opcode '%s' at line %d\n", token->value,
+        printf("Error: Unknown opcode '%s' at line %d\n", tokenized_line->tokens[0],
                current_line);
         return;
     }
@@ -43,78 +84,18 @@ static void handle_instruction(TokenizedLine *tokenized_line, int *IC) {
 }
 
 static void handle_label(TokenizedLine *tokenized_line, int *IC, int *DC) {
-    Token *label_token = &tokenized_line->tokens[0];
-    char *label = label_token->value;
-    int length = strlen(label) + 1;
-
-    if (tokenized_line->type == LABEL_INSTRUCTION) {
-        if (!addSymbol(label, IC, SYMBOL_CODE)) {
-            printf("Error: Failed to add code symbol '%s' at line %d\n", label,
-                   current_line);
-        }
-    } else if (tokenized_line->type == LABEL_DATA) {
-        if (!addSymbol(label, DC, SYMBOL_DATA)) {
-            printf("Error: Failed to add data symbol '%s' at line %d\n", label,
-                   current_line);
-        }
-        handle_directive(tokenized_line, DC);
-    }
 }
 
 static void handle_directive(TokenizedLine *tokenized_line, int *DC) {
-    int opcode_index =
-        (tokenized_line->type == LABEL_INSTRUCTION || tokenized_line->type == LABEL_DATA)
-            ? 1
-            : 0;
-    const char *directive =
-        tokenized_line->tokens[opcode_index]
-            .value; // Assuming Token has a 'value' field of type char*
-    if (strcmp(directive, ".data") == 0) {
-        tokenized_line->type = DATA;
-        *DC += tokenized_line->num_of_tokens -
-               1; // Assuming TokenizedLine has a 'num_tokens' field
-    } else if (strcmp(directive, ".string") == 0) {
-        *DC += strlen(tokenized_line->tokens[opcode_index + 1].value) -
-               1; // Assuming Token has a 'value' field of type char*
-    }
 }
 
-/**
- * Calculates the number of words required to represent an instruction.
- *
- * @param tokenized_line A pointer to a TokenizedLine struct representing the
- *                       instruction to be processed.
- * @return The number of words required to represent the instruction.
- *
- * This function takes a TokenizedLine struct pointer as input and returns the
- * number of words required to represent the instruction.
- *
- * The function first determines the opcode of the instruction. If the line type
- * is INSTRUCTION, the opcode is obtained from the first token. Otherwise, the
- * opcode is obtained from the second token.
- *
- * The function then calls the find_opcode() function to find the Opcode struct
- * corresponding to the opcode. If no Opcode struct is found, an error message
- * is printed and the program exits.
- *
- * Finally, the function returns the number of words required for the instruction.
- * This is calculated by adding 1 to the operands field of the Opcode struct.
- */
 int calculate_instruction_words(TokenizedLine *tokenized_line) {
     // Determine the opcode of the instruction
-    const char *opcode = (tokenized_line->type == INSTRUCTION)
-                             ? tokenized_line->tokens[0].value
-                             : tokenized_line->tokens[1].value;
 
     // Find the Opcode struct corresponding to the opcode
-    const Opcode *instruction = find_opcode(opcode);
 
     // If no Opcode struct is found, print an error message and exit
-    if (!instruction) {
-        printf("Error: Unknown opcode: %s\n", opcode);
-        exit(1);
-    }
 
     // Calculate and return the number of words required for the instruction
-    return 1 + instruction->operands;
+    return 1;
 }

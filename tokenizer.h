@@ -5,22 +5,11 @@
 #define MAX_LABEL_LENGTH 31
 
 typedef enum {
-    TOKEN_UNKNOWN,
-    TOKEN_LABEL, /* LABEL:*/
-    TOKEN_OPCODE, /* mov , add , cmp */
-    TOKEN_DIRECTIVE, /* .data , .string , .extern , .entry */
-    TOKEN_OPERAND, /**/
-    TOKEN_COMMA,
-    TOKEN_REGISTER,
-    TOKEN_STRING, /* "hello" */
-    TOKEN_NUMBER /* 0 , 1 , 2 , 3 , ... */
-} TokenType;
-
-typedef enum {
     ERROR,
     LABEL_DEFINITION,
     LABEL_INSTRUCTION,
     LABEL_DATA,
+    STRING,
     DATA,
     INSTRUCTION,
     EXTERN,
@@ -28,18 +17,13 @@ typedef enum {
 } LineType;
 
 typedef struct {
-    char value[MAX_TOKEN_LENGTH];
-    TokenType type;
-} Token;
-
-typedef struct {
-    Token tokens[MAX_TOKENS];
+    char tokens[MAX_TOKENS][MAX_TOKEN_LENGTH];
     int num_of_tokens;
     int line_number;
     LineType type;
 } TokenizedLine;
 
-
+void print_tokenized_line(TokenizedLine *tok_line);
 TokenizedLine *tokenize_line(char *line);
 void initTokenizer();
 
