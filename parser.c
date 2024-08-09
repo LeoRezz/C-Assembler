@@ -6,23 +6,21 @@ static void handle_directive(TokenizedLine *tokenized_line, int *DC);
 static void handle_instruction(TokenizedLine *tokenized_line, int *IC);
 int calculate_instruction_words(TokenizedLine *tokenized_line);
 void parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
-    int i, instruction_length, label_definition = 0;
+    int i, j, instruction_length, data_length, label_definition = 0;
     const Opcode *opcode;
     i = 0;
-
-    printf("Parsing line %d\n", tok_line->line_number);
+    instruction_length = 0;
 
     /* Is there a label definition ? */
     if (tok_line->tokens[1][0] == ':') {
         printf("Label definition detected\n");
         tok_line->type = LABEL_DEFINITION;
         label_definition = 1;
-        i = 2;
+        i = 2; /* advance to the instruction/directive */
     }
-
     /* Is this an instruction line? */
     if ((opcode = find_opcode(tok_line->tokens[i])) != NULL) {
-        printf("Instruction detected\n");
+        printf("Instruction '%s' has %d operands\n", tok_line->tokens[i], instruction_length);
         if (label_definition) {
             tok_line->type = LABEL_INSTRUCTION;
         } else {
@@ -30,41 +28,52 @@ void parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
         }
         /* Calculate the number of words for this instruction */
         instruction_length = opcode->operands;
-        printf("Instruction '%s' has %d operands\n", tok_line->tokens[i], instruction_length);
+        if (instruction_length == 2) { /* if 2 operands, check for two registers */
+            if (tok_line->tokens[i + 1][0] == 'r' && tok_line->tokens[i + 3][0] == 'r') {
+                printf("Operands %s and %s are both registers\n", tok_line->tokens[i + 1], tok_line->tokens[i + 3]);
+                instruction_length--;
+            }
+        }
+
         /* Add instruction length to IC */
         if (label_definition) {
             addSymbol(tok_line->tokens[0], IC, SYMBOL_CODE);
-            /* code */
+            printf("Added symbol '%s' to IC\n", tok_line->tokens[0]);
         }
 
-        *IC += instruction_length + 1;
+        *IC += instruction_length + 1; /* add one word for instruction */
+        printf("Added %d words to IC\n", instruction_length + 1);
         i++;
     }
 
-    if (tok_line->tokens[i][0] == '.') {
-        printf("Directive detected\n");
-        handle_directive(tok_line, DC);
+    if (strcmp(tok_line->tokens[i], ".string") == 0) {
+
+        i++; /* skip over the.string directive */
+        printf(".string Directive detected\n");
+        data_length = strlen(tok_line->tokens[i]) - 1;
         if (label_definition) {
             addSymbol(tok_line->tokens[0], DC, SYMBOL_DATA);
-            *DC = *DC + tok_line->num_of_tokens - 4;
-        }        
+            printf("Added symbol '%s' to DC = %d\n", tok_line->tokens[0], *DC);
+        }
+        *DC = *DC + data_length;
+        printf("Added %d words to DC\n", data_length);
     }
-    if (tok_line->type == LABEL_DATA) {
-        printf("Label data detected\n");
-        handle_label(tok_line, IC, DC);
-        handle_directive(tok_line, DC);
-    }
-    if (tok_line->type == INSTRUCTION) {
-        printf("Instruction detected\n");
-        handle_instruction(tok_line, IC);
-    }
-    if (tok_line->type == DATA) {
-        printf("Data detected\n");
-        handle_directive(tok_line, DC);
-    }
-    if (tok_line->type == EXTERN || tok_line->type == ENTRY) {
-        printf("External or entry detected\n");
-        handle_directive(tok_line, DC);
+
+    if (strcmp(tok_line->tokens[i], ".data") == 0) {
+        /* i++;  skip over the .data directive */
+        printf(".data Directive detected\n");
+        if (tok_line->num_of_tokens == 2) {
+            data_length = 1;
+        } else {
+            data_length = 1 + ((tok_line->num_of_tokens) / 2) - i; /* TODO: need to exclude commas*/
+        }
+
+        if (label_definition) {
+            addSymbol(tok_line->tokens[0], DC, SYMBOL_DATA);
+            printf("Added symbol '%s' to DC = %d\n", tok_line->tokens[0], *DC);
+        }
+        *DC = *DC + data_length;
+        printf("Added %d words to DC\n", data_length);
     }
 }
 

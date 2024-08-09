@@ -1,0 +1,6 @@
+MAIN: mov r3 ,LIST
+add r9 , r2
+LOOP: prn #4a
+LIST: .data +6 , -9 , 15,
+TEXT: .string "Hello, World!
+LABEL:: mov *x5, #-abc

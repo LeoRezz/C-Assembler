@@ -75,6 +75,7 @@ void first_pass(FILE *file) {
             free(tok_line);
             return;
         }
+        print_tokenized_line(tok_line);
         parse_tokenized_line(tok_line, &IC, &DC); /* Parse the line */
         printf("IC in firstPass: %d\n", IC);
         printf("DC in firstPass: %d\n", DC);
