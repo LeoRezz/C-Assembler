@@ -13,7 +13,7 @@ extern int current_line;
 TokenizedLine *tokenize_line(char *line) {
     int error;
     TokenizedLine *result;
-    TRY(result = (TokenizedLine *)malloc(sizeof(TokenizedLine)));
+    TRY(result = (TokenizedLine *)calloc(1, sizeof(TokenizedLine)));
     result->num_of_tokens = 0;
     result->type = ERROR;
     result->line_number = current_line;
@@ -33,7 +33,7 @@ TokenizedLine *tokenize_line(char *line) {
                 printf("Unknown error in token %s\n", token);
             }
             // Handle error (e.g., stop processing, continue to next line, etc.)
-            continue;
+            return NULL;
         }
         strncpy(result->tokens[result->num_of_tokens], token, MAX_TOKEN_LENGTH - 1);
         /* Increment token count */

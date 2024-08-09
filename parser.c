@@ -5,7 +5,7 @@ static void handle_label(TokenizedLine *tokenized_line, int *IC, int *DC);
 static void handle_directive(TokenizedLine *tokenized_line, int *DC);
 static void handle_instruction(TokenizedLine *tokenized_line, int *IC);
 int calculate_instruction_words(TokenizedLine *tokenized_line);
-void parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
+int parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
     int i, j, instruction_length, data_length, label_definition = 0;
     const Opcode *opcode;
     i = 0;
@@ -74,6 +74,18 @@ void parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
         }
         *DC = *DC + data_length;
         printf("Added %d words to DC\n", data_length);
+    }
+
+    if (strcmp(tok_line->tokens[i], ".entry") == 0) {
+
+        printf(".entry Directive detected\n");
+    }
+    if (strcmp(tok_line->tokens[i], ".extern") == 0) {
+
+        printf(".extern Directive detected\n");
+    } else {
+        printf("Unhandled directive or instruction '%s' at line %d\n", tok_line->tokens[i], current_line);
+        return 0;
     }
 }
 

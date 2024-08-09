@@ -4,5 +4,5 @@
 #include "opcodeTable.h"
 #include "symbolTable.h"
 #include "tokenizer.h"
-void parse_tokenized_line(TokenizedLine *tokenized_line, int *IC, int *DC);
+int parse_tokenized_line(TokenizedLine *tokenized_line, int *IC, int *DC);
 #endif
