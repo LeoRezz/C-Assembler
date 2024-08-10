@@ -39,6 +39,11 @@ TokenizedLine *tokenize_line(char *line) {
         /* Increment token count */
         result->num_of_tokens++;
     }
+    if (result->tokens[1][0] == ':') {
+        printf("Label definition detected\n");
+        result->type = LABEL_DEFINITION;
+    }
+
     return result;
 }
 

@@ -9,7 +9,6 @@
 #define TOKEN_OK 0
 #define ERROR_INVALID_IMMEDIATE -1
 #define ERROR_INVALID_REGISTER -2
-
 #define TRY(a)       \
     if (!(a)) {      \
         perror(#a);  \

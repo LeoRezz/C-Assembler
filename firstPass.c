@@ -1,4 +1,6 @@
 #include "firstPass.h"
+#include "program.h"
+
 
 #define INITIAL_ADDRESS 100
 #define MAX_LINE 82
@@ -29,6 +31,36 @@ int main(int argc, char *argv[]) {
     freeSymbolTable();
 }
 
+/* Implement Pass 1 algorithm here */
+void first_pass(FILE *file) {
+    char *p;
+    char line[MAX_LINE];
+    TokenizedLine *tok_line;
+    Line *parsed_line;
+
+    /* Read each line from the source file */
+    while (fgets(line, MAX_LINE, file)) {
+        if (p = strrchr(line, '\n'))
+            *p = '\0'; /* Remove newline character */
+
+        current_line++;                 /* Increment line number for error reporting */
+        tok_line = tokenize_line(line); /* Tokenize the line */
+        if (tok_line == NULL) {
+            printf("Error tokenizing line %d\n", current_line);
+            free(tok_line);
+            return;
+        }
+        print_tokenized_line(tok_line);
+
+        parsed_line = parse_line(tok_line, &IC, &DC); /* Parse the line */
+        printf("IC in firstPass: %d\n", IC);
+        printf("DC in firstPass: %d\n", DC);
+        free(tok_line);
+        free(parsed_line);
+    }
+}
+
+
 /* Pass 1 Algorithm:
  * 1. Initialize: DC = 0, IC = 0
  * 2. Read the next line from the source file. If end of file, go to step 16.
@@ -57,28 +89,3 @@ int main(int argc, char *argv[]) {
  * 15. Update values in the symbol table for all symbols marked as "data"
  *     by adding IC+100.
  */
-
-void first_pass(FILE *file) {
-    char *p;
-    /* Implement Pass 1 algorithm here */
-    char line[MAX_LINE];
-    TokenizedLine *tok_line;
-    /* Read each line from the source file */
-    while (fgets(line, MAX_LINE, file)) {
-        if (p = strrchr(line, '\n'))
-            *p = '\0';
-
-        current_line++;                 /* Increment line number for error reporting */
-        tok_line = tokenize_line(line); /* Tokenize the line */
-        if (tok_line == NULL) {
-            printf("Error tokenizing line %d\n", current_line);
-            free(tok_line);
-            return;
-        }
-        print_tokenized_line(tok_line);
-        parse_tokenized_line(tok_line, &IC, &DC); /* Parse the line */
-        printf("IC in firstPass: %d\n", IC);
-        printf("DC in firstPass: %d\n", DC);
-        free(tok_line);
-    }
-}

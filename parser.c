@@ -20,7 +20,7 @@ int parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
     }
     /* Is this an instruction line? */
     if ((opcode = find_opcode(tok_line->tokens[i])) != NULL) {
-        printf("Instruction '%s' has %d operands\n", tok_line->tokens[i], instruction_length);
+        printf("Instruction '%s' has %d operands\n", tok_line->tokens[i], opcode->operands);
         if (label_definition) {
             tok_line->type = LABEL_INSTRUCTION;
         } else {
@@ -34,27 +34,27 @@ int parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
                 instruction_length--;
             }
         }
-
         /* Add instruction length to IC */
         if (label_definition) {
             addSymbol(tok_line->tokens[0], IC, SYMBOL_CODE);
             printf("Added symbol '%s' to IC\n", tok_line->tokens[0]);
         }
-
         *IC += instruction_length + 1; /* add one word for instruction */
         printf("Added %d words to IC\n", instruction_length + 1);
         i++;
     }
 
     if (strcmp(tok_line->tokens[i], ".string") == 0) {
-
         i++; /* skip over the.string directive */
         printf(".string Directive detected\n");
         data_length = strlen(tok_line->tokens[i]) - 1;
         if (label_definition) {
+            tok_line->type = LABEL_DATA;
             addSymbol(tok_line->tokens[0], DC, SYMBOL_DATA);
             printf("Added symbol '%s' to DC = %d\n", tok_line->tokens[0], *DC);
-        }
+        } else
+            tok_line->type = DATA;
+
         *DC = *DC + data_length;
         printf("Added %d words to DC\n", data_length);
     }
@@ -69,9 +69,12 @@ int parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
         }
 
         if (label_definition) {
+            tok_line->type = LABEL_DATA;
             addSymbol(tok_line->tokens[0], DC, SYMBOL_DATA);
             printf("Added symbol '%s' to DC = %d\n", tok_line->tokens[0], *DC);
-        }
+        } else
+            tok_line->type = DATA;
+
         *DC = *DC + data_length;
         printf("Added %d words to DC\n", data_length);
     }
@@ -81,7 +84,7 @@ int parse_tokenized_line(TokenizedLine *tok_line, int *IC, int *DC) {
         printf(".entry Directive detected\n");
     }
     if (strcmp(tok_line->tokens[i], ".extern") == 0) {
-
+        
         printf(".extern Directive detected\n");
     } else {
         printf("Unhandled directive or instruction '%s' at line %d\n", tok_line->tokens[i], current_line);

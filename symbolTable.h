@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define MAX_LINE 82
-#define MAX_LABEL_LENGTH 31
+#define MAX_SYMBOL_LENGTH 31
 
 typedef enum {
     SYMBOL_DATA,
@@ -14,7 +14,7 @@ typedef enum {
 } SymbolType;
 
 typedef struct {
-    char name[MAX_LABEL_LENGTH];
+    char name[MAX_SYMBOL_LENGTH];
     int value;
     SymbolType type;
 } symbol;
