@@ -17,7 +17,7 @@ void first_pass(FILE *input_file);
 int main(int argc, char *argv[]) {
     FILE *input_file;
     char *file_name;
-    input_file = fopen("asm1.am", "r"); /* TODO: change later to argv[1] */
+    input_file = fopen("./input_test/asm1.am", "r"); /* TODO: change later to argv[1] */
     /* fopen() return NULL if unable to open file in given mode. */
     if (!input_file) {
         printf("Failed to open input file: %s\n", argv[1]);
