@@ -16,7 +16,7 @@ struct ParsedProgram* create_parsed_program(void)
     return program;
 }
 
-void add_line_to_program(struct ParsedProgram* program, struct Line* line)
+void add_line_to_program(struct ParsedProgram* program, Line* line)
 {
     if (program != NULL && program->line_count < MAX_PROGRAM_LINES) {
         program->lines[program->line_count] = line;
