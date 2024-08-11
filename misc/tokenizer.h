@@ -5,41 +5,37 @@
 #define MAX_LABEL_LENGTH 31
 
 
+/* In tokenizer.h */
 typedef enum {
-    /* Structural elements */
-    EOL,            /* End of Line */
-    LABEL,
-    COLON,          /* : */
-    COMMA,          /* , */
-
-    /* Instructions */
-    OPCODE,         /* mov, add, sub, etc. */
-
     /* Registers */
-    REGISTER,       /* r0, r1, r2, etc. */
+    R0, R1, R2, R3, R4, R5, R6, R7,
 
-    /* Memory access */
-    ASTERISK,       /* * (for indirect addressing) */
-
-    /* Literals */
-    INTEGER,        /* Immediate values */
-    STRING,         /* String literals */
+    /* Opcodes (Instructions) */
+    MOV, CMP, ADD, SUB, NOT, CLR, LEA,
+    INC, DEC, JMP, BNE, RED, PRN, JSR, RTS, STOP,
 
     /* Directives */
-    DIRECTIVE,      /* .data, .string, .entry, .extern */
+    DATA, STRING, ENTRY, EXTERN,
 
-    /* Symbols */
-    SYMBOL,         /* User-defined symbols */
+    /* Special symbols */
+    HASH,  /* For immediate addressing */
+    ASTERISK,   /* For indirect addressing */
 
-    /* Special */
-    HASH,           /* # (for immediate addressing) */
-    PLUS,           /* + */
-    MINUS,          /* - */
+    /* Additional token types */
+    LABEL_DEF,      /* Label definition (ends with ':') */
+    LABEL_USE,      /* Label use (without ':') */
+    COMMA,          /* ',' */
+    INTEGER,
+    STRING_LITERAL,
 
-    /* Miscellaneous */
-    COMMENT,        /* ; (start of a comment) */
-    UNKNOWN,        /* For unrecognized tokens */
+    EOL,  /* End of line */
+    EOF,  /* End of file */
+
+    UNKNOWN  /* For unrecognized tokens */
 } TokenType;
+
+/* Function prototype */
+TokenType get_token_type(const char* token);
 
 
 typedef struct {
