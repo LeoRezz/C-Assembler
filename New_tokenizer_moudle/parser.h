@@ -4,3 +4,4 @@
 #include "tokenizer.h"
 
 Line *parse_line(Token *token_arr, int token_count);
+void print_parsed_line(Line *parsed_line);

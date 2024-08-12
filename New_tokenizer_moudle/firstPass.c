@@ -11,6 +11,7 @@ int current_line = 0;
 
 /* prototypes: should be in header file*/
 void first_pass(FILE *input_file);
+void print_token_arr(Token *token_arr, int token_count);
 
 /* Main for testing */
 int main() {
@@ -46,13 +47,20 @@ void first_pass(FILE *input_file) {
 		/* Parse the tokens in the line */
         parsed_line = parse_line(token_arr, token_count);
 
-        /* output printer */
-        for (i = 0; i < token_count; i++) {
-            printf("%s\t%s\n", token_arr[i].value, token_type_to_string(token_arr[i].type));
-        }
+
+        print_parsed_line(parsed_line);
         printf("\n");
     }
     free(token_arr);
     free(parsed_line);
     fclose(input_file);
+}
+
+
+void print_token_arr(Token *token_arr, int token_count) {
+    /* output printer */
+    int i;
+    for (i = 0; i < token_count; i++) {
+        printf("%s\t%s\n", token_arr[i].value, token_type_to_string(token_arr[i].type));
+    }
 }
