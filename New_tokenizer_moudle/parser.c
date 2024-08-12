@@ -1,51 +1,65 @@
 #include "parser.h"
+
 extern int IC, DC, current_line;
+
+/* Helper functions for parsing instructions and data */
 int get_addressing_type(TokenType type);
 int calculate_instruction_words(int opcode);
-
 void print_parsed_line(Line *parsed_line);
+int is_opcode(TokenType type);
+void parse_instruction(Line *parsed_line, Token *token_arr, int *i);
+void parse_data(Line *parsed_line, Token *token_arr, int *i);
 
+/*------------------------------------------------------------------------*/
+/* TODO: Finish the instruction parsing logic, make sure operands are parsed correctly */
+/* TODO: Add data parsing logic */
+/* TODO: Error handling */
+/*------------------------------------------------------------------------*/
 Line *parse_line(Token *token_arr, int token_count) {
-    int i;
-    int instruction_length = 0;
-    int label_definition = 0;
-    i = 0;
+
+    int current_token;
+    int label_def_flag;
+
     Line *parsed_line = calloc(1, sizeof(Line));
-    if (!parsed_line) {
-        // Handle memory allocation error
+    if (!parsed_line)
         return NULL;
-    }
+    current_token = 0;
+    label_def_flag = 0;
 
     /* Check for label */
-    if (token_arr[0].type == LABEL_DEF) {
-        label_definition = 1;
-        strcpy(parsed_line->label, token_arr[0].value);
-        i++;
+    if (token_arr[current_token].type == LABEL_DEF) {
+        strcpy(parsed_line->label, token_arr[current_token].value);
+        label_def_flag = 1;
+        current_token++; /* Skips label definition */
     }
 
-    /* TODO: Syntax error handling */
     /* Checks for instruction */
-    if (i < token_count) {
-        /* Checks first token for an opcode */
-        if (token_arr[i].type >= MOV && token_arr[i].type <= STOP) {
-            parsed_line->type = LINE_INSTRUCTION;
-            parsed_line->content.inst.opcode = ((token_arr[i].type) - MOV);
-            i++;
-            parsed_line->content.inst.operand_types[0] = get_addressing_type(token_arr[i].type);
-            i + 2; /* Skip comma */
-            parsed_line->content.inst.operand_types[1] = get_addressing_type(token_arr[i++].type);
-
-            if (label_definition) {
-                addSymbol(parsed_line->label, &IC, parsed_line->type);
-                label_definition = 0;
-            }
-            instruction_length = calculate_instruction_words(parsed_line->content.inst.opcode);
-            IC += instruction_length + 1;
-        }
+    if (is_opcode(token_arr[current_token].type)) {
+        parse_instruction(parsed_line, token_arr, &current_token);
+        parse_data(parsed_line, token_arr, &current_token);
     }
 
     /* Check for data */
     return parsed_line;
+}
+int is_opcode(TokenType type) {
+    return type >= MOV && type <= STOP;
+}
+void parse_instruction(Line *parsed_line, Token *token_arr, int *i) {
+    parsed_line->type = LINE_INSTRUCTION;
+    parsed_line->content.inst.opcode = ((token_arr[*i].type) - MOV);
+    *i += 1;
+    parsed_line->content.inst.operand_types[0] = get_addressing_type(token_arr[*i].type);
+    *i += 2; /* Skip comma */
+    parsed_line->content.inst.operand_types[1] = get_addressing_type(token_arr[*i++].type);
+}
+
+void parse_data(Line *parsed_line, Token *token_arr, int *i) {
+    if (parsed_line->type == LINE_INSTRUCTION) {
+        addSymbol(parsed_line->label, &IC, parsed_line->type);
+    }
+    int instruction_length = calculate_instruction_words(parsed_line->content.inst.opcode);
+    IC += instruction_length + 1;
 }
 
 int get_addressing_type(TokenType type) {
@@ -104,16 +118,6 @@ void print_parsed_line(Line *parsed_line) {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
 
 const char *line_type_to_string(LineType line_type) {
     switch (line_type) {
