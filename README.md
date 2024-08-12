@@ -1,4 +1,12 @@
 # Assembler Project
+<pre>
+    _    ____ ____  _____ __  __ ____  _     _____ ____                
+   / \  / ___/ ___|| ____|  \/  | __ )| |   | ____|  _ \           
+  / _ \ \___ \___ \|  _| | |\/| |  _ \| |   |  _| | |_) |        
+ / ___ \ ___) |__) | |___| |  | | |_) | |___| |___|  _ <            
+/_/   \_\____/____/|_____|_|  |_|____/|_____|_____|_| \_\                
+</pre>                                                                     
+
 ## Description
 [Provide a brief description of your assembler project. Explain its purpose and main features.]
 
