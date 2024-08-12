@@ -4,37 +4,25 @@
    returns ':' when encounterd in label definition. */
 static int my_getword(char *word, int lim, const char **line);
 
-
-/**
- * @brief Tokenizes a given line of assembly code into an array of tokens with assigned type.
- *
- * This function processes a line of assembly code, breaking it down into individual tokens
- * and categorizing each token by its type. It handles labels, instructions, directives, 
- * and other symbols.
- *
- * @param line The input line of assembly code to be tokenized.
- * @param token_count A pointer to an integer where the function will store the number of tokens found.
- * @return A dynamically allocated array of tokens. Each token contains its value and type.
- *         The caller is responsible for freeing this array.
- */
-Token *tokenize_line(const char *line, int *token_count) {
+/* Tokenizes a given line of assembly code into tokens with assigned type. */
+Token *tokenize_line(const char *line, int *tokens_count) {
     Token *tokens;
     int label_def_flag;
-    const char *line_ptr; 
+    const char *line_ptr;
     
     TRY(tokens = (Token *)calloc(MAX_TOKENS, sizeof(Token)));
+
     line_ptr = line; /* Use a pointer to traverse the line */
-    *token_count = 0;
+    *tokens_count = 0;
     label_def_flag = 0;
     
-    while ((label_def_flag = my_getword(tokens[*token_count].value, MAX_LINE, &line_ptr)) != EOF) {
+    while ((label_def_flag = my_getword(tokens[*tokens_count].value, MAX_LINE, &line_ptr)) != EOF) {
         if ((char)label_def_flag == ':') {
-            tokens[*token_count].type = LABEL_DEF;
-            (*token_count)++;
+            tokens[*tokens_count].type = LABEL_DEF;
         } else {
-            tokens[*token_count].type = get_token_type(tokens[*token_count].value);
-            (*token_count)++;
+            tokens[*tokens_count].type = get_token_type(tokens[*tokens_count].value);
         }
+        (*tokens_count)++;
     }
 
     return tokens;
@@ -94,84 +82,6 @@ TokenType get_token_type(const char *token) {
     return ERROR;
 }
 
-const char *token_type_to_string(TokenType type) {
-    switch (type) {
-    case R0:
-        return "R0";
-    case R1:
-        return "R1";
-    case R2:
-        return "R2";
-    case R3:
-        return "R3";
-    case R4:
-        return "R4";
-    case R5:
-        return "R5";
-    case R6:
-        return "R6";
-    case R7:
-        return "R7";
-    case MOV:
-        return "MOV";
-    case CMP:
-        return "CMP";
-    case ADD:
-        return "ADD";
-    case SUB:
-        return "SUB";
-    case NOT:
-        return "NOT";
-    case CLR:
-        return "CLR";
-    case LEA:
-        return "LEA";
-    case INC:
-        return "INC";
-    case DEC:
-        return "DEC";
-    case JMP:
-        return "JMP";
-    case BNE:
-        return "BNE";
-    case RED:
-        return "RED";
-    case PRN:
-        return "PRN";
-    case JSR:
-        return "JSR";
-    case RTS:
-        return "RTS";
-    case STOP:
-        return "STOP";
-    case DATA:
-        return "DATA";
-    case STRING:
-        return "STRING";
-    case ENTRY:
-        return "ENTRY";
-    case EXTERN:
-        return "EXTERN";
-    case HASH:
-        return "HASH";
-    case INTEGER:
-        return "INTEGER";
-    case STRING_LITERAL:
-        return "STRING_LITERAL";
-    case ERROR:
-        return "ERROR";
-    case LABEL_DEF:
-        return "LABEL_DEF";
-    case LABEL_USE:
-        return "LABEL_USE";
-    case COMMA:
-        return "COMMA";
-    case ASTERISK:
-        return "ASTERISK";
-    default:
-        return "UNDEFINED";
-    }
-}
 static int my_getword(char *word, int lim, const char **line) {
     int c;
     char *w = word;
@@ -255,3 +165,81 @@ static int my_getword(char *word, int lim, const char **line) {
     return is_label ? ':' : c; /* Return ':' if it's a label */
 }
 
+const char *token_type_to_string(TokenType type) {
+    switch (type) {
+    case R0:
+        return "R0";
+    case R1:
+        return "R1";
+    case R2:
+        return "R2";
+    case R3:
+        return "R3";
+    case R4:
+        return "R4";
+    case R5:
+        return "R5";
+    case R6:
+        return "R6";
+    case R7:
+        return "R7";
+    case MOV:
+        return "MOV";
+    case CMP:
+        return "CMP";
+    case ADD:
+        return "ADD";
+    case SUB:
+        return "SUB";
+    case NOT:
+        return "NOT";
+    case CLR:
+        return "CLR";
+    case LEA:
+        return "LEA";
+    case INC:
+        return "INC";
+    case DEC:
+        return "DEC";
+    case JMP:
+        return "JMP";
+    case BNE:
+        return "BNE";
+    case RED:
+        return "RED";
+    case PRN:
+        return "PRN";
+    case JSR:
+        return "JSR";
+    case RTS:
+        return "RTS";
+    case STOP:
+        return "STOP";
+    case DATA:
+        return "DATA";
+    case STRING:
+        return "STRING";
+    case ENTRY:
+        return "ENTRY";
+    case EXTERN:
+        return "EXTERN";
+    case HASH:
+        return "HASH";
+    case INTEGER:
+        return "INTEGER";
+    case STRING_LITERAL:
+        return "STRING_LITERAL";
+    case ERROR:
+        return "ERROR";
+    case LABEL_DEF:
+        return "LABEL_DEF";
+    case LABEL_USE:
+        return "LABEL_USE";
+    case COMMA:
+        return "COMMA";
+    case ASTERISK:
+        return "ASTERISK";
+    default:
+        return "UNDEFINED";
+    }
+}

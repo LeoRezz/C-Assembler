@@ -1,18 +1,11 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#include "util.h"
 #define MAX_LINE 82
 #define MAX_TOKENS 40
 #define MAX_TOKEN_LENGTH 70
 #define MAX_LABEL_LENGTH 31
-#define TRY(a)       \
-    if (!(a)) {      \
-        perror(#a);  \
-        exit(1); \
-    }
 
 
 
@@ -43,15 +36,74 @@ typedef enum {
     UNKNOWN  /* For unrecognized tokens */
 } TokenType;
 
-
+typedef enum {
+    LINE_INSTRUCTION,
+    LINE_DATA,
+    LINE_DIRECTIVE
+} LineType;
 
 typedef struct {
     TokenType type;
     char value[MAX_TOKEN_LENGTH];
 } Token;
 
+typedef struct {
+    Token tokens[MAX_TOKENS];
+    int num_of_tokens;
+    int line_number;
+    LineType type;
+} TokenizedLine;
+
+#define MAX_DATA_VALUES 70
+#define MAX_SYMBOL_LENGTH 31
+
+typedef struct Instruction {
+    int address;
+    int opcode;
+    int operand_types[2];
+    union {
+        int immediate;
+        char symbol[MAX_SYMBOL_LENGTH];
+        int reg;
+    } operands[2];
+} Instruction;
+
+typedef struct Data {
+    int address;
+    enum DataType {
+        DATA_INT,
+        DATA_STRING
+    } type;
+    int value_count;
+    union {
+        int int_values[MAX_DATA_VALUES];
+        char char_values[MAX_DATA_VALUES];
+    } content;
+} Data;
+
+typedef struct Line {
+    LineType type;
+    char label[MAX_LABEL_LENGTH];
+    union {
+        Instruction inst;
+        Data data;
+    } content;
+} Line;
+
 /* Function prototype */
 TokenType get_token_type(const char* token);
+/**
+ * @brief Tokenizes a given line of assembly code into an array of tokens with assigned type.
+ *
+ * This function processes a line of assembly code, breaking it down into individual tokens
+ * and categorizing each token by its type. It handles labels, instructions, directives, 
+ * and other symbols.
+ *
+ * @param line The input line of assembly code to be tokenized.
+ * @param token_count A pointer to an integer where the function will store the number of tokens found.
+ * @return A dynamically allocated array of tokens. Each token contains its value and type.
+ *         The caller is responsible for freeing this array.
+ */
 Token *tokenize_line(const char *line, int *token_count);
 TokenType get_token_type(const char *token);
 const char *token_type_to_string(TokenType type);

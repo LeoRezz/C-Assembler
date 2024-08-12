@@ -4,7 +4,6 @@
 #include "preprocessor.h"
 #include "firstPass.h"
 #include "secondPass.h"
-#include "outputGenerator.h"
 
 #define MAX_FILENAME 100
 
@@ -28,17 +27,9 @@ int main(int argc, char *argv[])
     /* Process each input file */
     for (i = 1; i < argc; i++) {
         /* Construct filenames */
-        strcpy(input_filename, argv[i]);
-        strcpy(am_filename, input_filename);
-        strcpy(ob_filename, input_filename);
-        strcpy(ent_filename, input_filename);
-        strcpy(ext_filename, input_filename);
+
 
         /* Replace .as extension with appropriate extensions */
-        strcpy(strrchr(am_filename, '.'), ".am");
-        strcpy(strrchr(ob_filename, '.'), ".ob");
-        strcpy(strrchr(ent_filename, '.'), ".ent");
-        strcpy(strrchr(ext_filename, '.'), ".ext");
 
         /* Preprocess (macro expansion) */
         if (!preprocess(input_filename, am_filename)) {
