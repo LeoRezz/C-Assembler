@@ -62,7 +62,7 @@ typedef struct {
 typedef struct Instruction {
     int address;
     int opcode;
-    int operand_types[2];
+    int operand_types[2]; /* Types of Addressing mode */
     union {
         int immediate;
         char symbol[MAX_SYMBOL_LENGTH];

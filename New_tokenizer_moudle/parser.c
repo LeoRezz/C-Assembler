@@ -68,7 +68,7 @@ void parse_instruction_line(Line *parsed_line, Token *token_arr, int *i, int *op
             printf("Missing comma\n");
             return;
         }
-        parsed_line->content.inst.operand_types[1] = get_addressing_type(token_arr[*i++].type);
+        parsed_line->content.inst.operand_types[1] = get_addressing_type(token_arr[*i].type);
 
         break;
 
@@ -78,7 +78,6 @@ void parse_instruction_line(Line *parsed_line, Token *token_arr, int *i, int *op
 
     case 0:
         printf("Zero operand instruction\n");
-
         break;
 
     default:
@@ -121,8 +120,8 @@ int get_addressing_type(TokenType type) {
     if (type == LABEL_USE) {
         return ADD_DIRECT;
     }
-
-    if (type == ASTERISK) {
+    /*       mov r5 , * r3      */
+    if (type == ASTERISK) { /* Assuming token is correct? *5 */
         return ADD_INDIRECT_REGISTER;
     }
 
