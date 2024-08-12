@@ -7,8 +7,8 @@
 #define MAX_SYMBOL_LENGTH 31
 
 typedef enum {
-    SYMBOL_DATA,
     SYMBOL_CODE,
+    SYMBOL_DATA,
     SYMBOL_ENTRY,
     SYMBOL_EXTERNAL
 } SymbolType;

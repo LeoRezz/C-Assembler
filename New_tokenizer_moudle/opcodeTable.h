@@ -2,10 +2,10 @@
 #define OPCODE_TABLE_H
 
 typedef enum {
-    ADD_IMMEDIATE = 1,
-    ADD_DIRECT = 2,
-    ADD_INDIRECT_REGISTER = 4,
-    ADD_REGISTER = 8
+    ADD_IMMEDIATE,
+    ADD_DIRECT,
+    ADD_INDIRECT_REGISTER,
+    ADD_REGISTER
 } AddressingMode;
 
 typedef struct {

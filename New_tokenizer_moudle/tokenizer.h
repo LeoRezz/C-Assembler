@@ -14,7 +14,7 @@ typedef enum {
     R0, R1, R2, R3, R4, R5, R6, R7,
 
     /* Opcodes (Instructions) */
-    MOV, CMP, ADD, SUB, NOT, CLR, LEA,
+    MOV, CMP, ADD, SUB, LEA, CLR, NOT,
     INC, DEC, JMP, BNE, RED, PRN, JSR, RTS, STOP,
 
     /* Directives */
