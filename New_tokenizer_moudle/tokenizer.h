@@ -1,11 +1,21 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX_LINE 82
 #define MAX_TOKENS 40
 #define MAX_TOKEN_LENGTH 70
 #define MAX_LABEL_LENGTH 31
+#define TRY(a)       \
+    if (!(a)) {      \
+        perror(#a);  \
+        exit(1); \
+    }
 
 
-/* In tokenizer.h */
+
 typedef enum {
     /* Registers */
     R0, R1, R2, R3, R4, R5, R6, R7,
@@ -29,13 +39,10 @@ typedef enum {
     STRING_LITERAL,
 
     EOL,  /* End of line */
-    EOF,  /* End of file */
-
+    ERROR, /* for blatant errors */
     UNKNOWN  /* For unrecognized tokens */
 } TokenType;
 
-/* Function prototype */
-TokenType get_token_type(const char* token);
 
 
 typedef struct {
@@ -43,5 +50,10 @@ typedef struct {
     char value[MAX_TOKEN_LENGTH];
 } Token;
 
+/* Function prototype */
+TokenType get_token_type(const char* token);
+Token *tokenize_line(const char *line, int *token_count);
+TokenType get_token_type(const char *token);
+const char *token_type_to_string(TokenType type);
 
 #endif 
