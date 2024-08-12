@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     /* Open files*/
+    /* Fix output bug, making .as.am file */
     input_name = my_strdup(argv[1]);
     output_name = my_strdup(argv[1]);
     TRY(strcat(input_name, ".as"));

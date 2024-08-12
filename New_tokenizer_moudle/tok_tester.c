@@ -9,8 +9,10 @@ int main() {
 	int i;
 	char line[MAX_LINE];
 	
+	/* op1 , op2 | op1, op2 | op1 ,op2 */
+
 	/* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-	input_file = fopen("source_code.txt","r"); 
+	input_file = fopen("Invalid_source_code.txt","r"); 
     TRY(input_file); /* TRY macro checks for errors while opening file */
     
 	/* Read each line from the source file */

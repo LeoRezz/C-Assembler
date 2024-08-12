@@ -7,8 +7,8 @@ int get_addressing_type(TokenType type);
 int calculate_instruction_words(int opcode);
 void print_parsed_line(Line *parsed_line);
 int is_opcode(TokenType type);
-void parse_instruction(Line *parsed_line, Token *token_arr, int *i);
-void parse_data(Line *parsed_line, Token *token_arr, int *i);
+void parse_instruction_line(Line *parsed_line, Token *token_arr, int *i,int *operand_count);
+void add_operand_value(Instruction *inst, TokenType type);
 
 /*------------------------------------------------------------------------*/
 /* TODO: Finish the instruction parsing logic, make sure operands are parsed correctly */
@@ -16,7 +16,7 @@ void parse_data(Line *parsed_line, Token *token_arr, int *i);
 /* TODO: Error handling */
 /*------------------------------------------------------------------------*/
 Line *parse_line(Token *token_arr, int token_count) {
-
+    int operand_count;
     int current_token;
     int label_def_flag;
 
@@ -33,35 +33,82 @@ Line *parse_line(Token *token_arr, int token_count) {
         current_token++; /* Skips label definition */
     }
 
-    /* Checks for instruction */
+    /* Checks if it's an instruction line */
     if (is_opcode(token_arr[current_token].type)) {
-        parse_instruction(parsed_line, token_arr, &current_token);
-        parse_data(parsed_line, token_arr, &current_token);
+        parse_instruction_line(parsed_line, token_arr, &current_token, &operand_count);
+        if (label_def_flag) {
+            addSymbol(parsed_line->label, &IC, SYMBOL_CODE);
+        }
+
+        IC += operand_count + 1;
     }
 
     /* Check for data */
+
+
     return parsed_line;
 }
+
 int is_opcode(TokenType type) {
     return type >= MOV && type <= STOP;
 }
-void parse_instruction(Line *parsed_line, Token *token_arr, int *i) {
-    parsed_line->type = LINE_INSTRUCTION;
-    parsed_line->content.inst.opcode = ((token_arr[*i].type) - MOV);
-    *i += 1;
-    parsed_line->content.inst.operand_types[0] = get_addressing_type(token_arr[*i].type);
-    *i += 2; /* Skip comma */
-    parsed_line->content.inst.operand_types[1] = get_addressing_type(token_arr[*i++].type);
-}
+void parse_instruction_line(Line *parsed_line, Token *token_arr, int *i, int *operand_count) {
+    parsed_line->type = LINE_INSTRUCTION; /* Set the line type */
+    parsed_line->content.inst.opcode = ((token_arr[*i++].type) - MOV); /* Gets the opcode and Skips to the next token */
+    *operand_count = calculate_instruction_words(parsed_line->content.inst.opcode); /* Gets the number of operands */
 
-void parse_data(Line *parsed_line, Token *token_arr, int *i) {
-    if (parsed_line->type == LINE_INSTRUCTION) {
-        addSymbol(parsed_line->label, &IC, parsed_line->type);
+    /* Parse operands by number of operands */
+    switch (*operand_count) {
+    case 2:
+        add_operand_value(&parsed_line->content.inst, token_arr[*i].type);
+        if (token_arr[*i].type != COMMA) {
+            printf("Missing comma\n");
+            return;
+        }
+        parsed_line->content.inst.operand_types[1] = get_addressing_type(token_arr[*i++].type);
+
+        break;
+
+    case 1:
+        printf("One operand instruction\n");
+        break;
+
+    case 0:
+        printf("Zero operand instruction\n");
+
+        break;
+
+    default:
+        printf("Wrong operand count\n");
+        break;
     }
-    int instruction_length = calculate_instruction_words(parsed_line->content.inst.opcode);
-    IC += instruction_length + 1;
 }
 
+
+void add_operand_value(Instruction *inst, TokenType type) {
+    /*TODO: Needs to add value as well */
+    switch (type) {
+    case HASH:
+        inst->operand_types[0] = ADD_IMMEDIATE;
+        break;
+    case LABEL_USE:
+        inst->operand_types[0] = ADD_DIRECT;
+        break;
+    case ASTERISK:
+        inst->operand_types[0] = ADD_INDIRECT_REGISTER;
+        break;
+    case R0:
+    case R1:
+    case R2:
+    case R3:
+    case R4:
+    case R5:
+    case R6:
+    case R7:
+        inst->operand_types[0] = ADD_REGISTER;
+        break;
+    }
+}
 int get_addressing_type(TokenType type) {
 
     if (type == HASH) {

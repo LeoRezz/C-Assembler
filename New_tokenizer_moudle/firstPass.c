@@ -43,13 +43,10 @@ void first_pass(FILE *input_file) {
 
         /* Tokenizes a given line of assembly code into an array of tokens with assigned type. */
         token_arr = tokenize_line(line, &token_count);
-		
+		print_token_arr(token_arr, token_count);
 		/* Parse the tokens in the line */
-        parsed_line = parse_line(token_arr, token_count);
-
-
-        print_parsed_line(parsed_line);
-        printf("\n");
+        
+        printf("\n\n");
     }
     free(token_arr);
     free(parsed_line);
