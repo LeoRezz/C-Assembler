@@ -29,7 +29,7 @@ TokenType get_token_type(const char *token) {
 
     for (i = 0; reserved_words[i] != NULL; i++) {
         if (strcmp(token, reserved_words[i]) == 0) {
-            /* Found a reserved word, reutnrs its TokenType enum */
+            /* Found a reserved word, return its TokenType enum */
             return (TokenType)i;
         }
     }
@@ -169,7 +169,7 @@ int my_getword(char *word, int lim, const char **line) {
         }
         *w = '\0';
         *line = l;
-        break;
+            ;
 
     case '+': /* Handle positive numbers or standalone + */
     case '-': /* Handle negative numbers or standalone - */
@@ -224,6 +224,7 @@ int my_getword(char *word, int lim, const char **line) {
     return is_label ? ':' : c; /* Return ':' if it's a label */
 }
 
+/* Main for testing */
 int main(int argc, char *argv[]) {
     char *p;
     FILE *input_file;

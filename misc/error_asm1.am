@@ -9,7 +9,7 @@ LOOP:	prn  #48.5                ; Decimal point in immediate value
 	dec  K+                    ; Invalid character after operand
 	jmp  LOO P                 ; Space in label name
 END:	sto p                     ; Misspelled instruction (space in middle)
-STR:	.string  "ab\\\````\!@##%#$%^%^&!\\\\""""\\\\cd\g"
+STR:	.string  "ab\\\``   jhgfd(*&&*())``\!@##%#$%^%^&!\\\\""""\\\\cd\g"
 LIST:	.data  6, -09             ; Leading zero in negative number
 	.data -100,                ; Trailing comma
 K:	.data  31H                 ; Invalid hexadecimal format
