@@ -32,7 +32,7 @@ Line *parse_line(Token *token_arr, int token_count) {
         label_def_flag = 1;
         current_token++; /* Skips label definition */
     }
-
+    /* prn # 48 */
     /* Checks if it's an instruction line */
     if (is_opcode(token_arr[current_token].type)) {
         parse_instruction_line(parsed_line, token_arr, &current_token, &operand_count);
@@ -54,14 +54,17 @@ int is_opcode(TokenType type) {
 }
 void parse_instruction_line(Line *parsed_line, Token *token_arr, int *i, int *operand_count) {
     parsed_line->type = LINE_INSTRUCTION; /* Set the line type */
-    parsed_line->content.inst.opcode = ((token_arr[*i++].type) - MOV); /* Gets the opcode and Skips to the next token */
+    parsed_line->content.inst.opcode = ((token_arr[*i].type) - MOV); /* Gets the opcode and Skips to the next token */
+    (*i)++;
     *operand_count = calculate_instruction_words(parsed_line->content.inst.opcode); /* Gets the number of operands */
 
     /* Parse operands by number of operands */
     switch (*operand_count) {
     case 2:
-        add_operand_value(&parsed_line->content.inst, token_arr[*i].type);
+        /*add_operand_value(&parsed_line->content.inst, token_arr[*i].type); */
+        (*i)++;
         if (token_arr[*i].type != COMMA) {
+            printf("%s\n", token_arr[*i].value);
             printf("Missing comma\n");
             return;
         }
