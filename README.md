@@ -48,7 +48,7 @@ This assembler is a student project developed as part of [Course Name] at [Unive
 
 ## Contributors
 This project was developed by:
-- [Your Name]
-- [Your Project Partner's Name]
+- Lior Mor
+- Vikki
 
-As part of [Course Name] under the guidance of [Instructor's Name].
+As part of Systems Programming Laboratory under the guidance of [Instructor's Name].
