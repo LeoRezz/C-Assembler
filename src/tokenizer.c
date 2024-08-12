@@ -68,9 +68,10 @@ TokenType get_token_type(const char *token) {
         return ASTERISK;
     }
 
-    if (isdigit((unsigned char)token[0]) || ((token[0] == '-') || (token[0] == '+')) && isdigit((unsigned char)token[1])) {
-        return INTEGER;
-    }
+   if (isdigit((unsigned char)token[0]) || (((token[0] == '-') || (token[0] == '+')) && isdigit((unsigned char)token[1]))) {
+       return INTEGER;
+   }
+   
     if (token[0] == '"' && token[len - 1] == '"') {
         return STRING_LITERAL;
     }
@@ -110,7 +111,7 @@ static int my_getword(char *word, int lim, const char **line) {
         }
         *w = '\0';
         *line = l;
-        ;
+        break;
 
     case '+': /* Handle positive numbers or standalone + */
     case '-': /* Handle negative numbers or standalone - */

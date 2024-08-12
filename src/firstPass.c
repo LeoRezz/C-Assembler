@@ -18,7 +18,7 @@ int main() {
     FILE *input_file;
 
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("source_code.txt", "r");
+    input_file = fopen("../input/asm1.am", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
     initSymbolTable(); /* Initialize symbol table */
     first_pass(input_file);
