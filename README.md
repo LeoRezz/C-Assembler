@@ -1,11 +1,14 @@
 # Assembler Project
-<pre>
-    ___                             __    __         
-   /   |  _____________  ____ ___  / /_  / ___  _____
-  / /| | / ___/ ___/ _ \/ __ `__ \/ __ \/ / _ \/ ___/
- / ___ |(__  (__  /  __/ / / / / / /_/ / /  __/ /    
-/_/  |_/____/____/\___/_/ /_/ /_/_.___/_/\___/_/     
-                                                                   
+<pre>                                                                                    
+                                                      ,,        ,,                  
+      db                                             *MM      `7MM                  
+     ;MM:                                             MM        MM                  
+    ,V^MM.   ,pP"Ybd ,pP"Ybd  .gP"Ya `7MMpMMMb.pMMMb. MM,dMMb.  MM  .gP"Ya `7Mb,od8 
+   ,M  `MM   8I   `" 8I   `" ,M'   Yb  MM    MM    MM MM    `Mb MM ,M'   Yb  MM' "' 
+   AbmmmqMA  `YMMMa. `YMMMa. 8M""""""  MM    MM    MM MM     M8 MM 8M""""""  MM     
+  A'     VML L.   I8 L.   I8 YM.    ,  MM    MM    MM MM.   ,M9 MM YM.    ,  MM     
+.AMA.   .AMMAM9mmmP' M9mmmP'  `Mbmmd'.JMML  JMML  JMMLP^YbmdP'.JMML.`Mbmmd'.JMML.   
+                                                                                                                                                  
 </pre>                                                                     
 
 ## Description
