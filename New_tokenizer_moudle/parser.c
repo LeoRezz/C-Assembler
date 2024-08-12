@@ -67,36 +67,19 @@ int get_addressing_type(TokenType type) {
     }
 }
 int calculate_instruction_words(int opcode) {
-    switch (opcode + MOV) {
-    case MOV:
-    case CMP:
-    case ADD:
-    case SUB:
-    case LEA:
-        /* code for two-operand instructions */
-        return 2; // Assuming these instructions always use 2 words
-
-    case CLR:
-    case NOT:
-    case INC:
-    case DEC:
-    case JMP:
-    case BNE:
-    case RED:
-    case PRN:
-    case JSR:
-        /* code for one-operand instructions */
-        return 1; // Assuming these instructions always use 1 word
-
-    case RTS:
-    case STOP:
-        /* code for zero-operand instructions */
-        return 0; // These instructions don't use additional words
-
-    default:
-        /* Handle unexpected token type */
-        return -1; // Return an error code
+    if (opcode + MOV >= MOV && opcode + MOV <= LEA) {
+        return 2; // Two operand instructions
     }
+
+    if (opcode + MOV >= CLR && opcode + MOV <= JSR) {
+        return 1; // One operand instructions
+    }
+
+    if (opcode + MOV == RTS || opcode + MOV == STOP) {
+        return 0; // Zero operand instructions
+    }
+
+    return -1; // Unexpected token type
 }
 
 void print_parsed_line(Line *parsed_line) {
@@ -121,6 +104,16 @@ void print_parsed_line(Line *parsed_line) {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 const char *line_type_to_string(LineType line_type) {
     switch (line_type) {
