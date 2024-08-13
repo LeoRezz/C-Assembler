@@ -6,6 +6,9 @@
 #define MAX_TOKENS 40
 #define MAX_TOKEN_LENGTH 70
 #define MAX_LABEL_LENGTH 31
+#define MAX_DATA_VALUES 70
+#define MAX_SYMBOL_LENGTH 31
+
 
 
 
@@ -36,9 +39,12 @@ typedef enum {
     UNKNOWN  /* For unrecognized tokens */
 } TokenType;
 
+
+
 typedef enum {
     LINE_INSTRUCTION,
     LINE_DATA,
+    LINE_STRING,
     LINE_DIRECTIVE
 } LineType;
 
@@ -47,20 +53,8 @@ typedef struct {
     char value[MAX_TOKEN_LENGTH];
 } Token;
 
-/* Token tok[MAX_TOKENS] */
-
-typedef struct {
-    Token tokens[MAX_TOKENS];
-    int num_of_tokens;
-    int line_number;
-    LineType type;
-} TokenizedLine;
-
-#define MAX_DATA_VALUES 70
-#define MAX_SYMBOL_LENGTH 31
 
 typedef struct Instruction {
-    int address;
     int opcode;
     int operand_types[2]; /* Types of Addressing mode */
     union {
@@ -71,7 +65,6 @@ typedef struct Instruction {
 } Instruction;
 
 typedef struct Data {
-    int address;
     enum DataType {
         DATA_INT,
         DATA_STRING
@@ -84,6 +77,7 @@ typedef struct Data {
 } Data;
 
 typedef struct Line {
+    int address;
     LineType type;
     char label[MAX_LABEL_LENGTH];
     union {
@@ -110,4 +104,4 @@ Token *tokenize_line(const char *line, int *token_count);
 TokenType get_token_type(const char *token);
 const char *token_type_to_string(TokenType type);
 
-#endif 
+#endif
