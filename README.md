@@ -1,14 +1,68 @@
 # Assembler Project
 <pre>                                                                                    
-                                                      ,,        ,,                  
-      db                                             *MM      `7MM                  
-     ;MM:                                             MM        MM                  
-    ,V^MM.   ,pP"Ybd ,pP"Ybd  .gP"Ya `7MMpMMMb.pMMMb. MM,dMMb.  MM  .gP"Ya `7Mb,od8 
-   ,M  `MM   8I   `" 8I   `" ,M'   Yb  MM    MM    MM MM    `Mb MM ,M'   Yb  MM' "' 
-   AbmmmqMA  `YMMMa. `YMMMa. 8M""""""  MM    MM    MM MM     M8 MM 8M""""""  MM     
-  A'     VML L.   I8 L.   I8 YM.    ,  MM    MM    MM MM.   ,M9 MM YM.    ,  MM     
-.AMA.   .AMMAM9mmmP' M9mmmP'  `Mbmmd'.JMML  JMML  JMMLP^YbmdP'.JMML.`Mbmmd'.JMML.   
+      .o.                                                      .o8       oooo                     
+     .888.                                                    "888       `888                     
+    .8"888.      .oooo.o  .oooo.o  .ooooo.  ooo. .oo.  .oo.    888oooo.   888   .ooooo.  oooo d8b 
+   .8' `888.    d88(  "8 d88(  "8 d88' `88b `888P"Y88bP"Y88b   d88' `88b  888  d88' `88b `888""8P 
+  .88ooo8888.   `"Y88b.  `"Y88b.  888ooo888  888   888   888   888   888  888  888ooo888  888     
+ .8'     `888.  o.  )88b o.  )88b 888    .o  888   888   888   888   888  888  888    .o  888     
+o88o     o8888o 8""888P' 8""888P' `Y8bod8P' o888o o888o o888o  `Y8bod8P' o888o `Y8bod8P' d888b    
 </pre>                                                                     
+
+
+
+## Diagram
+<pre> 
+Start
+│
+├─ Read input file
+│
+├─ For each line in input file
+│   │
+│   ├─ Tokenize line (tokenize_line function)
+│   │   │
+│   │   ├─ Initialize token array
+│   │   │
+│   │   ├─ For each word in line
+│   │   │   │
+│   │   │   ├─ Extract word (my_getword function)
+│   │   │   │
+│   │   │   └─ Determine token type (get_token_type function)
+│   │   │
+│   │   └─ Return array of tokens
+│   │
+│   ├─ Parse line (parse_line function)
+│   │   │
+│   │   ├─ Check for label
+│   │   │
+│   │   ├─ Identify line type (instruction/data/directive)
+│   │   │
+│   │   ├─ If instruction
+│   │   │   │
+│   │   │   ├─ Identify opcode
+│   │   │   │
+│   │   │   └─ Parse operands
+│   │   │
+│   │   ├─ If data
+│   │   │   │
+│   │   │   └─ Parse data values
+│   │   │
+│   │   └─ If directive
+│   │       │
+│   │       └─ Handle directive
+│   │
+│   ├─ Update symbol table if necessary
+│   │
+│   └─ Update IC or DC
+│
+├─ End of first pass
+│
+├─ Update data symbols
+│
+├─ Print symbol table
+│
+└─ End
+</pre> 
 
 ## Description
 [Provide a brief description of your assembler project. Explain its purpose and main features.]
