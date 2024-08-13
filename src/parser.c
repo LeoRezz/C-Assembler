@@ -67,6 +67,7 @@ Line *parse_line(Token *token_arr, int token_count) {
 void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int *data_count) {
     int token_count;
     Data *data;
+    char *p;
 
     data = &(parsed_line->content.data);
     token_count = strlen(token_arr[*current_token].value);
@@ -74,6 +75,7 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
     /* Check the type of data */
     switch (token_arr[*current_token].type) {
     case DATA:
+        parsed_line->type = LINE_DATA;
         /* Parse the integer data and update DC */
         data->type = DATA_INT; /* not sure if needed */
         (*current_token)++;    /* Advancing to first integer */
@@ -87,21 +89,33 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
             }
 
             if ((token_arr[*current_token].type == INTEGER)) {
-                data->content.int_values[(*data_count)++] = strtol(token_arr[*current_token].value, NULL, 10);
+                data->content.int_values[data->value_count++] = strtol(token_arr[*current_token].value, NULL, 10);
+                
                 DC++;
             } else {
                 printf("Invalid token type for integer data: %s\n", token_arr[*current_token].value);
                 return;
             }
-            break;
+            
         }
+        break;
     case STRING:
+        parsed_line->type = LINE_STRING;
         /* Parse the string data and update DC */
         data->type = DATA_STRING;
         (*current_token)++; /* Advancing to string litral*/
+        
         if (token_arr[*current_token].type == STRING_LITERAL) {
-            strncpy(data->content.char_values, token_arr[*current_token].value, MAX_DATA_VALUES); /* check syntax? */
-            DC += (strlen(data->content.char_values)) + 1; /* +1 for the null character */
+            strncpy(data->content.char_values, (token_arr[*current_token].value) + 1, MAX_DATA_VALUES);
+            
+            if ((p = strrchr(data->content.char_values, '"')) != NULL)
+                *p = '\0';
+            else
+                printf("Invalid string literal\n");
+            
+            /* +1 for the null character */
+            data->value_count = strlen(data->content.char_values) + 1; 
+            DC += data->value_count; 
             (*data_count)++;
         }
         break;
@@ -231,32 +245,68 @@ int is_opcode(TokenType type) { return type >= MOV && type <= STOP; }
 int is_data(TokenType type) { return (type == DATA || type == STRING); }
 
 void print_parsed_line(Line *parsed_line) {
-  const char *line_type_to_string(LineType line_type);
-  const char *operand_type_to_string(int operand_type);
-  const char *opcode_to_string(int opcode);
-  int i;
-  printf("Line type: %s\n", line_type_to_string(parsed_line->type));
-  printf("Label: %s\n", parsed_line->label);
+    const char *line_type_to_string(LineType line_type);
+    const char *operand_type_to_string(int operand_type);
+    const char *opcode_to_string(int opcode);
+    int i;
 
-  if (parsed_line->type == LINE_INSTRUCTION) {
-    printf("Instruction: %s\n",
-           opcode_to_string(parsed_line->content.inst.opcode));
-    for (i = 0; i < 2; i++) {
-      printf(
-          "Operand %d type: %s\n", i,
-          operand_type_to_string(parsed_line->content.inst.operand_types[i]));
-      if (parsed_line->content.inst.operand_types[i] == ADD_IMMEDIATE) {
-        printf("Operand %d immediate value: %d\n", i,
-               parsed_line->content.inst.operands[i].immediate);
-      } else if (parsed_line->content.inst.operand_types[i] == ADD_REGISTER) {
-        printf("Operand %d register: %d\n", i,
-               parsed_line->content.inst.operands[i].reg);
-      } else if (parsed_line->content.inst.operand_types[i] == ADD_DIRECT) {
-        printf("Operand %d symbol: %s\n", i,
-               parsed_line->content.inst.operands[i].symbol);
-      }
+    if (parsed_line == NULL) {
+        printf("Error: Parsed line is NULL\n");
+        return;
     }
-  }
+    printf("--------------------parsed line-----------------------\n");
+    printf("Line type: %s\n", line_type_to_string(parsed_line->type));
+    printf("Label: %s\n", parsed_line->label ? parsed_line->label : "N/A");
+
+    switch (parsed_line->type) {
+
+    case LINE_INSTRUCTION:
+        printf("Instruction: %s\n",
+               opcode_to_string(parsed_line->content.inst.opcode));
+        for (i = 0; i < 2; i++) {
+            printf(
+                "Operand %d type: %s\n", i,
+                operand_type_to_string(parsed_line->content.inst.operand_types[i]));
+            if (parsed_line->content.inst.operand_types[i] == ADD_IMMEDIATE) {
+                printf("Operand %d immediate value: %d\n", i,
+                       parsed_line->content.inst.operands[i].immediate);
+            } else if (parsed_line->content.inst.operand_types[i] == ADD_REGISTER) {
+                printf("Operand %d register: %d\n", i,
+                       parsed_line->content.inst.operands[i].reg);
+            } else if (parsed_line->content.inst.operand_types[i] == ADD_DIRECT) {
+                printf("Operand %d symbol: %s\n", i,
+                       parsed_line->content.inst.operands[i].symbol ? parsed_line->content.inst.operands[i].symbol : "N/A");
+            }
+        }
+        break;
+
+    case LINE_DATA:
+
+        printf("Data type: INT\n");
+        printf("Data value count: %d\n", parsed_line->content.data.value_count);
+
+        for (i = 0; i < parsed_line->content.data.value_count; i++) {
+            printf("Data value: %d\n", parsed_line->content.data.content.int_values[i]);
+        }
+        break;
+
+    case LINE_STRING:
+        printf("Data type: STRING\n");
+        printf("String length: %d\n", parsed_line->content.data.value_count);
+        printf("String: %s\n", parsed_line->content.data.content.char_values);
+        break;
+
+    case LINE_DIRECTIVE:
+        printf("Directive\n");
+        break;
+
+    default:
+        printf("Invalid line type\n");
+        break;
+    }
+    printf("------------------------------------------------------\n");
+
+    return;
 }
 
 const char *line_type_to_string(LineType line_type) {
@@ -265,6 +315,8 @@ const char *line_type_to_string(LineType line_type) {
     return "INSTRUCTION";
   case LINE_DATA:
     return "DATA";
+  case LINE_STRING:
+    return "STRING";
   case LINE_DIRECTIVE:
     return "DIRECTIVE";
   default:
