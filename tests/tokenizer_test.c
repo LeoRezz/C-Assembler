@@ -11,7 +11,7 @@ int main() {
 	
 
 	/* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-	input_file = fopen("invalid_input.as","r"); 
+	input_file = fopen("valid_input.as","r"); 
     TRY(input_file); /* TRY macro checks for errors while opening file */
     
 	/* Read each line from the source file */
