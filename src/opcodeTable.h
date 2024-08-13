@@ -23,4 +23,4 @@ void print_allowed_modes(int modes);
 void print_opcode_info(const Opcode *op);
 void print_opcode_table();
 
-#endif // OPCODE_TABLE_H
+#endif

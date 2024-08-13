@@ -47,7 +47,8 @@ int addSymbol(char *name, int *value, SymbolType type) {
 
 /* Look up a symbol in the table */
 symbol *findSymbol(char *name) {
-    for (int i = 0; i < symbolCount; i++) {
+    int i;
+    for (i = 0; i < symbolCount; i++) {
         if (strcmp(symbolTable[i].name, name) == 0) {
             return &symbolTable[i];
         }
@@ -56,7 +57,8 @@ symbol *findSymbol(char *name) {
 }
 
 void updateDataSymbols(int IC) {
-    for (int i = 0; i < symbolCount; i++) {
+    int i;
+    for (i = 0; i < symbolCount; i++) {
         if (symbolTable[i].type == SYMBOL_DATA) {
             symbolTable[i].value += IC;
         }
@@ -64,10 +66,11 @@ void updateDataSymbols(int IC) {
 }
 
 void printSymbolTable() {
+    int i;
     printf("\nSymbol Table:\n");
     printf("%-32s %-10s %-10s\n", "Name", "Value", "Type");
     printf("-------------------------------- ---------- ----------\n");
-    for (int i = 0; i < symbolCount; i++) {
+    for (i = 0; i < symbolCount; i++) {
         printf("%-32s %-10d ", symbolTable[i].name, symbolTable[i].value);
         switch (symbolTable[i].type) {
         case SYMBOL_CODE:

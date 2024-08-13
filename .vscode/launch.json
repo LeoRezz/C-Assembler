@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "tok_tester",
+            "name": "firstPass",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/lior/vsCode/Mamman14/New_tokenizer_moudle/tok_tester",
+            "program": "/home/lior/vsCode/Mamman14/src/firstPass",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",

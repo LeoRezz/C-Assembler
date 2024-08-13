@@ -46,7 +46,8 @@ static const Opcode OPCODE_TABLE[NUM_OPCODES] = {
     {"stop", 15, 0, 0, 0}};
 
 const Opcode *find_opcode(const char *mnemonic) {
-    for (int i = 0; i < NUM_OPCODES; i++) {
+    int i;
+    for (i = 0; i < NUM_OPCODES; i++) {
         if (strcmp(OPCODE_TABLE[i].mnemonic, mnemonic) == 0) {
             return &OPCODE_TABLE[i];
         }
@@ -107,11 +108,12 @@ void print_opcode_info(const Opcode *op) {
 }
 
 void print_opcode_table() {
+    int i;
     printf("Opcode Table:\n");
     printf("%-6s %-5s %-8s %-20s %-20s\n", "Mnem.", "Code", "Operands", "Src Modes", "Dest Modes");
     printf("------ ----- -------- -------------------- --------------------\n");
 
-    for (int i = 0; i < NUM_OPCODES; i++) {
+    for (i = 0; i < NUM_OPCODES; i++) {
         printf("%-6s %-5d %-8d ",
                OPCODE_TABLE[i].mnemonic,
                OPCODE_TABLE[i].opcode,
