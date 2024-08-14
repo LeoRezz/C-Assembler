@@ -1,6 +1,6 @@
 CC= gcc
 CFLAGS= -Wall -ansi -pedantic -g -fsanitize=address
-SOURCES= firstPass.c tokenizer.c opcodeTable.c symbolTable.c parser.c util.c
+SOURCES= main.c firstPass.c tokenizer.c opcodeTable.c symbolTable.c parser.c util.c
 TARGET= firstPass
 
 $(TARGET): $(SOURCES)
