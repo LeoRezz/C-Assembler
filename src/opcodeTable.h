@@ -8,6 +8,18 @@ typedef enum {
     ADD_REGISTER
 } AddressingMode;
 
+/* Old definition for addressing modes,
+ * for using bitwise logic within 
+ * is_addressing_mode_allowed:
+
+typedef enum {
+    ADD_IMMEDIATE = 1, //0001
+    ADD_DIRECT = 2, //0010
+    ADD_INDIRECT_REGISTER = 4, //0100
+    ADD_REGISTER = 8  //1000
+} AddressingMode;
+ */
+
 typedef struct {
     const char *mnemonic;
     int opcode;
