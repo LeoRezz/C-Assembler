@@ -2,13 +2,9 @@
 #include "symbolTable.h"
 #include "opcodeTable.h"
 #include "parser.h"
-/*assuming i have a program[] that contains an array of the tokenized lines, in my opinion 
-its a waist of memory (?) and its better to save the tokenized lines as an attribute of the 
-Line structure.
-we should think about it.*/
 
 int CommandsArrayLength = 20;
-///////////////////////--------------------NO ERROR CATCHING----------------------------------
+///////////////////////--------------------NO ERROR CATCHING??----------------------------------
 /*The function gets a decimal integer and covert it to binary for the amount of specified bits*/
 char* CodeToBinary(int input, int numberOfBits) 
 {
@@ -37,6 +33,9 @@ char InstructionToBinary(Line *line)
             strcat(binaryCode, CodeToBinary(line->content.inst.operands[i].immediate,12)); //משלים ל2
             strcat(binaryCode, CodeToBinary(4,3)); // A=1, R,E=0 
             return binaryCode;                          
+
+
+///////////////////// finish later its 5 AM #labeltable #M&M&M////////////////////
 
         case 2: //ADD_DIRECT  --------------- need to access labeltable address
             //label = line->content.inst.operands[i].symbol
