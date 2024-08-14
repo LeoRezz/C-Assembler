@@ -1,10 +1,10 @@
 #include "tokenizer.h"
 /* I removed some #includes because I couldn't compile */
-
+/* To compile: gcc -g first_word_binary.c -o first_word_binary */
+/*----------------------------------------------------------------------------*/
 /* enum for addressing modes */
 /* There is an enum in opcodeTable.h, with bit logic to detect invalid modes 
  * for each instruction, we need to figure out how to implement this or revise it */
-
 typedef enum {
     ADD_IMMEDIATE,
     ADD_DIRECT,
@@ -58,7 +58,7 @@ char *InstructionToBinary(Line *line) {
 
         case ADD_DIRECT: /* ADD_DIRECT  --------------- need to access labeltable address
             //label = line->content.inst.operands[i].symbol
-            //strcat(binaryCode, CodeToBinary(,12)); /*2's complement */
+            //strcat(binaryCode, CodeToBinary(,12)); 2's complement */
         printf("ADD_DIRECT not implemented yet\n");
             break;
 
