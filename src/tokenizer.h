@@ -10,8 +10,6 @@
 #define MAX_SYMBOL_LENGTH 31
 
 
-
-
 typedef enum {
     /* Registers */
     R0, R1, R2, R3, R4, R5, R6, R7,
@@ -54,7 +52,7 @@ typedef struct {
 } Token;
 
 
-typedef struct Instruction {
+typedef struct Instruction { /* add LABEL , r2 */
     int opcode;
     int operand_types[2]; /* Types of Addressing mode, should be intialized to -1 ? */
     int operands_count; /* For determining operand count */

@@ -15,7 +15,7 @@ typedef enum {
 
 typedef struct {
     char name[MAX_SYMBOL_LENGTH];
-    int value;
+    int value; /* ADDRESS */
     SymbolType type;
 } symbol;
 
