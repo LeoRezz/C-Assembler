@@ -56,11 +56,12 @@ typedef struct {
 
 typedef struct Instruction {
     int opcode;
-    int operand_types[2]; /* Types of Addressing mode */
+    int operand_types[2]; /* Types of Addressing mode, should be intialized to -1 ? */
+    int operands_count; /* For determining operand count */
     union {
-        int immediate;
-        char symbol[MAX_SYMBOL_LENGTH];
-        int reg;
+        int immediate; /* Storing opreand's integer value  */
+        char symbol[MAX_SYMBOL_LENGTH]; /* Storing label opreand name, like: LOOP */
+        int reg; /* Storing register's value, 0 to 7 */
     } operands[2];
 } Instruction;
 
@@ -76,18 +77,20 @@ typedef struct Data {
     } content;
 } Data;
 
+/* Structure to represent a line of assembly code */
 typedef struct Line {
-    int address;
+    int line_number; /* For error reporting */
+    int address; /* Current IC for output */
     LineType type;
-    char label[MAX_LABEL_LENGTH];
+    char label[MAX_LABEL_LENGTH]; /* Stores labels, currently used for debugging */
     union {
-        Instruction inst;
-        Data data;
+        Instruction inst; /* Instruction fields */
+        Data data; /* Data fields */
     } content;
 } Line;
 
 /* Function prototype */
-TokenType get_token_type(const char* token);
+
 /**
  * @brief Tokenizes a given line of assembly code into an array of tokens with assigned type.
  *
