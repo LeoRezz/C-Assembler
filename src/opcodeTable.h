@@ -1,16 +1,10 @@
 #ifndef OPCODE_TABLE_H
 #define OPCODE_TABLE_H
 
-typedef enum {
-    ADD_IMMEDIATE,
-    ADD_DIRECT,
-    ADD_INDIRECT_REGISTER,
-    ADD_REGISTER
-} AddressingMode;
 
 /* Old definition for addressing modes,
  * for using bitwise logic within 
- * is_addressing_mode_allowed:
+ * is_addressing_mode_allowed: */
 
 typedef enum {
     ADD_IMMEDIATE = 1, //0001
@@ -18,7 +12,7 @@ typedef enum {
     ADD_INDIRECT_REGISTER = 4, //0100
     ADD_REGISTER = 8  //1000
 } AddressingMode;
- */
+ 
 
 typedef struct {
     const char *mnemonic;

@@ -22,6 +22,7 @@ void first_pass(FILE *input_file) {
         if ((p = strrchr(line, '\n')) != NULL) *p = '\0'; /* Remove the newline character at the end*/
 
         /* Tokenizes a given line of assembly code into an array of tokens with assigned type. */
+        /* TODO: check reserved words for label defenitionssssssss */
         token_arr = tokenize_line(line, &token_count);
         print_token_arr(token_arr, token_count);
         /* Parse the tokens in the line */

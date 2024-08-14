@@ -5,12 +5,6 @@
 /* enum for addressing modes */
 /* There is an enum in opcodeTable.h, with bit logic to detect invalid modes 
  * for each instruction, we need to figure out how to implement this or revise it */
-typedef enum {
-    ADD_IMMEDIATE,
-    ADD_DIRECT,
-    ADD_INDIRECT_REGISTER,
-    ADD_REGISTER
-} AddressingMode; 
 
 /* Function prototypes */
 char* FirstTokenToBinary(Line *line, char binaryCode[]);
@@ -37,66 +31,65 @@ char* CodeToBinary(int input, int numberOfBits)
     return binary;
 }
 
-
 char *InstructionToBinary(Line *line) {
     int i = 0;
     int address = 0;
     /* char binaryCode[13] = "";   Warning: Function returns address of local variable */
-    char *binaryCode = (char *)malloc(13); /* Free later */
+    char *binaryCode = (char *)malloc(14);             /* Free later */
     binaryCode = FirstTokenToBinary(line, binaryCode); /*save to the binarycode file */
+    
+    if (line->content.inst.operands_count > 0) {
+        /* code */
 
-    switch (line->content.inst.operand_types[0])
-    {
-        case ADD_IMMEDIATE: /* ADD_IMMEDIATE */
-            strcat(binaryCode, CodeToBinary(line->content.inst.operands[i].immediate,12)); /* 2's complement */
-            strcat(binaryCode, CodeToBinary(4,3)); /* A=1, R=0 ,E=0 */
+        switch (line->content.inst.operand_types[0]) {
+        case 1:                                                                 /* ADD_IMMEDIATE need to change to 1 instead of 0 */
+            strcat(binaryCode, CodeToBinary(line->content.inst.operands[i].immediate, 12)); /* 2's complement */
+            strcat(binaryCode, CodeToBinary(4, 3));                                         /* A=1, R=0 ,E=0 */
             printf("DEBUG: In InstructionToBinary()\nswitch(operand_types[0])\ncase: ADD_IMMEDIATE\n\n");
-            return binaryCode;                      
+            return binaryCode;
 
+            /*/////////////////// finish later its 5 AM #labeltable #M&M&M//////////////////*/
 
-/*/////////////////// finish later its 5 AM #labeltable #M&M&M//////////////////*/
-
-        case ADD_DIRECT: /* ADD_DIRECT  --------------- need to access labeltable address
+        case 2: /* ADD_DIRECT  --------------- need to access labeltable address
             //label = line->content.inst.operands[i].symbol
             //strcat(binaryCode, CodeToBinary(,12)); 2's complement */
-        printf("ADD_DIRECT not implemented yet\n");
+            printf("ADD_DIRECT not implemented yet\n");
             break;
 
-        case ADD_INDIRECT_REGISTER: /*ADD_INDIRECT_REGISTER */
-        printf("ADD_INDIRECT_REGISTER not implemented yet\n");
-        /* code */
+        case 4: /*ADD_INDIRECT_REGISTER */
+            printf("ADD_INDIRECT_REGISTER not implemented yet\n");
+            /* code */
             break;
 
-        case ADD_REGISTER: /*ADD_REGISTER*/
-        printf("ADD_REGISTER not implemented yet\n");
+        case 8: /*ADD_REGISTER*/
+            printf("ADD_REGISTER not implemented yet\n");
             /* code */
             break;
 
         default:
-        printf("Reached default\n");
+            printf("Reached default\n");
             return NULL;
             break;
+        }
+    } else {
+        printf("NO OPERANDSSSSSSSS\n");
+        return binaryCode;
     }
 }
-    
 
-    
-    
-
-
-char* FirstTokenToBinary(Line *line, char *binaryCode) //only if instruction line
+char* FirstTokenToBinary(Line *line, char *binaryCode) //only if instruction line // o 1 2 3 to 1 2 4 8
 { 
     int instruction_words;
 
     instruction_words = calculate_instruction_words(line->content.inst.opcode);
-    char* binaryCodeToReturn = (char*) calloc(13, sizeof(char)); // not sure if neede here?
+    char* binaryCodeToReturn = (char*) calloc(14, sizeof(char)); // not sure if neede here?
     strcat(binaryCode, CodeToBinary(line->content.inst.opcode,4)); //bits 11-14 are opcode
     switch (instruction_words) 
     {
         case 0:
             strcat(binaryCode, CodeToBinary(0,8)); // source and destination are irrelevant
-            strcat(binaryCode, CodeToBinary(4,3)); // A=1, R,E=0
-            strcpy(binaryCodeToReturn , binaryCode);
+            strcat(binaryCode, CodeToBinary(4,3)); // A=1,R=0 ,E=0 //100
+            strcpy(binaryCodeToReturn , binaryCode); 
         return binaryCodeToReturn;
 
         case 1:
@@ -114,10 +107,12 @@ char* FirstTokenToBinary(Line *line, char *binaryCode) //only if instruction lin
         return binaryCodeToReturn;
         
         default:
+          printf("Reached default\n");
             break; //error message?
     }
     
 }
+
 
 void test_CodeToBinary() {
     int test_cases[][2] = {{10, 8}, {15, 4}, {255, 8}, {0, 4}, {-5, 8}};
@@ -133,9 +128,9 @@ void test_CodeToBinary() {
 }
 
 int main() {
-    test_CodeToBinary();
+    //test_CodeToBinary();
 
-        Line line1 = {  /* MAIN:    add #5, r3 */
+        Line line1 = {  /* MAIN:    add #5, #3 */
         .address = 100,
         .type = LINE_INSTRUCTION,
         .label = "MAIN",
@@ -157,18 +152,17 @@ int main() {
             .operands = {{}, {}}
         }
     };
-    print_parsed_line(&line1);
+    //print_parsed_line(&line1);
     print_parsed_line(&line2);
 
-
-    char* binary = InstructionToBinary(&line1);
-    printf("Binary: %s\n", binary);
-    free(binary);
-    printf("\n");
-    char* binary2 = InstructionToBinary(&line2);
+    // char *binary = InstructionToBinary(&line1);
+    // printf("Binary: %s\n", binary);
+    // free(binary);
+    // printf("\n");
+    char *binary2 = InstructionToBinary(&line2);
     printf("Binary: %s\n", binary2);
-    free(binary);
-return 0;
+    free(binary2);
+    return 0;
 }
 
 
@@ -193,6 +187,16 @@ int calculate_instruction_words(int opcode) {
   if (opcode + MOV >= MOV && opcode + MOV <= LEA) {
     return 2; /* Two operand instructions */
   }
+
+  if (opcode + MOV >= CLR && opcode + MOV <= JSR) {
+    return 1; /* One operand instructions */
+  }
+
+  if (opcode + MOV == RTS || opcode + MOV == STOP) {
+    return 0; /* Zero operand instructions */
+  }
+
+  return -1; /* Unexpected token type */
 }
 
 void print_parsed_line(Line *parsed_line) {

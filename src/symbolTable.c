@@ -24,8 +24,9 @@ void initSymbolTable() {
 
 /*Add a symbol to the table */
 int addSymbol(char *name, int *value, SymbolType type) {
+    int new_capacity;
     if (symbolCount >= symbolCapacity) {
-        int new_capacity = symbolCapacity * 2;
+        new_capacity = symbolCapacity * 2;
         symbol *new_table = realloc(symbolTable, new_capacity * sizeof(symbol));
         if (new_table == NULL) {
             /* Handle reallocation error*/

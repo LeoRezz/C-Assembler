@@ -1,5 +1,5 @@
 CC= gcc
-CFLAGS= -Wall -ansi -pedantic -g -fsanitize=address
+CFLAGS= -g -fsanitize=address
 SOURCES= main.c firstPass.c tokenizer.c opcodeTable.c symbolTable.c parser.c util.c
 TARGET= firstPass
 

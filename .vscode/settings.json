@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "tokenizer.h": "c",
-        "parser.h": "c"
+        "parser.h": "c",
+        "util.h": "c",
+        "limits": "c"
     }
 }
