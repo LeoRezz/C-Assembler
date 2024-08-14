@@ -1,11 +1,11 @@
-#include "tokenizer.h"
+#include "../src/tokenizer.h"
+#include "../src/parser.h"
+#include "../src/opcodeTable.h"
+#include "../src/util.h"
+#include "../src/symbolTable.h"
 
-static enum {
-    ADD_IMMEDIATE,
-    ADD_DIRECT,
-    ADD_INDIRECT_REGISTER,
-    ADD_REGISTER
-} AddressingMode;
+int IC = 100;
+int DC = 0;
 
 int main() {
     Line line1 = {  /* MAIN:    add #5, r3 */
@@ -38,6 +38,10 @@ int main() {
             .content.int_values = {6, -9, 15}
         }
     };
+
+    print_parsed_line(&line1);
+    print_parsed_line(&line2);
+    print_parsed_line(&line3);
     
     return 0;
 }

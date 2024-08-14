@@ -4,7 +4,7 @@
 #include "parser.h"
 
 int CommandsArrayLength = 20;
-///////////////////////--------------------NO ERROR CATCHING??----------------------------------
+/*/////////////////////--------------------NO ERROR CATCHING??----------------------------------*/
 /*The function gets a decimal integer and covert it to binary for the amount of specified bits*/
 char* CodeToBinary(int input, int numberOfBits) 
 {
@@ -25,29 +25,29 @@ char InstructionToBinary(Line *line)
 {   int i = 0;
     int address = 0;
     char binaryCode[13] = "";
-    FirstTokenToBinary(line, binaryCode); //save to the binarycode file
+    FirstTokenToBinary(line, binaryCode); /*save to the binarycode file */
 
     switch (line->content.inst.operand_types[0])
     {
-        case 1: //ADD_IMMEDIATE
+        case 1: /* ADD_IMMEDIATE */
             strcat(binaryCode, CodeToBinary(line->content.inst.operands[i].immediate,12)); //משלים ל2
             strcat(binaryCode, CodeToBinary(4,3)); // A=1, R,E=0 
             return binaryCode;                          
 
 
-///////////////////// finish later its 5 AM #labeltable #M&M&M////////////////////
+/*/////////////////// finish later its 5 AM #labeltable #M&M&M//////////////////*/
 
-        case 2: //ADD_DIRECT  --------------- need to access labeltable address
+        case 2: /* ADD_DIRECT  --------------- need to access labeltable address
             //label = line->content.inst.operands[i].symbol
-            //strcat(binaryCode, CodeToBinary(,12)); //משלים ל2
+            //strcat(binaryCode, CodeToBinary(,12)); /*2's complement */
 
             break;
 
-        case 4: //ADD_INDIRECT_REGISTER
+        case 4: /*ADD_INDIRECT_REGISTER */
         /* code */
             break;
 
-        case 8: //ADD_REGISTER
+        case 8: /*ADD_REGISTER*/
             /* code */
             break;
 
