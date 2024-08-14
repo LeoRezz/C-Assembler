@@ -73,7 +73,7 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
     token_count = strlen(token_arr[*current_token].value);
 
     /* Check the type of data */
-    switch (token_arr[*current_token].type) {
+    switch (token_arr[*current_token].type) { /* .data 6 , 5 = DATA */
     case DATA:
         parsed_line->type = LINE_DATA;
         /* Parse the integer data and update DC */
@@ -96,7 +96,6 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
                 printf("Invalid token type for integer data: %s\n", token_arr[*current_token].value);
                 return;
             }
-            
         }
         break;
     case STRING:
