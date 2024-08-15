@@ -66,5 +66,5 @@ dkms.conf
 diff.txt
 launch.json
 settings.json
-src/first_word_binary
-src/build.sh
+first_word_binary
+build.sh
