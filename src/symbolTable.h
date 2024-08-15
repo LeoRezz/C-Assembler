@@ -1,9 +1,10 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX_LINE 82
+
 #define MAX_SYMBOL_LENGTH 31
 
 typedef enum {
@@ -19,10 +20,12 @@ typedef struct {
     SymbolType type;
 } symbol;
 
-void initSymbolTable();
-int addSymbol(char *name, int *value, SymbolType type);
-symbol *findSymbol(char *name);
-void updateDataSymbols(int IC);
-void printSymbolTable();
-void freeSymbolTable();
-#endif
+void init_symbol_table(void);
+int add_symbol(char *name, int *value, SymbolType type);
+void grow_symbol_table(symbol *symbol_table);
+symbol *find_symbol(char *name);
+void update_data_symbols(int IC);
+void print_symbol_table(void);
+void free_symbol_table(void);
+
+#endif /* SYMBOL_TABLE_H */
