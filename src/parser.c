@@ -185,7 +185,7 @@ void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index
             break;
         case LABEL_USE:
             mode = ADD_DIRECT;
-            strncpy(inst->operands[op_index].label.symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
+            strncpy(inst->operands[op_index].symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
             break;
         case ASTERISK:
             (*i)++;
@@ -262,7 +262,7 @@ void print_parsed_line(Line *parsed_line) {
                        parsed_line->content.inst.operands[i].reg);
             } else if (parsed_line->content.inst.operand_types[i] == ADD_DIRECT) {
                 printf("Operand %d label: %s\n", i,
-                       parsed_line->content.inst.operands[i].label.symbol ? parsed_line->content.inst.operands[i].label.symbol : "N/A");
+                       parsed_line->content.inst.operands[i].symbol ? parsed_line->content.inst.operands[i].symbol : "N/A");
             }
         }
         break;

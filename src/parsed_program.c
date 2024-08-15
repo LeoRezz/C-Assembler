@@ -41,7 +41,7 @@ void grow_parsed_program(ParsedProgram *program) {
 
 void add_line_to_program(ParsedProgram *program, Line *line) {
 
-    if (program->size == program->capacity) {
+    if (program->size >= program->capacity) {
         grow_parsed_program(program);
     }
    
@@ -53,7 +53,7 @@ void update_data_lines(int IC, ParsedProgram *ParsedProgram) {
     int i;
     for (i = 0; i < ParsedProgram->size; i++) {
         if (ParsedProgram->lines[i].type == LINE_DATA || ParsedProgram->lines[i].type == LINE_STRING) {
-            ParsedProgram->lines[i].address += IC;
+            ParsedProgram->lines[i].address += IC; /* DC = DC + IC */
         }
     }
 }

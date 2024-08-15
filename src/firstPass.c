@@ -25,7 +25,7 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
         /* Tokenizes a given line of assembly code into an array of tokens with assigned type. */
         /* TODO: check reserved words for label defenitionssssssss */
         token_arr = tokenize_line(line, &token_count);
-        print_token_arr(token_arr, token_count);
+        // print_token_arr(token_arr, token_count);
         /* Parse the tokens in the line */
         parsed_line = parse_line(token_arr, token_count);
         add_line_to_program(parsed_program, parsed_line);

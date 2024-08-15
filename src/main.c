@@ -16,9 +16,15 @@ int current_line = 0;
 /* Make sure there is no extern and entry on the same label name
    Make sure macro names arn't declared as a label
    Make sure reserved words aren't valid label defenitions
+   Make sure there are no two labels with the same name
    
    
    secondPass:
+   Write data to binary
+   Binary to octal
+   Entry and extern files 
+   Make sure instruction to binary is correct
+   Make sure writeLine is correct
    Make sure code image isn't bigger than 4096
    Make sure to build an ob file, and possibly ext and ent if needed.
    
@@ -29,7 +35,7 @@ int main() {
 
     
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("../input/asm1_data_mix.am", "r");
+    input_file = fopen("../input/asm1.am", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
 
     parsed_program = create_parsed_program(); 

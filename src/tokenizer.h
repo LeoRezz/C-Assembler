@@ -50,11 +50,6 @@ typedef struct {
     char value[MAX_TOKEN_LENGTH];
 } Token;
 
-typedef struct {
-    char symbol[MAX_SYMBOL_LENGTH]; /* Storing label opreand name, like: LOOP */
-    int address;
-    /* Label operands are assumed undefined and set to -1, To be updated in the second pass, using the ~LabelTable~ */
-} LabelOperand;
 
 typedef struct Instruction {
     int opcode;
@@ -62,7 +57,7 @@ typedef struct Instruction {
     int operands_count; /* For determining operand count */
     union {
         int immediate; /* Storing opreand's integer value  */
-        LabelOperand label; /* Storing opreand's label name, and address field for resolution */
+        char symbol[MAX_SYMBOL_LENGTH]; /* Storing label opreand name, like: LOOP */
         int reg; /* Storing register's value, 0 to 7 */
     } operands[2];
 } Instruction;
