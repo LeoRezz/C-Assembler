@@ -1,8 +1,8 @@
-LIST:   .data  6, -9
+STR:    .string  "abcd"
 MAIN:   add  r3, LIST 
-        .data -100
 LOOP:   prn  #48
         lea  STR, r6
+LIST:   .data  6, -9
         macr m_macr
         cmp  r3, #-6
         bne  END 
@@ -10,10 +10,11 @@ LOOP:   prn  #48
         inc  r6
         mov *r6, K
         sub  r1, r4
+
+        .data -100  
+
         m_macr
+K:      .data 31
         dec  K
         jmp  LOOP
-STR:    .string  "abcd"
-        .data 31
 END:    stop
-K:      .data 31

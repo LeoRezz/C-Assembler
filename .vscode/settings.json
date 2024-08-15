@@ -5,6 +5,9 @@
         "util.h": "c",
         "limits": "c",
         "symboltable.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "opcodetable.h": "c",
+        "preprocessor.h": "c",
+        "parsed_program.h": "c"
     }
 }

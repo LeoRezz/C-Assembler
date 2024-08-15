@@ -15,5 +15,10 @@ ParsedProgram* create_parsed_program(void);
 void grow_parsed_program(ParsedProgram* program);
 void add_line_to_program(ParsedProgram* program, Line* line);
 void free_parsed_program(ParsedProgram* program);
+<<<<<<< HEAD
+=======
+void print_parsed_program(const ParsedProgram* program);
+void update_data_lines(int IC, ParsedProgram *ParsedProgram);
+>>>>>>> sandbox
 
 #endif /* PARSED_PROGRAM_H */

@@ -152,3 +152,13 @@ void print_opcode_table() {
         printf("\n");
     }
 }
+
+const char *opcode_to_string(int opcode) {
+    int i;
+    for (i = 0; i < NUM_OPCODES; i++) {
+        if (OPCODE_TABLE[i].opcode == opcode) {
+            return OPCODE_TABLE[i].mnemonic;
+        }
+    }
+    return "Invalid opcode";
+}

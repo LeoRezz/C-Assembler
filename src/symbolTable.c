@@ -2,6 +2,8 @@
 #define MAX_LABEL_LENGTH 31
 #define INITIAL_SYMBOL_TABLE_SIZE 20
 
+
+
 /* Global state, Instruction and Data count*/
 extern int IC;
 extern int DC;
@@ -22,9 +24,22 @@ void init_symbol_table(void) {
     symbol_capacity = INITIAL_SYMBOL_TABLE_SIZE;
 }
 
+<<<<<<< HEAD
 /*Add a symbol to the table */
 int add_symbol(char *name, int *value, SymbolType type) {
         
+=======
+/**
+ * Add a symbol to the table.
+ *
+ * @param name The name of the symbol.
+ * @param value The value of the symbol.
+ * @param type The type of the symbol.
+ *
+ * @return 1 on success, 0 on failure.
+ */
+int add_symbol(char *name, int *value, SymbolType type) {
+>>>>>>> sandbox
     if (symbol_count >= symbol_capacity) {
         grow_symbol_table(symbol_table);
     }
@@ -39,6 +54,27 @@ int add_symbol(char *name, int *value, SymbolType type) {
     printf("Symbol type set: %d\n", symbol_table[symbol_count].type);
     printf("------------------------------Labels added----------------------------------\n\n\n");
 
+<<<<<<< HEAD
+=======
+    strncpy(symbol_table[symbol_count].name, name, MAX_LABEL_LENGTH);
+    symbol_table[symbol_count].name[MAX_LABEL_LENGTH] = '\0'; /* Ensure null-termination */
+    symbol_table[symbol_count].type = type;
+    switch (type) {
+    case SYMBOL_CODE:
+        symbol_table[symbol_count].value = *value;
+        break;
+    case SYMBOL_DATA:
+        symbol_table[symbol_count].value = *value;
+        break;
+    case SYMBOL_EXTERNAL:
+        symbol_table[symbol_count].value = 0;
+        break;
+    default:
+        printf("Error: Unknown symbol type\n");
+        return 0;
+    }
+
+>>>>>>> sandbox
     symbol_count++;
     return 1;
 }
@@ -78,9 +114,17 @@ void update_data_symbols(int IC) {
     }
 }
 
+<<<<<<< HEAD
+=======
+int compare_symbols(const void *a, const void *b) {
+    return ((symbol*)a)->value - ((symbol*)b)->value;
+}
+
+>>>>>>> sandbox
 void print_symbol_table() {
     int i;
-    printf("\nSymbol Table:\n");
+    qsort(symbol_table, symbol_count, sizeof(symbol), compare_symbols);
+    printf("\nSymbol Table, Sorted by value (Sorted only at printing, table itself is by order of insertion)\n");
     printf("%-32s %-10s %-10s\n", "Name", "Value", "Type");
     printf("-------------------------------- ---------- ----------\n");
     for (i = 0; i < symbol_count; i++) {
