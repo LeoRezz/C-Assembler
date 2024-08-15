@@ -11,7 +11,7 @@ Token *tokenize_line(const char *line, int *tokens_count) {
     const char *line_ptr;
     
     TRY(tokens = (Token *)calloc(MAX_TOKENS, sizeof(Token)));
-
+    memset(tokens, -1 , MAX_TOKENS * sizeof(Token));
     line_ptr = line; /* Use a pointer to traverse the line */
     *tokens_count = 0;
     label_def_flag = 0;

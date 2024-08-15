@@ -32,9 +32,8 @@ typedef enum {
     INTEGER,
     STRING_LITERAL,
 
-    EOL,  /* End of line */
-    ERROR, /* for blatant errors */
-    UNKNOWN  /* For unrecognized tokens */
+    ERROR = - 2, /* for blatant errors */
+    UNKNOWN = -1  /* For unrecognized tokens */
 } TokenType;
 
 
