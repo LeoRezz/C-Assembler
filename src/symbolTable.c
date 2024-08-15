@@ -7,77 +7,85 @@ extern int IC;
 extern int DC;
 extern int current_line;
 
-symbol *symbolTable;
-int symbolCount;
-int symbolCapacity;
+symbol *symbol_table;
+int symbol_count;
+int symbol_capacity;
 
 /*Initialize the symbol table */
-void initSymbolTable() {
-    symbolTable = calloc(INITIAL_SYMBOL_TABLE_SIZE , sizeof(symbol));
-    if (symbolTable == NULL) { /* Handle allocation error */
+void init_symbol_table(void) {
+    symbol_table = calloc(INITIAL_SYMBOL_TABLE_SIZE , sizeof(symbol));
+    if (symbol_table == NULL) { /* Handle allocation error */
         printf("Failed to allocate memory for SymbolTable\n");
         exit(1);
     }
-    symbolCount = 0;
-    symbolCapacity = INITIAL_SYMBOL_TABLE_SIZE;
+    symbol_count = 0;
+    symbol_capacity = INITIAL_SYMBOL_TABLE_SIZE;
 }
 
 /*Add a symbol to the table */
-int addSymbol(char *name, int *value, SymbolType type) {
-    int new_capacity;
-    if (symbolCount >= symbolCapacity) {
-        new_capacity = symbolCapacity * 2;
-        symbol *new_table = realloc(symbolTable, new_capacity * sizeof(symbol));
-        if (new_table == NULL) {
-            /* Handle reallocation error*/
-            printf("Failed to reallocate memory for symbolTable\n");
-            return 0;
-        }
-        symbolTable = new_table;
-        symbolCapacity = new_capacity;
+int add_symbol(char *name, int *value, SymbolType type) {
+        
+    if (symbol_count >= symbol_capacity) {
+        grow_symbol_table(symbol_table);
     }
-
+    printf("-------------------------Label Table in action------------------------------\n");
     printf("Adding symbol: %s, value: %d, type: %d\n", name, *value, type);
-    strncpy(symbolTable[symbolCount].name, name, MAX_LABEL_LENGTH);
-    symbolTable[symbolCount].name[MAX_LABEL_LENGTH] = '\0'; /* Ensure null-termination */
-    printf("Symbol name copied: %s\n", symbolTable[symbolCount].name);
-    symbolTable[symbolCount].value = *value;
-    printf("Symbol value set: %d\n", symbolTable[symbolCount].value);
-    symbolTable[symbolCount].type = type;
-    printf("Symbol type set: %d\n", symbolTable[symbolCount].type);
+    strncpy(symbol_table[symbol_count].name, name, MAX_LABEL_LENGTH);
+    symbol_table[symbol_count].name[MAX_LABEL_LENGTH] = '\0'; /* Ensure null-termination */
+    printf("Symbol name copied: %s\n", symbol_table[symbol_count].name);
+    symbol_table[symbol_count].value = *value;
+    printf("Symbol value set: %d\n", symbol_table[symbol_count].value);
+    symbol_table[symbol_count].type = type;
+    printf("Symbol type set: %d\n", symbol_table[symbol_count].type);
+    printf("------------------------------Labels added----------------------------------\n\n\n");
 
-    symbolCount++;
+    symbol_count++;
     return 1;
 }
 
+void grow_symbol_table(symbol *symbol_table) {
+    int new_capacity;
+    symbol *new_table;
+
+    new_capacity = symbol_capacity * 2;
+    new_table = (symbol *) realloc(symbol_table, new_capacity * sizeof(symbol));
+    if (new_table == NULL) {
+        /* Handle reallocation error*/
+        printf("Failed to reallocate memory for symbol_table\n");
+        exit(1);
+    }
+    symbol_table = new_table;
+    symbol_capacity = new_capacity;
+}
+
 /* Look up a symbol in the table */
-symbol *findSymbol(char *name) {
+symbol *find_symbol(char *name) {
     int i;
-    for (i = 0; i < symbolCount; i++) {
-        if (strcmp(symbolTable[i].name, name) == 0) {
-            return &symbolTable[i];
+    for (i = 0; i < symbol_count; i++) {
+        if (strcmp(symbol_table[i].name, name) == 0) {
+            return &symbol_table[i];
         }
     }
     return NULL;
 }
 
-void updateDataSymbols(int IC) {
+void update_data_symbols(int IC) {
     int i;
-    for (i = 0; i < symbolCount; i++) {
-        if (symbolTable[i].type == SYMBOL_DATA) {
-            symbolTable[i].value += IC;
+    for (i = 0; i < symbol_count; i++) {
+        if (symbol_table[i].type == SYMBOL_DATA) {
+            symbol_table[i].value += IC;
         }
     }
 }
 
-void printSymbolTable() {
+void print_symbol_table() {
     int i;
     printf("\nSymbol Table:\n");
     printf("%-32s %-10s %-10s\n", "Name", "Value", "Type");
     printf("-------------------------------- ---------- ----------\n");
-    for (i = 0; i < symbolCount; i++) {
-        printf("%-32s %-10d ", symbolTable[i].name, symbolTable[i].value);
-        switch (symbolTable[i].type) {
+    for (i = 0; i < symbol_count; i++) {
+        printf("%-32s %-10d ", symbol_table[i].name, symbol_table[i].value);
+        switch (symbol_table[i].type) {
         case SYMBOL_CODE:
             printf("CODE\n");
             break;
@@ -91,13 +99,13 @@ void printSymbolTable() {
             printf("UNKNOWN\n");
         }
     }
-    printf("\nTotal symbols: %d\n", symbolCount);
+    printf("\nTotal symbols: %d\n", symbol_count);
 }
 
 /* Clean up the symbol table */
-void freeSymbolTable() {
-    free(symbolTable);
-    symbolTable = NULL;
-    symbolCount = 0;
-    symbolCapacity = 0;
+void free_symbol_table() {
+    free(symbol_table);
+    symbol_table = NULL;
+    symbol_count = 0;
+    symbol_capacity = 0;
 }

@@ -3,6 +3,8 @@
         "tokenizer.h": "c",
         "parser.h": "c",
         "util.h": "c",
-        "limits": "c"
+        "limits": "c",
+        "symboltable.h": "c",
+        "typeinfo": "c"
     }
 }

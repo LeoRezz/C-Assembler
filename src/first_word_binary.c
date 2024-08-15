@@ -228,7 +228,7 @@ void print_parsed_line(Line *parsed_line) {
                        parsed_line->content.inst.operands[i].reg);
             } else if (parsed_line->content.inst.operand_types[i] == ADD_DIRECT) {
                 printf("Operand %d symbol: %s\n", i,
-                       parsed_line->content.inst.operands[i].symbol ? parsed_line->content.inst.operands[i].symbol : "N/A");
+                       parsed_line->content.inst.operands[i].label.symbol ? parsed_line->content.inst.operands[i].label.symbol : "N/A");
             }
         }
         break;

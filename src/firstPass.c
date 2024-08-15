@@ -2,14 +2,15 @@
 #include "symbolTable.h"
 #include "opcodeTable.h"
 #include "parser.h"
+#include "parsed_program.h"
 
 extern int IC, DC, current_line;
 
 /* prototypes: should be in header file*/
-void first_pass(FILE *input_file);
+void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
 
-void first_pass(FILE *input_file) {
+void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
     char *p;
     Token *token_arr;
     Line *parsed_line;
@@ -27,17 +28,18 @@ void first_pass(FILE *input_file) {
         print_token_arr(token_arr, token_count);
         /* Parse the tokens in the line */
         parsed_line = parse_line(token_arr, token_count);
+        add_line_to_program(parsed_program, parsed_line);
         printf("\n");
         print_parsed_line(parsed_line);
 
         printf("\n");
         printf("\n\n");
+        free(token_arr); /* Free the token array, no need for him*/
+        free(parsed_line); /* Free the parsed line, because it was added to parsed_program */
     }
-    free(token_arr);
-    free(parsed_line);
+    
     fclose(input_file);
 }
-
 
 void print_token_arr(Token *token_arr, int token_count) {
     /* output printer */

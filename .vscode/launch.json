@@ -1,10 +1,10 @@
 {
     "configurations": [
         {
-            "name": "firstPass",
+            "name": "assembler",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/lior/vsCode/Mamman14/src/firstPass",
+            "program": "/home/lior/vsCode/Mamman14/src/assembler",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",

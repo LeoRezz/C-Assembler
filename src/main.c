@@ -2,9 +2,10 @@
 #include "symbolTable.h"
 #include "opcodeTable.h"
 #include "parser.h"
+#include "parsed_program.h"
 #define INITIAL_ADDRESS 100
 
-void first_pass(FILE *input_file);
+void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
 
 /* Global state, Instruction and Data count*/
@@ -25,14 +26,22 @@ int current_line = 0;
      */
 int main() {
     FILE *input_file;
+    ParsedProgram *parsed_program;
 
+    
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
     input_file = fopen("../input/asm1.am", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
-    initSymbolTable(); /* Initialize symbol table */
-    first_pass(input_file);
-    updateDataSymbols(IC);
-    printSymbolTable();
-    freeSymbolTable();
+    
+    parsed_program = create_parsed_program(); 
+    init_symbol_table(); /* Initialize symbol table */
+    first_pass(input_file, parsed_program);
+  
+    update_data_symbols(IC);
+
+    print_symbol_table();
+
+    free_symbol_table();
+    free_parsed_program(parsed_program);
     return 0;
 }

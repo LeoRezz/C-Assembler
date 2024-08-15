@@ -46,7 +46,7 @@ Line *parse_line(Token *token_arr, int token_count) {
     if (opcode != NULL) {
         parse_instruction_line(parsed_line, token_arr, &current_token, opcode);
         if (label_def_flag) {
-            addSymbol(parsed_line->label, &IC, SYMBOL_CODE);
+            add_symbol(parsed_line->label, &IC, SYMBOL_CODE);
         }
         word_count = calculate_word_count(opcode, parsed_line->content.inst.operand_types[0], parsed_line->content.inst.operand_types[1]);
         IC += word_count;
@@ -57,7 +57,7 @@ Line *parse_line(Token *token_arr, int token_count) {
     if (is_data(token_arr[current_token].type)) {
         parse_data_line(parsed_line, token_arr, &current_token, &data_count);
         if (label_def_flag) {
-            addSymbol(parsed_line->label, &DC, SYMBOL_DATA);
+            add_symbol(parsed_line->label, &DC, SYMBOL_DATA);
         }
         printf(" Current DC before incrementing: %d\n", DC);
         printf("data_count after parsing data: %d\n", data_count);
