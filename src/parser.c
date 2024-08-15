@@ -8,7 +8,7 @@ int calculate_instruction_words(int opcode);
 void print_parsed_line(Line *parsed_line);
 int is_opcode(TokenType type);
 int is_data(TokenType type);
-void parse_instruction_line(Line *parsed_line, Token *token_arr, int *i, int *operand_count);
+void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_token, const Opcode *opcode);
 void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index);
 void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int *operand_count);
 
@@ -19,6 +19,7 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
 /* TODO: Error handling */
 /*------------------------------------------------------------------------*/
 Line *parse_line(Token *token_arr, int token_count) {
+    const Opcode *opcode;
     int operand_count;
     int data_count;
     int current_token;
@@ -38,14 +39,15 @@ Line *parse_line(Token *token_arr, int token_count) {
         current_token++; /* Skips label definition */
     }
 
+    opcode = find_opcode(token_arr[current_token].value);
     /* Checks if it's an instruction line */
-    if (is_opcode(token_arr[current_token].type)) {
-        parse_instruction_line(parsed_line, token_arr, &current_token, &operand_count);
+    if (opcode != NULL) {
+        parse_instruction_line(parsed_line, token_arr, &current_token, opcode);
         if (label_def_flag) {
             addSymbol(parsed_line->label, &IC, SYMBOL_CODE);
         }
 
-        IC += operand_count + 1;
+        IC += opcode->operands + 1;
 
         return parsed_line;
     }
@@ -80,19 +82,21 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
         data->type = DATA_INT; /* not sure if needed */
         (*current_token)++;    /* Advancing to first integer */
 
-        for (; *current_token < token_count; (*current_token)++) {
+        while ((token_arr[*current_token].type) != UNKNOWN ) {
             if (token_arr[*current_token].type == COMMA) {
                 /* TODO: figure a way to handle missing or extranouse commas errors
                  * either here or in the tokenizer.c */
-
+                (*current_token)++;
                 continue; /* Skips comma */
             }
 
             if ((token_arr[*current_token].type == INTEGER)) {
                 data->content.int_values[data->value_count++] = strtol(token_arr[*current_token].value, NULL, 10);
-
+                (*current_token)++;
                 DC++;
             } else {
+                printf("token type: %s\n", token_type_to_string(token_arr[*current_token].type));
+                printf("token value: %s\n", token_arr[*current_token].value);
                 printf("Invalid token type for integer data: %s\n", token_arr[*current_token].value);
                 return;
             }
@@ -124,85 +128,76 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
         return;
     }
 }
+void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_token, const Opcode *opcode) {
+    int i;
+    int addressing_mode;
 
-void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_token, int *operand_count) {
-    int op_index;
-    op_index = 0;
-    /* Set the line type */
+
     parsed_line->type = LINE_INSTRUCTION;
-    /* Gets the opcode and Skips to the next token */
-    parsed_line->content.inst.opcode = ((token_arr[*current_token].type) - MOV);
+    parsed_line->content.inst.opcode = opcode->opcode;
     (*current_token)++;
-    *operand_count = calculate_instruction_words(parsed_line->content.inst.opcode); /* Gets the number of operands */
-    parsed_line->content.inst.operands_count = *operand_count; /* TODO: ?? FIX THIS ?? */
+    
+    
+    parsed_line->content.inst.operands_count = opcode->operands;
 
-    /* Parse operands by number of operands */
-    switch (*operand_count) {
-    case 2: /* IDEA: for loop the operand count, and parse the op types etc.. */
-        add_operand_value(&parsed_line->content.inst, token_arr, current_token, op_index);
-        (*current_token)++; /* Advancing */
-        if (token_arr[*current_token].type != COMMA) {
-            printf("%s\n", token_arr[*current_token].value);
-            printf("Missing comma\n");
+    // Parse operands
+    for ( i = 0; i < (opcode->operands); i++) {
+        if (i > 0) {
+            // Check for comma between operands
+            if (token_arr[*current_token].type != COMMA) {
+                printf("Error: Missing comma between operands\n");
+                return;
+            }
+            (*current_token)++;
+        }
+        if (token_arr[*current_token].type == HASH || token_arr[*current_token].type == ASTERISK) {
+            (*current_token)++;
+        }
+        /* TODO: fix bug when # and * are used before operand */
+        addressing_mode = get_addressing_type(token_arr[*current_token].type);
+        if ((i == 0 && !is_addressing_mode_allowed(opcode->src_modes, addressing_mode)) ||
+            (i == 1 && !is_addressing_mode_allowed(opcode->dest_modes, addressing_mode))) {
+            printf("Error: Invalid addressing mode for operand %d\n", i + 1);
             return;
         }
-        (*current_token)++; /* Skips the comma */
-        op_index++;         /* Adderssing the second operand */
-        add_operand_value(&parsed_line->content.inst, token_arr, current_token, op_index);
 
-        parsed_line->content.inst.operand_types[1] = get_addressing_type(token_arr[*current_token].type);
-        break;
-
-    case 1:
-        printf("One operand instruction\n");
-        break;
-
-    case 0:
-        printf("Zero operand instruction\n");
-        break;
-
-    default:
-        printf("Wrong operand count\n");
-        break;
+        add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
+        (*current_token)++;
     }
 }
 
 void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index) {
-    /*TODO: Needs to add value as well */
+    AddressingMode mode;
 
     switch (token_arr[*i].type) {
-    case HASH:
-        inst->operand_types[op_index] = ADD_IMMEDIATE;
-        inst->operands[op_index].immediate = strtol(token_arr[*i].value, NULL, 10);
-        break;
-    case LABEL_USE:
-        inst->operand_types[op_index] = ADD_DIRECT;
-        strncpy(inst->operands[op_index].symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
-        break;
-    case ASTERISK:
-        (*i)++; /* Skips the asterisk */
-        inst->operand_types[op_index] = ADD_INDIRECT_REGISTER;
-        if (token_arr[*i].type >= R0 && token_arr[*i].type <= R7) {
+        case HASH:
+            mode = ADD_IMMEDIATE;
+            inst->operands[op_index].immediate = strtol(token_arr[*i].value + 1, NULL, 10);
+            break;
+        case LABEL_USE:
+            mode = ADD_DIRECT;
+            strncpy(inst->operands[op_index].symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
+            break;
+        case ASTERISK:
+            (*i)++;
+            mode = ADD_INDIRECT_REGISTER;
+            if (token_arr[*i].type >= R0 && token_arr[*i].type <= R7) {
+                inst->operands[op_index].reg = token_arr[*i].type - R0;
+            } else {
+                printf("Error: Invalid register for indirect addressing\n");
+                return;
+            }
+            break;
+        case R0: case R1: case R2: case R3: case R4: case R5: case R6: case R7:
+            mode = ADD_REGISTER;
             inst->operands[op_index].reg = token_arr[*i].type - R0;
-        }
-        break;
-
-    case R0:
-    case R1:
-    case R2:
-    case R3:
-    case R4:
-    case R5:
-    case R6:
-    case R7:
-        inst->operand_types[op_index] = ADD_REGISTER;
-        inst->operands[op_index].reg = token_arr[*i].type - R0;
-        break;
-
-    default:
-        printf("Invalid operand %s\n", token_arr[*i].value);
-        break;
+            break;
+        default:
+            printf("Error: Invalid operand %s\n", token_arr[*i].value);
+            return;
     }
+
+    inst->operand_types[op_index] = mode;
 }
 
 int get_addressing_type(TokenType type) {
