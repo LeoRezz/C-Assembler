@@ -1,10 +1,8 @@
 #include "tokenizer.h"
-/* I removed some #includes because I couldn't compile */
+#include "opcodeTable.h"
+
 /* To compile: gcc -g first_word_binary.c -o first_word_binary */
 /*----------------------------------------------------------------------------*/
-/* enum for addressing modes */
-/* There is an enum in opcodeTable.h, with bit logic to detect invalid modes 
- * for each instruction, we need to figure out how to implement this or revise it */
 
 /* Function prototypes */
 char* FirstTokenToBinary(Line *line, char binaryCode[]);

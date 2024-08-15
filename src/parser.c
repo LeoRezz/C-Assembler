@@ -4,7 +4,6 @@ extern int IC, DC, current_line;
 
 /* Helper functions for parsing instructions and data */
 int get_addressing_type(TokenType type);
-int calculate_instruction_words(int opcode);
 void print_parsed_line(Line *parsed_line);
 int is_opcode(TokenType type);
 int is_data(TokenType type);
@@ -13,13 +12,16 @@ void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index
 void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int *operand_count);
 
 /*------------------------------------------------------------------------*/
-/* TODO: Finish the instruction parsing logic, make sure operands are parsed
- * correctly */
-/* TODO: Add data parsing logic */
-/* TODO: Error handling */
+/* TODO: Fix the bug at the instruction parsing logic */
+/* TODO: Check data parsing logic for errors */
+/* TODO: More robust error handling */
+/* TODO: Consider adding a function to validate the entire instruction (opcode + operands) in one go.
+         To simplify the parse_instruction_line function. */
+/* TODO: Consider adding a function to validate the entire data */
 /*------------------------------------------------------------------------*/
 Line *parse_line(Token *token_arr, int token_count) {
     const Opcode *opcode;
+    int word_count;
     int operand_count;
     int data_count;
     int current_token;
@@ -46,8 +48,8 @@ Line *parse_line(Token *token_arr, int token_count) {
         if (label_def_flag) {
             addSymbol(parsed_line->label, &IC, SYMBOL_CODE);
         }
-
-        IC += opcode->operands + 1;
+        word_count = calculate_word_count(opcode, parsed_line->content.inst.operand_types[0], parsed_line->content.inst.operand_types[1]);
+        IC += word_count;
 
         return parsed_line;
     }
@@ -57,6 +59,10 @@ Line *parse_line(Token *token_arr, int token_count) {
         if (label_def_flag) {
             addSymbol(parsed_line->label, &DC, SYMBOL_DATA);
         }
+        printf(" Current DC before incrementing: %d\n", DC);
+        printf("data_count after parsing data: %d\n", data_count);
+        DC += data_count;
+        printf("After updating DC += data_count: %d\n", DC);
 
         return parsed_line;
     }
@@ -93,7 +99,7 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
             if ((token_arr[*current_token].type == INTEGER)) {
                 data->content.int_values[data->value_count++] = strtol(token_arr[*current_token].value, NULL, 10);
                 (*current_token)++;
-                DC++;
+                (*data_count)++;
             } else {
                 printf("token type: %s\n", token_type_to_string(token_arr[*current_token].type));
                 printf("token value: %s\n", token_arr[*current_token].value);
@@ -118,8 +124,8 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
 
             /* +1 for the null character */
             data->value_count = strlen(data->content.char_values) + 1;
-            DC += data->value_count;
-            (*data_count)++;
+            (*data_count) = data->value_count;
+            
         }
         break;
 
@@ -140,7 +146,7 @@ void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_to
     
     parsed_line->content.inst.operands_count = opcode->operands;
 
-    // Parse operands
+    /* Parse operands, TODO: fix bugs */
     for ( i = 0; i < (opcode->operands); i++) {
         if (i > 0) {
             // Check for comma between operands
@@ -176,7 +182,7 @@ void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index
             break;
         case LABEL_USE:
             mode = ADD_DIRECT;
-            strncpy(inst->operands[op_index].symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
+            strncpy(inst->operands[op_index].label.symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
             break;
         case ASTERISK:
             (*i)++;
@@ -220,22 +226,6 @@ int get_addressing_type(TokenType type) {
 
     return -1;
 }
-int calculate_instruction_words(int opcode) {
-    if (opcode + MOV >= MOV && opcode + MOV <= LEA) {
-        return 2; /* Two operand instructions */
-    }
-
-    if (opcode + MOV >= CLR && opcode + MOV <= JSR) {
-        return 1; /* One operand instructions */
-    }
-
-    if (opcode + MOV == RTS || opcode + MOV == STOP) {
-        return 0; /* Zero operand instructions */
-    }
-
-    return -1; /* Unexpected token type */
-}
-int is_opcode(TokenType type) { return type >= MOV && type <= STOP; }
 int is_data(TokenType type) { return (type == DATA || type == STRING); }
 
 void print_parsed_line(Line *parsed_line) {
@@ -268,8 +258,8 @@ void print_parsed_line(Line *parsed_line) {
                 printf("Operand %d register: %d\n", i,
                        parsed_line->content.inst.operands[i].reg);
             } else if (parsed_line->content.inst.operand_types[i] == ADD_DIRECT) {
-                printf("Operand %d symbol: %s\n", i,
-                       parsed_line->content.inst.operands[i].symbol ? parsed_line->content.inst.operands[i].symbol : "N/A");
+                printf("Operand %d label: %s\n", i,
+                       parsed_line->content.inst.operands[i].label.symbol ? parsed_line->content.inst.operands[i].label.symbol : "N/A");
             }
         }
         break;
