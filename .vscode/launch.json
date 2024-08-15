@@ -1,6 +1,30 @@
 {
     "configurations": [
         {
+            "name": "prep",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/lior/vsCode/Mamman14/src/preprocessor",
+            "args": ["asm1_data_mix"],
+            "stopAtEntry": true,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "assembler",
             "type": "cppdbg",
             "request": "launch",

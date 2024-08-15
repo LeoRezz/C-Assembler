@@ -26,5 +26,6 @@ const char *addressing_mode_to_string(AddressingMode mode);
 void print_allowed_modes(int modes);
 void print_opcode_info(const Opcode *op);
 void print_opcode_table();
+const char *opcode_to_string(int opcode);
 
 #endif

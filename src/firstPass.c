@@ -41,6 +41,14 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
     fclose(input_file);
 }
 
+
+
+
+
+
+
+
+
 void print_token_arr(Token *token_arr, int token_count) {
     /* output printer */
     int i;
