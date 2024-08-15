@@ -17,12 +17,6 @@
  * Addressing modes are represented as bitwise combinations of:
  * ADD_IMMEDIATE, ADD_DIRECT, ADD_INDIRECT_REGISTER, and ADD_REGISTER.
  *
- * The table includes various types of instructions:
- * - Data movement (e.g., mov)
- * - Arithmetic operations (e.g., add, sub)
- * - Logical operations (e.g., not)
- * - Control flow (e.g., jmp, bne)
- * - I/O operations (e.g., red, prn)
  *
  * This table is used to validate instructions, determine operand counts,
  * and check addressing mode validity during assembly or simulation.
@@ -58,6 +52,40 @@ const Opcode *find_opcode(const char *mnemonic) {
 int is_addressing_mode_allowed(int allowed_modes, AddressingMode mode) {
     return (allowed_modes & mode) != 0;
 }
+
+
+/* calculate_word_count:
+ * Calculate the number of words required for an instruction.
+ */
+int calculate_word_count(const Opcode *op, AddressingMode src_mode, AddressingMode dest_mode) {
+    int count = 1;  /* Start with 1 for the instruction word */
+
+    switch (op->operands) {
+        case 0:
+            return count;  /* Only the instruction word */
+        
+        case 1:
+            /* For single operand instructions, always add one word for the operand */
+            return count + 1;
+        
+        case 2:
+            /* For two operand instructions */
+            if (src_mode == ADD_REGISTER && dest_mode == ADD_REGISTER) {
+                return count + 1;  /* Instruction word + one word for both registers */
+            } else {
+                /* Add a word for each operand */
+                count += 1;  /* For source operand */
+                count += 1;  /* For destination operand */
+                return count;
+            }
+        
+        default:
+            /* This shouldn't happen with your instruction set, but good to handle */
+            printf ("Error: Invalid number of operands\n");
+            return -1;  /* Indicate an error */
+    }
+}
+
 
 const char *addressing_mode_to_string(AddressingMode mode) {
     switch (mode) {

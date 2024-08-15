@@ -42,7 +42,9 @@ void first_pass(FILE *input_file) {
 void print_token_arr(Token *token_arr, int token_count) {
     /* output printer */
     int i;
+    printf("--------------------Tokenized result:-----------------------\n");    
     for (i = 0; i < token_count; i++) {
         printf("%s\t%s\n", token_arr[i].value, token_type_to_string(token_arr[i].type));
     }
+    printf("------------------------------------------------------------\n\n\n");
 }

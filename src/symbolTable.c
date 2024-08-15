@@ -37,10 +37,14 @@ int addSymbol(char *name, int *value, SymbolType type) {
         symbolCapacity = new_capacity;
     }
 
+    printf("Adding symbol: %s, value: %d, type: %d\n", name, *value, type);
     strncpy(symbolTable[symbolCount].name, name, MAX_LABEL_LENGTH);
     symbolTable[symbolCount].name[MAX_LABEL_LENGTH] = '\0'; /* Ensure null-termination */
+    printf("Symbol name copied: %s\n", symbolTable[symbolCount].name);
     symbolTable[symbolCount].value = *value;
+    printf("Symbol value set: %d\n", symbolTable[symbolCount].value);
     symbolTable[symbolCount].type = type;
+    printf("Symbol type set: %d\n", symbolTable[symbolCount].type);
 
     symbolCount++;
     return 1;
