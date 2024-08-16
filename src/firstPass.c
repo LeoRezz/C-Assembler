@@ -25,9 +25,19 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
         /* Tokenizes a given line of assembly code into an array of tokens with assigned type. */
         /* TODO: check reserved words for label defenitionssssssss */
         token_arr = tokenize_line(line, &token_count);
-        // print_token_arr(token_arr, token_count);
+        if (token_arr == NULL) {
+            printf("Invalid line %d: %s\n", current_line, line);
+            continue;
+        }
+
+        print_token_arr(token_arr, token_count);
         /* Parse the tokens in the line */
-        parsed_line = parse_line(token_arr, token_count);
+        if ((parsed_line = parse_line(token_arr, token_count)) == NULL) {
+            printf("Invalid line %d: %s\n", current_line, line);
+            free(token_arr);
+            free(parsed_line);
+            continue;
+        }
         add_line_to_program(parsed_program, parsed_line);
         printf("\n");
         print_parsed_line(parsed_line);
@@ -38,7 +48,6 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
         free(parsed_line); /* Free the parsed line, because it was added to parsed_program */
     }
     
-    fclose(input_file);
 }
 
 

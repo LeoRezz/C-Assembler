@@ -12,11 +12,12 @@ int IC = INITIAL_ADDRESS;
 int DC = 0;
 int current_line = 0;
 /* ----------------------TODO----------------------- */
-/* Make sure to address to Extern and entry ! */
-/* Make sure there is no extern and entry on the same label name
-   Make sure macro names arn't declared as a label
-   Make sure reserved words aren't valid label defenitions
-   Make sure there are no two labels with the same name
+/* DONE: Make sure to address to Extern and entry !   
+   DONE: Make sure there is no extern and entry on the same label name
+   Make sure macro names arn't declared as a label //add them to symbol table
+   Make sure to fix the parser's addressing mode bugs, and comma handeling
+   DONE: Make sure reserved words aren't valid label defenitions
+   DONE: Make sure there are no two labels with the same name
    
    
    secondPass:
@@ -35,7 +36,7 @@ int main() {
 
     
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("../input/asm1.am", "r");
+    input_file = fopen("../input/test-error.txt", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
 
     parsed_program = create_parsed_program(); 
@@ -51,5 +52,6 @@ int main() {
 
     free_symbol_table();
     free_parsed_program(parsed_program);
+    fclose(input_file);
     return 0;
 }

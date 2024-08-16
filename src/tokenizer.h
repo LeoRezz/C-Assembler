@@ -42,7 +42,8 @@ typedef enum {
     LINE_INSTRUCTION,
     LINE_DATA,
     LINE_STRING,
-    LINE_DIRECTIVE
+    LINE_ENTRY,
+    LINE_EXTERN,
 } LineType;
 
 typedef struct {
@@ -103,5 +104,5 @@ typedef struct Line {
 Token *tokenize_line(const char *line, int *token_count);
 TokenType get_token_type(const char *token);
 const char *token_type_to_string(TokenType type);
-
+int is_reserved_word(const char *word);
 #endif
