@@ -9,7 +9,5 @@ int increment_IC(int amount);
 int increment_DC(int amount);
 int get_IC(void);
 int get_DC(void);
-int get_total_words(void);
-void finalize_first_pass(void);
 
 #endif

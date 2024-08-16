@@ -86,6 +86,7 @@ int InstructionToBinary(Line *line, FILE* testfile, char* filename)
     int num_of_lines = 0;
     symbol *symbol_table;
     int symbolCount;
+    
     symbol_table = get_symbol_table(); /* get the symbol table */
     symbolCount = get_symbol_count(); /* get the symbol count */
 
