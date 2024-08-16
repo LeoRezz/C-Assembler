@@ -106,9 +106,11 @@ void print_parsed_program(const ParsedProgram* program)
                 printf("String\n");
                 printf("  Value: %s\n", line->content.data.content.char_values);
                 break;
-            case LINE_DIRECTIVE:
-                printf("Directive\n");
-                /* Add more details about directives if needed */
+            case LINE_ENTRY:
+                printf("Entry\n");
+                break;
+            case LINE_EXTERN:
+                printf("Extern\n");
                 break;
             default:
                 printf("Unknown\n");
