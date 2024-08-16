@@ -1,4 +1,5 @@
 #include "preprocessor.h"
+#include "symbolTable.h"
 #include "util.h"
 
 /* Complie with: make prep */

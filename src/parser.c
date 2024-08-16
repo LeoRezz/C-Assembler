@@ -1,6 +1,7 @@
 #include "parser.h"
+#include "memory_manager.h"
 
-extern int IC, DC, current_line;
+extern int current_line;
 
 /* Helper functions for parsing instructions and data */
 int get_addressing_type(Token token);
@@ -46,26 +47,28 @@ Line *parse_line(Token *token_arr, int token_count) {
     if (opcode != NULL) {
         parse_instruction_line(parsed_line, token_arr, &current_token, opcode);
         if (label_def_flag) {
-            add_symbol(parsed_line->label, &IC, SYMBOL_CODE);
+            add_symbol(parsed_line->label, get_IC(), SYMBOL_CODE);
         }
         word_count = calculate_word_count(opcode, parsed_line->content.inst.operand_types[0], parsed_line->content.inst.operand_types[1]);
-        parsed_line->address = IC;
-        printf("Current IC before incrementing: %d\n", IC);
-        IC += word_count;
-        printf("After updating IC += word_count: %d\n", IC);
+
+        parsed_line->address = get_IC();
+        printf("Current IC before incrementing: %d\n", get_IC());
+        increment_IC(word_count);
+        printf("After updating IC += word_count: %d\n", get_IC());
         return parsed_line;
     }
     /* Check for data */
     if (is_data(token_arr[current_token].type)) {
         parse_data_line(parsed_line, token_arr, &current_token, &data_count);
         if (label_def_flag) {
-            add_symbol(parsed_line->label, &DC, SYMBOL_DATA);
+            add_symbol(parsed_line->label, get_DC(), SYMBOL_DATA);
         }
-        parsed_line->address = DC;
-        printf(" Current DC before incrementing: %d\n", DC);
+
+        parsed_line->address = get_DC();
+        printf(" Current DC before incrementing: %d\n", get_DC());
         printf("data_count after parsing data: %d\n", data_count);
-        DC += data_count;
-        printf("After updating DC += data_count: %d\n", DC);
+        increment_DC(data_count);
+        printf("After updating DC += data_count: %d\n", get_DC());
 
         return parsed_line;
     }
@@ -110,7 +113,7 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
         data->type = DATA_INT; /* not sure if needed */
         (*current_token)++;    /* Advancing to first integer */
 
-        while ((token_arr[*current_token].type) != UNKNOWN ) {
+        while ((token_arr[*current_token].type) != UNKNOWN) {
             if (token_arr[*current_token].type == COMMA) {
                 /* TODO: figure a way to handle missing or extranouse commas errors
                  * either here or in the tokenizer.c */
@@ -147,7 +150,6 @@ void parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, in
             /* +1 for the null character */
             data->value_count = strlen(data->content.char_values) + 1;
             (*data_count) = data->value_count;
-            
         }
         break;
 
@@ -160,16 +162,14 @@ void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_to
     int i;
     int addressing_mode;
 
-
     parsed_line->type = LINE_INSTRUCTION;
     parsed_line->content.inst.opcode = opcode->opcode;
     (*current_token)++;
-    
-    
+
     parsed_line->content.inst.operands_count = opcode->operands;
 
     /* Parse operands, TODO: fix bugs */
-    for ( i = 0; i < (opcode->operands); i++) {
+    for (i = 0; i < (opcode->operands); i++) {
         if (i > 0) {
             // Check for comma between operands
             if (token_arr[*current_token].type != COMMA) {
@@ -211,41 +211,48 @@ void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index
     AddressingMode mode;
 
     switch (token_arr[*i].type) {
-        case INTEGER:
-            mode = ADD_IMMEDIATE;
-            inst->operands[op_index].immediate = strtol(token_arr[*i].value, NULL, 10);
-            break;
-        case LABEL_USE:
-            mode = ADD_DIRECT;
-            strncpy(inst->operands[op_index].symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
-            break;
-        case ASTERISK:
-            (*i)++;
-            mode = ADD_INDIRECT_REGISTER;
-            if (token_arr[*i].type >= R0 && token_arr[*i].type <= R7) {
-                inst->operands[op_index].reg = token_arr[*i].type - R0;
-            } else {
-                printf("Error: Invalid register for indirect addressing\n");
-                return;
-            }
-            break;
-        case R0: case R1: case R2: case R3: case R4: case R5: case R6: case R7:
-            mode = ADD_REGISTER;
+    case INTEGER:
+        mode = ADD_IMMEDIATE;
+        inst->operands[op_index].immediate = strtol(token_arr[*i].value, NULL, 10);
+        break;
+    case LABEL_USE:
+        mode = ADD_DIRECT;
+        strncpy(inst->operands[op_index].symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
+        break;
+    case ASTERISK:
+        (*i)++;
+        mode = ADD_INDIRECT_REGISTER;
+        if (token_arr[*i].type >= R0 && token_arr[*i].type <= R7) {
             inst->operands[op_index].reg = token_arr[*i].type - R0;
-            break;
-        default:
-            printf("Error: Invalid operand %s\n", token_arr[*i].value);
+        } else {
+            printf("Error: Invalid register for indirect addressing\n");
             return;
+        }
+        break;
+    case R0:
+    case R1:
+    case R2:
+    case R3:
+    case R4:
+    case R5:
+    case R6:
+    case R7:
+        mode = ADD_REGISTER;
+        inst->operands[op_index].reg = token_arr[*i].type - R0;
+        break;
+    default:
+        printf("Error: Invalid operand %s\n", token_arr[*i].value);
+        return;
     }
 
     inst->operand_types[op_index] = mode;
 }
- 
+
 int get_addressing_type(Token token) {
-    char *endptr; 
+    char *endptr;
     long value;
     TokenType type = token.type;
-    
+
     if (type == INTEGER) {
         value = strtol(token.value, &endptr, 10);
         if (endptr == token.value) {
@@ -278,7 +285,6 @@ int get_addressing_type(Token token) {
     if (type >= R0 && type <= R7) {
         return ADD_REGISTER;
     }
-    
 
     return -1;
 }

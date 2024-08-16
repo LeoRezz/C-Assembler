@@ -50,8 +50,6 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
     
 }
 
-<<<<<<< HEAD
-=======
 
 
 
@@ -60,7 +58,6 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
 
 
 
->>>>>>> sandbox
 void print_token_arr(Token *token_arr, int token_count) {
     /* output printer */
     int i;

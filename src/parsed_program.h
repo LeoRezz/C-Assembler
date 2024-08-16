@@ -6,12 +6,12 @@
 #define INITIAL_CAPACITY 10
 
 typedef struct ParsedProgram {
-    Line* lines;
-    int size; /* Current lines number */
+    Line *lines;
+    int count; /* Current lines number */
     int capacity; /* For realloc */
 } ParsedProgram;
 
-ParsedProgram* create_parsed_program(void);
+ParsedProgram* init_parsed_program(void);
 void grow_parsed_program(ParsedProgram* program);
 void add_line_to_program(ParsedProgram* program, Line* line);
 void free_parsed_program(ParsedProgram* program);

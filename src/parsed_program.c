@@ -4,7 +4,8 @@
 #define INITIAL_ADDRESS 100
 
 void print_binary(int num, int bits);
-ParsedProgram *create_parsed_program() {
+
+ParsedProgram *init_parsed_program() {
 
     ParsedProgram *program;
 
@@ -18,7 +19,7 @@ ParsedProgram *create_parsed_program() {
         return NULL;
     }
 
-    program->size = 0;
+    program->count = 0;
     program->capacity = INITIAL_CAPACITY;
     return program;
 }
@@ -41,17 +42,17 @@ void grow_parsed_program(ParsedProgram *program) {
 
 void add_line_to_program(ParsedProgram *program, Line *line) {
 
-    if (program->size >= program->capacity) {
+    if (program->count >= program->capacity) {
         grow_parsed_program(program);
     }
    
-        program->lines[program->size] = *line;
-        program->size++;   
+        program->lines[program->count] = *line;
+        program->count++;   
 }
 
 void update_data_lines(int IC, ParsedProgram *ParsedProgram) {
     int i;
-    for (i = 0; i < ParsedProgram->size; i++) {
+    for (i = 0; i < ParsedProgram->count; i++) {
         if (ParsedProgram->lines[i].type == LINE_DATA || ParsedProgram->lines[i].type == LINE_STRING) {
             ParsedProgram->lines[i].address += IC; /* DC = DC + IC */
         }
@@ -77,10 +78,10 @@ void print_parsed_program(const ParsedProgram* program)
     }
     printf("\n\n-------------------------------\n");
     printf("Parsed Program:\n");
-    printf("Total lines: %d\n", program->size);
+    printf("Total lines: %d\n", program->count);
     printf("-------------------------------\n");
 
-    for (i = 0; i < program->size; i++)
+    for (i = 0; i < program->count; i++)
     {
         Line* line = &(program->lines[i]);
         printf("Line %d (Address: %d):\n", line->line_number, line->address);

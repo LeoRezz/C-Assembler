@@ -3,9 +3,12 @@
 #include "opcodeTable.h"
 #include "parser.h"
 #include "parsed_program.h"
+#include "memory_manager.h"
 
 void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
+
+/* Global state, Instruction and Data count*/
 
 int current_line = 0;
 /* ----------------------TODO----------------------- */
@@ -35,14 +38,14 @@ int main() {
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
     input_file = fopen("../input/test-error.txt", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
-
-    parsed_program = create_parsed_program(); 
+    init_memory_counters();
+    parsed_program = init_parsed_program(); 
     init_symbol_table(); /* Initialize symbol table */
     first_pass(input_file, parsed_program);
   
-    update_data_symbols(IC);
+    update_data_symbols(get_IC());
 
-    update_data_lines(IC, parsed_program);
+    update_data_lines(get_IC(), parsed_program);
 
     print_parsed_program(parsed_program);
     print_symbol_table();

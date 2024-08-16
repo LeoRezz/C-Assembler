@@ -2,16 +2,16 @@
 #define MAX_LABEL_LENGTH 31
 #define INITIAL_SYMBOL_TABLE_SIZE 20
 
-static void grow_symbol_table(symbol *symbol_table);
+static void grow_symbol_table(void);
 
 /* Global state, Instruction and Data count*/
 extern int IC;
 extern int DC;
 extern int current_line;
 
-symbol *symbol_table;
-int symbol_count;
-int symbol_capacity;
+static symbol *symbol_table;
+static int symbol_count;
+static int symbol_capacity;
 
 /*Initialize the symbol table */
 void init_symbol_table(void) {
@@ -41,7 +41,7 @@ static int is_duplicate_symbol(char *name, SymbolType type) {
 }
 
 /* Add a symbol to the table */
-int add_symbol(char *name, int *value, SymbolType type) {
+int add_symbol(char *name, int value, SymbolType type) {
 
     if (is_duplicate_symbol(name, type)) {
         return 0;
@@ -50,7 +50,7 @@ int add_symbol(char *name, int *value, SymbolType type) {
 
 
     if (symbol_count >= symbol_capacity) {
-        grow_symbol_table(symbol_table);
+        grow_symbol_table();
     }
 
 
@@ -60,10 +60,10 @@ int add_symbol(char *name, int *value, SymbolType type) {
     symbol_table[symbol_count].type = type;
     switch (type) {
     case SYMBOL_CODE:
-        symbol_table[symbol_count].value = *value;
+        symbol_table[symbol_count].value = value;
         break;
     case SYMBOL_DATA:
-        symbol_table[symbol_count].value = *value;
+        symbol_table[symbol_count].value = value;
         break;
     case SYMBOL_ENTRY:
         symbol_table[symbol_count].value = 0;
@@ -80,7 +80,7 @@ int add_symbol(char *name, int *value, SymbolType type) {
     return 1;
 }
 
-static void grow_symbol_table(symbol *symbol_table) {
+static void grow_symbol_table(void) {
     int new_capacity;
     symbol *new_table;
 
@@ -93,6 +93,14 @@ static void grow_symbol_table(symbol *symbol_table) {
     }
     symbol_table = new_table;
     symbol_capacity = new_capacity;
+}
+
+symbol* get_symbol_table() {
+    return symbol_table;
+}
+
+int get_symbol_count() {
+    return symbol_count;
 }
 
 /* Look up a symbol in the table */
