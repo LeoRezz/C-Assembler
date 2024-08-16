@@ -36,7 +36,7 @@ int main() {
 
     
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("../input/test-error.txt", "r");
+    input_file = fopen("../input/asm1.am", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
     init_memory_counters();
     parsed_program = init_parsed_program(); 
@@ -46,7 +46,7 @@ int main() {
     update_data_symbols(get_IC());
 
     update_data_lines(get_IC(), parsed_program);
-
+    secondPass( parsed_program, parsed_program->count);
     print_parsed_program(parsed_program);
     print_symbol_table();
 

@@ -5,9 +5,6 @@
 static void grow_symbol_table(void);
 
 /* Global state, Instruction and Data count*/
-extern int IC;
-extern int DC;
-extern int current_line;
 
 static symbol *symbol_table;
 static int symbol_count;

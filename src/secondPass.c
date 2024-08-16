@@ -4,6 +4,7 @@
 #include "opcodeTable.h"
 #include "parser.h"
 #include "memory_manager.h"
+#include "parsed_program.h"
 
 #define STARTING_ADDRESS 100
 
@@ -11,10 +12,11 @@
 /*---------------------------TODO-----------------------*/
 /*extren and entry tables*/
 /*fix order in secondpass() first all instructions*/
+/*write first line before translating...*/
 
 int address = STARTING_ADDRESS;
 
-void secondPass(Line *program[], int numOfLines);                         /*main function for the second transition*/
+void secondPass(ParsedProgram program, int numOfLines);                         /*main function for the second transition*/
 int WriteLine(char binarycode[], FILE* testfile, char* filename);        /*write a line to the object file*/
 char* CodeToBinary(int input, int numberOfBits);                         /*translates  assemly to binary and returns it*/
 int InstructionToBinary(Line *line, FILE* testfile, char* filename);     /*translates  an insuction line and writes it in file*/
@@ -40,31 +42,30 @@ void generate_ob_file(const char* filename) {
 }
 
 
-void secondPass(Line *program[], int numOfLines) {
+void secondPass(ParsedProgram program, int numOfLines) {
 
     int num_of_inst =0;
     int num_of_data = 0;
     char filename[] = "test.ob";   //add correct file name
     FILE* testfile;
+    Line temp;
     testfile = fopen(filename, "w"); /*create object file*/ 
-    if (testfile != NULL) {
-        fclose(testfile);
-    } else {
-        printf("Could not create file %s\n", filename);
-    }
+    fclose(testfile);
 
     int i = 0;
     char binaryCode[15] = "";
 
     for (; i < numOfLines; i++) /*TODO change order, first all instructions*/
     {   
-        if (program[i]->type == 0) /*instruction line*/
+        Line *current = &(program.lines[i]);
+
+        if ( current->type == 0) /*instruction line*/
         {
-            num_of_inst += InstructionToBinary(program[i], testfile, filename);  /*lines of instruction*/
+            num_of_inst += InstructionToBinary(current, testfile, filename);  /*lines of instruction*/
         }
-        if (program[i]->type == 1 || program[i]->type == 2) //line_data, line_string
+        if (current->type == 1 || current->type== 2) //line_data, line_string
         {
-            num_of_data += DataToBinary(program[i], testfile, filename); /*lines of data*/
+            num_of_data += DataToBinary(current, testfile, filename); /*lines of data*/
         }
         else /*create entry or extern files*/  /*TODO: extren file in instruction to binary.... */
         {
@@ -183,7 +184,7 @@ int DataToBinary(Line *line, FILE* testfile, char* filename){
                 }
             lines_of_data += WriteLine(binaryCode, testfile, filename);
         }
-        strcat(binaryCode, CodeToBinary(0,15)); /*print /0 to end string*/
+        strcat(binaryCode, CodeToBinary(0,15)); /*print /0 to end string*/ //lines_of_data++?
         lines_of_data += WriteLine(binaryCode, testfile, filename);
         return lines_of_data;
 

@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     /* Process each input file */
     for (i = 1; i < argc; i++) {
         /* Construct filenames */
-
+        /* add copy my_strdup*/
 
         /* Replace .as extension with appropriate extensions */
 
