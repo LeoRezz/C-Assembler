@@ -1,9 +1,14 @@
 #include "parsed_program.h"
+<<<<<<< HEAD
+#include <stdlib.h>
+
+=======
 #include "opcodeTable.h"
 #include <stdlib.h>
 #define INITIAL_ADDRESS 100
 
 void print_binary(int num, int bits);
+>>>>>>> sandbox
 ParsedProgram *create_parsed_program() {
 
     ParsedProgram *program;
@@ -44,6 +49,13 @@ void add_line_to_program(ParsedProgram *program, Line *line) {
     if (program->size >= program->capacity) {
         grow_parsed_program(program);
     }
+<<<<<<< HEAD
+    if (program->size < program->capacity) {
+        program->lines[program->size] = *line;
+        program->size++;
+    }
+    /* If we can't grow and we're at capacity, the line is not added */
+=======
    
         program->lines[program->size] = *line;
         program->size++;   
@@ -56,6 +68,7 @@ void update_data_lines(int IC, ParsedProgram *ParsedProgram) {
             ParsedProgram->lines[i].address += IC; /* DC = DC + IC */
         }
     }
+>>>>>>> sandbox
 }
 
 void free_parsed_program(ParsedProgram *program) {
@@ -64,6 +77,8 @@ void free_parsed_program(ParsedProgram *program) {
         free(program->lines);
         free(program);
     }
+<<<<<<< HEAD
+=======
 }
 
 void print_parsed_program(const ParsedProgram* program)
@@ -132,4 +147,5 @@ void print_binary(int num, int bits) {
     for (i = bits - 1; i >= 0; i--) {
         printf("%d", (num >> i) & 1);
     }
+>>>>>>> sandbox
 }

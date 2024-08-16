@@ -24,6 +24,8 @@
                 }
             ]
         },
+<<<<<<< HEAD
+=======
         {
             "name": "assembler",
             "type": "cppdbg",
@@ -48,5 +50,33 @@
                 }
             ]
         },
+<<<<<<< HEAD
+>>>>>>> sandbox
+    {
+        "name": "binary",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "/home/lior/vsCode/Mamman14/src/first_word_binary",
+        "args": [],
+        "stopAtEntry": true,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            },
+            {
+                "description": "Set Disassembly Flavor to Intel",
+                "text": "-gdb-set disassembly-flavor intel",
+                "ignoreFailures": true
+            }
+        ]
+    }
+=======
+>>>>>>> sandbox
     ]
 }

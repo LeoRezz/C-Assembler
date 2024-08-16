@@ -4,7 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+<<<<<<< HEAD
+
+=======
 #define INITIAL_ADDRESS 100
+>>>>>>> sandbox
 #define MAX_SYMBOL_LENGTH 31
 
 typedef enum {

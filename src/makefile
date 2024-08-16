@@ -2,8 +2,11 @@ CC= gcc
 CFLAGS= -g -fsanitize=address
 SOURCES= main.c firstPass.c tokenizer.c opcodeTable.c symbolTable.c parser.c util.c parsed_program.c
 TARGET= assembler
+<<<<<<< HEAD
+=======
 PREPROCESSOR_SOURCE= preprocessor.c util.c
 PREPROCESSOR_TARGET= preprocessor
+>>>>>>> sandbox
 
 $(TARGET): $(SOURCES)
 	$(CC) $(CFLAGS) $(SOURCES) -o $(TARGET)
