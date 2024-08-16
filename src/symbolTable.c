@@ -2,7 +2,7 @@
 #define MAX_LABEL_LENGTH 31
 #define INITIAL_SYMBOL_TABLE_SIZE 20
 
-
+static void grow_symbol_table(symbol *symbol_table);
 
 /* Global state, Instruction and Data count*/
 extern int IC;
@@ -24,38 +24,37 @@ void init_symbol_table(void) {
     symbol_capacity = INITIAL_SYMBOL_TABLE_SIZE;
 }
 
-<<<<<<< HEAD
-/*Add a symbol to the table */
+static int is_duplicate_symbol(char *name, SymbolType type) {
+    symbol *symbol_duplicate = find_symbol(name);
+
+    /* Checks if the symbol already exists */
+    if (symbol_duplicate != NULL) {
+        /* Checks if the symbol is of the same type */
+        if (symbol_duplicate->type == type) {
+            return 1;
+        }
+        if (symbol_duplicate->type == SYMBOL_ENTRY && type == SYMBOL_EXTERNAL) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* Add a symbol to the table */
 int add_symbol(char *name, int *value, SymbolType type) {
-        
-=======
-/**
- * Add a symbol to the table.
- *
- * @param name The name of the symbol.
- * @param value The value of the symbol.
- * @param type The type of the symbol.
- *
- * @return 1 on success, 0 on failure.
- */
-int add_symbol(char *name, int *value, SymbolType type) {
->>>>>>> sandbox
+
+    if (is_duplicate_symbol(name, type)) {
+        return 0;
+    }
+
+
+
     if (symbol_count >= symbol_capacity) {
         grow_symbol_table(symbol_table);
     }
-    printf("-------------------------Label Table in action------------------------------\n");
-    printf("Adding symbol: %s, value: %d, type: %d\n", name, *value, type);
-    strncpy(symbol_table[symbol_count].name, name, MAX_LABEL_LENGTH);
-    symbol_table[symbol_count].name[MAX_LABEL_LENGTH] = '\0'; /* Ensure null-termination */
-    printf("Symbol name copied: %s\n", symbol_table[symbol_count].name);
-    symbol_table[symbol_count].value = *value;
-    printf("Symbol value set: %d\n", symbol_table[symbol_count].value);
-    symbol_table[symbol_count].type = type;
-    printf("Symbol type set: %d\n", symbol_table[symbol_count].type);
-    printf("------------------------------Labels added----------------------------------\n\n\n");
 
-<<<<<<< HEAD
-=======
+
+
     strncpy(symbol_table[symbol_count].name, name, MAX_LABEL_LENGTH);
     symbol_table[symbol_count].name[MAX_LABEL_LENGTH] = '\0'; /* Ensure null-termination */
     symbol_table[symbol_count].type = type;
@@ -66,6 +65,9 @@ int add_symbol(char *name, int *value, SymbolType type) {
     case SYMBOL_DATA:
         symbol_table[symbol_count].value = *value;
         break;
+    case SYMBOL_ENTRY:
+        symbol_table[symbol_count].value = 0;
+        break;
     case SYMBOL_EXTERNAL:
         symbol_table[symbol_count].value = 0;
         break;
@@ -74,12 +76,11 @@ int add_symbol(char *name, int *value, SymbolType type) {
         return 0;
     }
 
->>>>>>> sandbox
     symbol_count++;
     return 1;
 }
 
-void grow_symbol_table(symbol *symbol_table) {
+static void grow_symbol_table(symbol *symbol_table) {
     int new_capacity;
     symbol *new_table;
 
@@ -114,13 +115,10 @@ void update_data_symbols(int IC) {
     }
 }
 
-<<<<<<< HEAD
-=======
-int compare_symbols(const void *a, const void *b) {
+static int compare_symbols(const void *a, const void *b) {
     return ((symbol*)a)->value - ((symbol*)b)->value;
 }
 
->>>>>>> sandbox
 void print_symbol_table() {
     int i;
     qsort(symbol_table, symbol_count, sizeof(symbol), compare_symbols);
@@ -136,9 +134,15 @@ void print_symbol_table() {
         case SYMBOL_DATA:
             printf("DATA\n");
             break;
+
+        case SYMBOL_ENTRY:
+            printf("ENTRY\n");
+            break;
+
         case SYMBOL_EXTERNAL:
             printf("EXTERNAL\n");
             break;
+
         default:
             printf("UNKNOWN\n");
         }

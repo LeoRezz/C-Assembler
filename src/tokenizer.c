@@ -1,9 +1,10 @@
 #include "tokenizer.h"
-
+extern int current_line;
 /* my_getword seprates a given line to meaningful tokens,
    returns ':' when encounterd in label definition. */
 static int my_getword(char *word, int lim, const char **line);
-
+int is_reserved_word(const char *word);
+void init_tokens(Token *tokens);
 /* Tokenizes a given line of assembly code into tokens with assigned type. */
 Token *tokenize_line(const char *line, int *tokens_count) {
     Token *tokens;
@@ -11,13 +12,19 @@ Token *tokenize_line(const char *line, int *tokens_count) {
     const char *line_ptr;
     
     TRY(tokens = (Token *)calloc(MAX_TOKENS, sizeof(Token)));
-    memset(tokens, -1 , MAX_TOKENS * sizeof(Token));
+    init_tokens(tokens);
     line_ptr = line; /* Use a pointer to traverse the line */
     *tokens_count = 0;
     label_def_flag = 0;
     
     while ((label_def_flag = my_getword(tokens[*tokens_count].value, MAX_LINE, &line_ptr)) != EOF) {
         if ((char)label_def_flag == ':') {
+            if(is_reserved_word(tokens[*tokens_count].value)){
+                printf("ERROR: line [%d]: '%s'\n'%s' is a reserved word. ",
+                       current_line, tokens[0].value, line);
+                free(tokens);
+                return NULL;
+            }
             tokens[*tokens_count].type = LABEL_DEF;
         } else {
             tokens[*tokens_count].type = get_token_type(tokens[*tokens_count].value);
@@ -26,6 +33,14 @@ Token *tokenize_line(const char *line, int *tokens_count) {
     }
 
     return tokens;
+}
+
+void init_tokens(Token *tokens) {
+    int i;
+    for (i = 0; i < MAX_TOKENS; i++) {
+        tokens[i].type = UNKNOWN;
+        tokens[i].value[0] = '\0';
+    }
 }
 
 static const char *reserved_words[] = {
@@ -40,7 +55,7 @@ static const char *reserved_words[] = {
     ".data", ".string", ".entry", ".extern",
 
     /* Special symbols */
-    "#", /* For immediate addressing */
+    "#","*", /* For immediate addressing */
 
     /* Null terminator to mark end of array */
     NULL};
@@ -77,10 +92,25 @@ TokenType get_token_type(const char *token) {
     }
 
     if (isalpha((unsigned char)token[0])) {
+        if (is_reserved_word(token)) {
+            printf("Warning: '%s' is a reserved word.\n",token);
+            return ERROR;
+        }
+
         return LABEL_USE;
     }
     /* If none of the above, it's a potential forward refrence */
     return ERROR;
+}
+
+int is_reserved_word(const char *word) {
+    int i;
+    for (i = 0; reserved_words[i] != NULL; i++) {
+        if (strcmp(word, reserved_words[i]) == 0) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static int my_getword(char *word, int lim, const char **line) {

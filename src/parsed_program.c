@@ -46,7 +46,7 @@ void grow_parsed_program(ParsedProgram *program) {
 
 void add_line_to_program(ParsedProgram *program, Line *line) {
 
-    if (program->size == program->capacity) {
+    if (program->size >= program->capacity) {
         grow_parsed_program(program);
     }
 <<<<<<< HEAD
@@ -65,7 +65,7 @@ void update_data_lines(int IC, ParsedProgram *ParsedProgram) {
     int i;
     for (i = 0; i < ParsedProgram->size; i++) {
         if (ParsedProgram->lines[i].type == LINE_DATA || ParsedProgram->lines[i].type == LINE_STRING) {
-            ParsedProgram->lines[i].address += IC;
+            ParsedProgram->lines[i].address += IC; /* DC = DC + IC */
         }
     }
 >>>>>>> sandbox
@@ -121,9 +121,11 @@ void print_parsed_program(const ParsedProgram* program)
                 printf("String\n");
                 printf("  Value: %s\n", line->content.data.content.char_values);
                 break;
-            case LINE_DIRECTIVE:
-                printf("Directive\n");
-                /* Add more details about directives if needed */
+            case LINE_ENTRY:
+                printf("Entry\n");
+                break;
+            case LINE_EXTERN:
+                printf("Extern\n");
                 break;
             default:
                 printf("Unknown\n");

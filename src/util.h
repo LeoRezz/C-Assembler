@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define MAX_IMMEDIATE_VALUE 2047
+#define MIN_IMMEDIATE_VALUE -2048
 #define STRING(s) #s
 #define CONCAT(x, y) STRING(x##y)
 #define TOKEN_OK 0

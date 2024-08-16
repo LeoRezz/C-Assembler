@@ -42,7 +42,8 @@ typedef enum {
     LINE_INSTRUCTION,
     LINE_DATA,
     LINE_STRING,
-    LINE_DIRECTIVE
+    LINE_ENTRY,
+    LINE_EXTERN,
 } LineType;
 
 typedef struct {
@@ -50,11 +51,6 @@ typedef struct {
     char value[MAX_TOKEN_LENGTH];
 } Token;
 
-typedef struct {
-    char symbol[MAX_SYMBOL_LENGTH]; /* Storing label opreand name, like: LOOP */
-    int address;
-    /* Label operands are assumed undefined and set to -1, To be updated in the second pass, using the ~LabelTable~ */
-} LabelOperand;
 
 typedef struct Instruction {
     int opcode;
@@ -62,7 +58,7 @@ typedef struct Instruction {
     int operands_count; /* For determining operand count */
     union {
         int immediate; /* Storing opreand's integer value  */
-        LabelOperand label; /* Storing opreand's label name, and address field for resolution */
+        char symbol[MAX_SYMBOL_LENGTH]; /* Storing label opreand name, like: LOOP */
         int reg; /* Storing register's value, 0 to 7 */
     } operands[2];
 } Instruction;
@@ -108,5 +104,5 @@ typedef struct Line {
 Token *tokenize_line(const char *line, int *token_count);
 TokenType get_token_type(const char *token);
 const char *token_type_to_string(TokenType type);
-
+int is_reserved_word(const char *word);
 #endif

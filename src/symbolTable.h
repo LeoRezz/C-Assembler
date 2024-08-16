@@ -26,7 +26,6 @@ typedef struct {
 
 void init_symbol_table(void);
 int add_symbol(char *name, int *value, SymbolType type);
-void grow_symbol_table(symbol *symbol_table);
 symbol *find_symbol(char *name);
 void update_data_symbols(int IC);
 void print_symbol_table(void);

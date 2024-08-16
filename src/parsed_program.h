@@ -7,8 +7,8 @@
 
 typedef struct ParsedProgram {
     Line* lines;
-    int size;
-    int capacity;
+    int size; /* Current lines number */
+    int capacity; /* For realloc */
 } ParsedProgram;
 
 ParsedProgram* create_parsed_program(void);

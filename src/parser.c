@@ -3,7 +3,7 @@
 extern int IC, DC, current_line;
 
 /* Helper functions for parsing instructions and data */
-int get_addressing_type(TokenType type);
+int get_addressing_type(Token token);
 void print_parsed_line(Line *parsed_line);
 int is_opcode(TokenType type);
 int is_data(TokenType type);
@@ -77,9 +77,28 @@ Line *parse_line(Token *token_arr, int token_count) {
 
         return parsed_line;
     }
+    /* Check for entry or extern line */
+    if (token_arr[current_token].type == ENTRY || token_arr[current_token].type == EXTERN) {
+        switch (token_arr[current_token].type) {
+        case ENTRY:
+            parsed_line->type = LINE_ENTRY;
+            current_token++;
+            strncpy(parsed_line->label, token_arr[current_token].value, MAX_LABEL_LENGTH);
+            add_symbol(token_arr[current_token].value, 0, SYMBOL_ENTRY);
+            break;
+        case EXTERN:
+            parsed_line->type = LINE_EXTERN;
+            current_token++;
+            strncpy(parsed_line->label, token_arr[current_token].value, MAX_LABEL_LENGTH);
+            add_symbol(token_arr[current_token].value, 0, SYMBOL_EXTERNAL);
+            break;
+        }
+        return parsed_line;
+    }
 
     /* Error */
     printf("Invalid line: %s\n", token_arr[current_token].value);
+    free(parsed_line);
     return NULL;
 }
 
@@ -171,15 +190,28 @@ void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_to
             (*current_token)++;
         }
         /* TODO: fix bug when # and * are used before operand */
-        addressing_mode = get_addressing_type(token_arr[*current_token].type);
-        if ((i == 0 && !is_addressing_mode_allowed(opcode->src_modes, addressing_mode)) ||
-            (i == 1 && !is_addressing_mode_allowed(opcode->dest_modes, addressing_mode))) {
-            printf("Error: Invalid addressing mode for operand %d\n", i + 1);
-            return;
-        }
+        addressing_mode = get_addressing_type(token_arr[*current_token]);
+        if (opcode->operands == 1) {
 
-        add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
-        (*current_token)++;
+            if (i == 1 && opcode->operands > 1 && !is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
+                printf("Error: Invalid addressing mode for destination operand\n");
+                return;
+            }
+            add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
+            (*current_token)++;
+
+        } else {
+            if (i == 0 && !is_addressing_mode_allowed(opcode->src_modes, addressing_mode)) {
+                printf("Error: Invalid addressing mode for source operand\n");
+                return;
+            }
+            if (i == 1 && opcode->operands > 1 && !is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
+                printf("Error: Invalid addressing mode for destination operand\n");
+                return;
+            }
+            add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
+            (*current_token)++;
+        }
     }
 }
 
@@ -187,13 +219,13 @@ void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index
     AddressingMode mode;
 
     switch (token_arr[*i].type) {
-        case HASH:
+        case INTEGER:
             mode = ADD_IMMEDIATE;
-            inst->operands[op_index].immediate = strtol(token_arr[*i].value + 1, NULL, 10);
+            inst->operands[op_index].immediate = strtol(token_arr[*i].value, NULL, 10);
             break;
         case LABEL_USE:
             mode = ADD_DIRECT;
-            strncpy(inst->operands[op_index].label.symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
+            strncpy(inst->operands[op_index].symbol, token_arr[*i].value, MAX_LABEL_LENGTH);
             break;
         case ASTERISK:
             (*i)++;
@@ -216,27 +248,49 @@ void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index
 
     inst->operand_types[op_index] = mode;
 }
+ 
+int get_addressing_type(Token token) {
+    char *endptr; 
+    long value;
+    TokenType type = token.type;
+    
+    if (type == INTEGER) {
+        value = strtol(token.value, &endptr, 10);
+        if (endptr == token.value) {
+            /* No digits were found */
+            printf("Error: Invalid immediate value\n");
+            return -1;
+        }
+        if (*endptr != '\0') {
+            /* The number is followed by invalid characters */
+            printf("Error: Invalid characters after immediate value\n");
+            return -1;
+        }
+        if (value == MAX_IMMEDIATE_VALUE || value == MIN_IMMEDIATE_VALUE) {
+            // Check if the number caused an overflow
+            printf("Error: Immediate value out of range\n");
+            return -1;
+        }
 
-int get_addressing_type(TokenType type) {
-
-    if (type == HASH) {
-        return ADD_IMMEDIATE;
+        return ADD_IMMEDIATE; /* Assuming token is correct? #a */
     }
 
     if (type == LABEL_USE) {
         return ADD_DIRECT;
     }
     /*       mov r5 , * r3      */
-    if (type == ASTERISK) { /* Assuming token is correct? *5 */
+    if (type == ASTERISK) { /* Assuming token is correct? *1 */
         return ADD_INDIRECT_REGISTER;
     }
 
     if (type >= R0 && type <= R7) {
         return ADD_REGISTER;
     }
+    
 
     return -1;
 }
+
 int is_data(TokenType type) { return (type == DATA || type == STRING); }
 
 void print_parsed_line(Line *parsed_line) {
@@ -258,7 +312,7 @@ void print_parsed_line(Line *parsed_line) {
     case LINE_INSTRUCTION:
         printf("Instruction: %s\n",
                opcode_to_string(parsed_line->content.inst.opcode));
-        for (i = 0; i < 2; i++) {
+        for (i = 0; i < parsed_line->content.inst.operands_count; i++) {
             printf(
                 "Operand %d type: %s\n", i,
                 operand_type_to_string(parsed_line->content.inst.operand_types[i]));
@@ -270,7 +324,7 @@ void print_parsed_line(Line *parsed_line) {
                        parsed_line->content.inst.operands[i].reg);
             } else if (parsed_line->content.inst.operand_types[i] == ADD_DIRECT) {
                 printf("Operand %d label: %s\n", i,
-                       parsed_line->content.inst.operands[i].label.symbol ? parsed_line->content.inst.operands[i].label.symbol : "N/A");
+                       parsed_line->content.inst.operands[i].symbol ? parsed_line->content.inst.operands[i].symbol : "N/A");
             }
         }
         break;
@@ -291,8 +345,12 @@ void print_parsed_line(Line *parsed_line) {
         printf("String: %s\n", parsed_line->content.data.content.char_values);
         break;
 
-    case LINE_DIRECTIVE:
-        printf("Directive\n");
+    case LINE_ENTRY:
+        printf("Entry\n");
+        break;
+
+    case LINE_EXTERN:
+        printf("Extern\n");
         break;
 
     default:
@@ -312,8 +370,10 @@ const char *line_type_to_string(LineType line_type) {
         return "DATA";
     case LINE_STRING:
         return "STRING";
-    case LINE_DIRECTIVE:
-        return "DIRECTIVE";
+    case LINE_ENTRY:
+        return "ENTRY";
+    case LINE_EXTERN:
+        return "EXTERN";
     default:
         /* Handle unexpected line type */
         return "UNKNOWN";

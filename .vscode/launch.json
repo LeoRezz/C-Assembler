@@ -4,7 +4,7 @@
             "name": "prep",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/lior/vsCode/Mamman14/src/preprocessor",
+            "program": "/home/lior/vsCode/mamman14/src/preprocessor",
             "args": ["asm1_data_mix"],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",
@@ -30,7 +30,7 @@
             "name": "assembler",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/lior/vsCode/Mamman14/src/assembler",
+            "program": "/home/lior/vsCode/mamman14/src/assembler",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",
@@ -50,6 +50,7 @@
                 }
             ]
         },
+<<<<<<< HEAD
 >>>>>>> sandbox
     {
         "name": "binary",
@@ -75,5 +76,7 @@
             }
         ]
     }
+=======
+>>>>>>> sandbox
     ]
 }
