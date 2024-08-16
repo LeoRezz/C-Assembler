@@ -7,9 +7,6 @@
 void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
 
-/* Global state, Instruction and Data count*/
-int IC = INITIAL_ADDRESS;
-int DC = 0;
 int current_line = 0;
 /* ----------------------TODO----------------------- */
 /* DONE: Make sure to address to Extern and entry !   
