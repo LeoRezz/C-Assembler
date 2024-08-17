@@ -8,8 +8,6 @@
 void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
 
-/* Global state, Instruction and Data count*/
-int current_line = 0;
 
 /* ----------------------TODO----------------------- */
 /*
@@ -38,7 +36,7 @@ int current_line = 0;
     parsed_program = init_parsed_program(); 
     init_symbol_table(); /* Initialize symbol table */
     first_pass(input_file, parsed_program);
-  
+
     update_data_symbols(get_IC());
 
     update_data_lines(get_IC(), parsed_program);

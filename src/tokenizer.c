@@ -1,5 +1,5 @@
 #include "tokenizer.h"
-extern int current_line;
+
 /* my_getword seprates a given line to meaningful tokens,
    returns ':' when encounterd in label definition. */
 static int my_getword(char *word, int lim, const char **line);
@@ -9,7 +9,7 @@ int is_reserved_word(const char *word);
 int is_valid_register(const char *token);
 void init_tokens(Token *tokens);
 /* Tokenizes a given line of assembly code into tokens with assigned type. */
-Token *tokenize_line(const char *line, int *tokens_count) {
+Token *tokenize_line(const char *line, int *tokens_count , int current_line) {
     Token *tokens;
     int label_def_flag;
     const char *line_ptr;
