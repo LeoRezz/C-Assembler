@@ -8,17 +8,11 @@
 void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
 
-/* Global state, Instruction and Data count*/
 
-int current_line = 0;
 /* ----------------------TODO----------------------- */
-/* DONE: Make sure to address to Extern and entry !   
-   DONE: Make sure there is no extern and entry on the same label name
+/*
    Make sure macro names arn't declared as a label //add them to symbol table
    Make sure to fix the parser's addressing mode bugs, and comma handeling
-   DONE: Make sure reserved words aren't valid label defenitions
-   DONE: Make sure there are no two labels with the same name
-   
    
    secondPass:
    Write data to binary
@@ -30,19 +24,19 @@ int current_line = 0;
    Make sure to build an ob file, and possibly ext and ent if needed.
    
      */
-int main() {
+    int main() {
     FILE *input_file;
     ParsedProgram *parsed_program;
 
     
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("../input/test-error.txt", "r");
+    input_file = fopen("../input/asm1.am", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
     init_memory_counters();
     parsed_program = init_parsed_program(); 
     init_symbol_table(); /* Initialize symbol table */
     first_pass(input_file, parsed_program);
-  
+
     update_data_symbols(get_IC());
 
     update_data_lines(get_IC(), parsed_program);
