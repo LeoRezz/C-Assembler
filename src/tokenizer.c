@@ -19,21 +19,27 @@ Token *tokenize_line(const char *line, int *tokens_count , int current_line) {
     line_ptr = line; /* Use a pointer to traverse the line */
     *tokens_count = 0;
     label_def_flag = 0;
-    
-    while ((label_def_flag = my_getword(tokens[*tokens_count].value, MAX_LINE, &line_ptr)) != EOF) {
-        if ((char)label_def_flag == ':') {
-            if(is_reserved_word(tokens[*tokens_count].value)){
-                       printf("Error in line %d: '%s'\n", current_line, line);
-                       printf("'%s' is a reserved word\n", tokens[*tokens_count].value);
-                free(tokens);
-                return NULL;
-            }
-            tokens[*tokens_count].type = LABEL_DEF;
-        } else {
-            tokens[*tokens_count].type = get_token_type(tokens[*tokens_count].value);
+
+    label_def_flag = my_getword(tokens[*tokens_count].value, MAX_LINE, &line_ptr);
+    if ((char)label_def_flag == ':') {
+        if (is_reserved_word(tokens[*tokens_count].value)) {
+            printf("Error in line %d: Label name '%s:' is a reserved word\n", current_line, tokens[*tokens_count].value);
+            free(tokens);
+            return NULL;
         }
+        tokens[*tokens_count].type = LABEL_DEF;
         (*tokens_count)++;
     }
+    do {
+        if ((tokens[*tokens_count].type = get_token_type(tokens[*tokens_count].value)) == ERROR) {
+            printf("Error: Invalid token '%s'\n", tokens[*tokens_count].value);
+            free(tokens);
+            return NULL;
+        }
+
+        (*tokens_count)++;
+
+    } while (my_getword(tokens[*tokens_count].value, MAX_LINE, &line_ptr) != EOF);
 
     return tokens;
 }
@@ -46,8 +52,26 @@ void init_tokens(Token *tokens) {
     }
 }
 
-static const char *reserved_words[] = {
 
+static const char *reserved_words[] = {
+    /* Registers */
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+
+    /* Opcodes (Instructions) */
+    "mov", "cmp", "add", "sub", "lea", "clr", "not",
+    "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop",
+
+    /* Directives */
+    ".data", ".string", ".entry", ".extern",
+
+    /* Special symbols */
+    "#", /* For immediate addressing */
+
+    /* Null terminator to mark end of array */
+    NULL};
+
+static const char *token_type[] = {
+    
     /* Opcodes (Instructions) */
     "mov", "cmp", "add", "sub", "lea", "clr", "not",
     "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop",
@@ -63,8 +87,8 @@ TokenType get_token_type(const char *token) {
     int len;
     len = strlen(token);
 
-    for (i = 0; reserved_words[i] != NULL; i++) {
-        if (strcmp(token, reserved_words[i]) == 0) {
+    for (i = 0; token_type[i] != NULL; i++) {
+        if (strcmp(token, token_type[i]) == 0) {
             /* Found a reserved word, return its TokenType enum */
             return (TokenType)i;
         }
@@ -96,10 +120,11 @@ TokenType get_token_type(const char *token) {
         return STRING_LITERAL;
     }
 
+    /* If none of the above, it's a potential label refrence */
     if (isalpha((unsigned char)token[0])) {
         return DIRECET;
     }
-    /* If none of the above, it's a potential forward refrence */
+    /* else it's an error */
     return ERROR;
 }
 
@@ -262,7 +287,7 @@ static int my_getword(char *word, int lim, const char **line) {
 
     *w = '\0';
     *line = l;
-    return is_label ? ':' : c; /* Return ':' if it's a label */
+    return is_label ? ':' : 0; /* Return ':' if it's a label */
 }
 
 const char *token_type_to_string(TokenType type) {

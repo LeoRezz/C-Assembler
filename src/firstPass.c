@@ -21,12 +21,13 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program ) {
     /* Read each line from the source file */
     while (fgets(line, MAX_LINE, input_file)) {
         current_line++;
-        if ((p = strrchr(line, '\n')) != NULL) *p = '\0'; /* Remove the newline character at the end*/
+        line[strcspn(line, "\r\n")] = '\0'; /* Remove the newline character at the end*/
+
         /* Tokenizes a given line of assembly code into an array of tokens with assigned type. */
         /* TODO: check reserved words for label defenitionssssssss */
         token_arr = tokenize_line(line, &token_count, current_line);
         if (token_arr == NULL) {
-            printf("Invalid line %d: '%s'\n", current_line, line);
+            printf("Line %d: '%s'\n\n", current_line, line);
             continue;
         }
 
