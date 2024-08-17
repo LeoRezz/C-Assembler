@@ -10,14 +10,15 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
 
 void first_pass(FILE *input_file, ParsedProgram *parsed_program ) {
-    int current_line = 0;
+    int current_line;
     char *p;
     Token *token_arr;
     Line *parsed_line;
     int token_count;
     char line[MAX_LINE];
 
-
+    current_line = 0;
+    token_count = 0;
     /* Read each line from the source file */
     while (fgets(line, MAX_LINE, input_file)) {
         current_line++;

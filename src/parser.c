@@ -185,41 +185,39 @@ void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_to
             }
             (*current_token)++;
         }
-        if(token_arr[*current_token].type == IMMEDIATE) {
-            add_operand_value(inst,token_arr,current_token,i);
+        if (token_arr[*current_token].type == IMMEDIATE) {
+            add_operand_value(inst, token_arr, current_token, i);
         }
         if (token_arr[*current_token].type == INDIRECT_REGISTER) {
-            
-                /* code */
-            }
-
-            // if (token_arr[*current_token].type == HASH || token_arr[*current_token].type == ASTERISK) {
-            //     (*current_token)++;
-            // }
-            /* TODO: fix bug when # and * are used before operand */
-            addressing_mode = get_addressing_type(token_arr[*current_token]);
-            if (opcode->operands == 1) {
-
-                if (!is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
-                    printf("Error: Invalid addressing mode for destination operand\n");
-                    return;
-                }
-                add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
-                (*current_token)++;
-
-            } else {
-                if (i == 0 && !is_addressing_mode_allowed(opcode->src_modes, addressing_mode)) {
-                    printf("Error: Invalid addressing mode for source operand\n");
-                    return;
-                }
-                if (i == 1 && opcode->operands > 1 && !is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
-                    printf("Error: Invalid addressing mode for destination operand\n");
-                    return;
-                }
-                add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
-                (*current_token)++;
-            }
+            add_operand_value(inst, token_arr, current_token, i);
         }
+
+        /* TODO: fix bug when # and * are used before operand */
+        addressing_mode = get_addressing_type(token_arr[*current_token]);
+        
+        
+        if (opcode->operands == 1) {
+
+            if (!is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
+                printf("Error: Invalid addressing mode for destination operand\n");
+                return;
+            }
+            add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
+            (*current_token)++;
+
+        } else {
+            if (i == 0 && !is_addressing_mode_allowed(opcode->src_modes, addressing_mode)) {
+                printf("Error: Invalid addressing mode for source operand\n");
+                return;
+            }
+            if (i == 1 && opcode->operands > 1 && !is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
+                printf("Error: Invalid addressing mode for destination operand\n");
+                return;
+            }
+            add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
+            (*current_token)++;
+        }
+    }
 }
 
 void add_operand_value(Instruction *inst, Token *token_arr, int *current_index, int op_index) {

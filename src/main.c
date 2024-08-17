@@ -20,7 +20,6 @@ void print_token_arr(Token *token_arr, int token_count);
    Entry and extern files 
    Make sure instruction to binary is correct
    Make sure writeLine is correct
-   Make sure code image isn't bigger than 4096
    Make sure to build an ob file, and possibly ext and ent if needed.
    
      */

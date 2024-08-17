@@ -13,33 +13,38 @@ Token *tokenize_line(const char *line, int *tokens_count , int current_line) {
     Token *tokens;
     int label_def_flag;
     const char *line_ptr;
+    int i;
     
     TRY(tokens = (Token *)calloc(MAX_TOKENS, sizeof(Token)));
     init_tokens(tokens);
     line_ptr = line; /* Use a pointer to traverse the line */
-    *tokens_count = 0;
+    i = 0;
     label_def_flag = 0;
 
-    label_def_flag = my_getword(tokens[*tokens_count].value, MAX_LINE, &line_ptr);
-    if ((char)label_def_flag == ':') {
-        if (is_reserved_word(tokens[*tokens_count].value)) {
-            printf("Error in line %d: Label name '%s:' is a reserved word\n", current_line, tokens[*tokens_count].value);
+    label_def_flag = my_getword(tokens[i].value, MAX_LINE, &line_ptr);
+    
+    if (label_def_flag) {
+        if (is_reserved_word(tokens[i].value)) {
+            printf("Error in line %d: Label name '%s:' is a reserved word\n", current_line, tokens[i].value);
             free(tokens);
             return NULL;
         }
-        tokens[*tokens_count].type = LABEL_DEF;
-        (*tokens_count)++;
+        tokens[i].type = LABEL_DEF;
+        (i)++;
     }
-    do {
-        if ((tokens[*tokens_count].type = get_token_type(tokens[*tokens_count].value)) == ERROR) {
-            printf("Error: Invalid token '%s'\n", tokens[*tokens_count].value);
+
+    while (my_getword(tokens[i].value, MAX_LINE, &line_ptr) != EOF) {
+        printf("Token value: %s\n", tokens[i].value);
+        tokens[i].type = get_token_type(tokens[i].value);
+        if ((tokens[i].type) == ERROR) {
+            printf("Error: Invalid token '%s'\n", tokens[i].value);
             free(tokens);
             return NULL;
         }
 
-        (*tokens_count)++;
-
-    } while (my_getword(tokens[*tokens_count].value, MAX_LINE, &line_ptr) != EOF);
+        i++;
+    }
+    *tokens_count = i;
 
     return tokens;
 }
@@ -287,7 +292,7 @@ static int my_getword(char *word, int lim, const char **line) {
 
     *w = '\0';
     *line = l;
-    return is_label ? ':' : 0; /* Return ':' if it's a label */
+    return is_label ? 1 : 0; /* Return ':' if it's a label */
 }
 
 const char *token_type_to_string(TokenType type) {
