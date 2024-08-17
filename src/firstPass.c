@@ -34,10 +34,9 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program ) {
 
         print_token_arr(token_arr, token_count);
         /* Parse the tokens in the line */
-        if ((parsed_line = parse_line(token_arr, token_count)) == NULL) {
+        if ((parsed_line = parse_line(token_arr, token_count, current_line)) == NULL) {
             printf("Invalid line %d: %s\n", current_line, line);
             free(token_arr);
-            free(parsed_line);
             continue;
         }
         add_line_to_program(parsed_program, parsed_line);

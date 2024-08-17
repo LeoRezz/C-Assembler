@@ -1,15 +1,17 @@
 #include "parser.h"
 #include "memory_manager.h"
+#define PARSE(a)           \
+    if (!(a)) {            \
+        free(parsed_line); \
+        return NULL;       \
+    }
 
-extern int current_line;
 
 /* Helper functions for parsing instructions and data */
 int get_addressing_type(Token token);
-void print_parsed_line(Line *parsed_line);
-int is_opcode(TokenType type);
 int is_data(TokenType type);
-void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_token, const Opcode *opcode);
-void add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index);
+int parse_instruction_line(Line *parsed_line, Token *token_arr, int *i, const Opcode *op,int tok_count);
+int add_operand_value(Instruction *inst, Token *token_arr, int *i, int op_index);
 int parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int *data_count);
 
 /*------------------------------------------------------------------------*/
@@ -20,7 +22,7 @@ int parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int
          To simplify the parse_instruction_line function. */
 /* TODO: Consider adding a function to validate the entire data */
 /*------------------------------------------------------------------------*/
-Line *parse_line(Token *token_arr, int token_count) {
+Line *parse_line(Token *token_arr, int token_count, int current_line) {
     const Opcode *opcode;
     int word_count;
     int operand_count;
@@ -30,13 +32,14 @@ Line *parse_line(Token *token_arr, int token_count) {
     Line *parsed_line;
 
     TRY(parsed_line = calloc(1, sizeof(Line)));
-
+    parsed_line->line_number = current_line;
     data_count = 0; /* NOT IN USE */
     current_token = 0;
     label_def_flag = 0;
 
     /* Check for label */
     if (token_arr[current_token].type == LABEL_DEF) {
+        token_count--;
         strcpy(parsed_line->label, token_arr[current_token].value);
         label_def_flag = 1;
         current_token++; /* Skips label definition */
@@ -45,7 +48,8 @@ Line *parse_line(Token *token_arr, int token_count) {
     opcode = find_opcode(token_arr[current_token].value);
     /* Checks if it's an instruction line */
     if (opcode != NULL) {
-        parse_instruction_line(parsed_line, token_arr, &current_token, opcode);
+        token_count--;
+        PARSE(parse_instruction_line(parsed_line, token_arr, &current_token, opcode , token_count));
         if (label_def_flag) {
             add_symbol(parsed_line->label, get_IC(), SYMBOL_CODE);
         }
@@ -64,9 +68,7 @@ Line *parse_line(Token *token_arr, int token_count) {
     /* Check for data */
     if (is_data(token_arr[current_token].type)) {
         /* TODO: DATA value count BUGGED at zero */
-        if (parse_data_line(parsed_line, token_arr, &current_token, &data_count) == 0) {
-            return NULL;
-        }
+        PARSE (parse_data_line(parsed_line, token_arr, &current_token, &data_count));
         if (label_def_flag) {
             add_symbol(parsed_line->label, get_DC(), SYMBOL_DATA);
         }
@@ -137,6 +139,7 @@ int parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int
             }
         }
         break;
+
     case STRING:
         parsed_line->type = LINE_STRING;
         /* Parse the string data and update DC */
@@ -144,29 +147,36 @@ int parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int
         (*current_token)++; /* Advancing to string litral*/
 
         if (token_arr[*current_token].type == STRING_LITERAL) {
+
             strncpy(data->content.char_values, (token_arr[*current_token].value) + 1, MAX_DATA_VALUES);
-
-            if ((p = strrchr(data->content.char_values, '"')) != NULL)
-                *p = '\0';
-            else
-                printf("Invalid string literal\n");
-
-            /* +1 for the null character */
-            data->value_count = strlen(data->content.char_values) + 1;
-            (*data_count) = data->value_count;
+        } else {
+            printf("Error in line %d: .string directive requires a string enclosed in quotes\n", parsed_line->line_number);
+            return 0;
         }
+
+        if ((p = strrchr(data->content.char_values, '"')) != NULL) {
+            *p = '\0';
+        } else {
+            printf("Invalid string literal\n");
+            return 0;
+        }
+        /* +1 for the null character */
+        data->value_count = strlen(data->content.char_values) + 1;
+        (*data_count) = data->value_count;
+
         break;
 
     default:
         printf("Invalid token type for data line: %s\n", token_arr[*current_token].value);
         return 0;
     }
-    return 1;
+    return (*data_count);
 }
-void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_token, const Opcode *opcode) {
+int parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_token, const Opcode *opcode, int token_count) {
     int i;
     int addressing_mode;
     Instruction *inst;
+    enum{ZERO_OPERAND = 0 ,ONE_OPERAND = 1, TWO_OPERAND = 2 };
 
     inst = &(parsed_line->content.inst);
     parsed_line->type = LINE_INSTRUCTION;
@@ -175,58 +185,86 @@ void parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_to
 
     inst->operands_count = opcode->operands;
 
-    /* Parse operands, TODO: fix bugs */
-    for (i = 0; i < (opcode->operands); i++) {
-        if (i > 0) {
-            // Check for comma between operands
-            if (token_arr[*current_token].type != COMMA) {
-                printf("Error: Missing comma between operands\n");
-                return;
-            }
-            (*current_token)++;
-        }
-        if (token_arr[*current_token].type == IMMEDIATE) {
-            add_operand_value(inst, token_arr, current_token, i);
-        }
-        if (token_arr[*current_token].type == INDIRECT_REGISTER) {
-            add_operand_value(inst, token_arr, current_token, i);
-        }
+    
 
-        /* TODO: fix bug when # and * are used before operand */
+    
+
+    switch (opcode->operands) {
+    case ONE_OPERAND:
         addressing_mode = get_addressing_type(token_arr[*current_token]);
-        
-        
-        if (opcode->operands == 1) {
+        if (!is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
+            printf("Error: Invalid addressing mode for destination operand\n");
+            return 0;
+        }
+        if (!add_operand_value(&parsed_line->content.inst, token_arr, current_token, i)) {
+            printf("Error: Invalid operand value\n");
+            return 0;
+        }
+        (*current_token)++;
+        break;
 
-            if (!is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
-                printf("Error: Invalid addressing mode for destination operand\n");
-                return;
+    case TWO_OPERAND:
+
+        for (i = 0; i < opcode->operands; i++) {
+            /* Skip Comma */
+            if (i == 1) {
+                /* Check for comma between operands */
+                if (token_arr[*current_token].type != COMMA) {
+                    printf("Error: Missing comma between operands\n");
+                    return 0;
+                }
+                (*current_token)++;
             }
-            add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
-            (*current_token)++;
+            addressing_mode = get_addressing_type(token_arr[*current_token]);
 
-        } else {
             if (i == 0 && !is_addressing_mode_allowed(opcode->src_modes, addressing_mode)) {
                 printf("Error: Invalid addressing mode for source operand\n");
-                return;
+                return 0;
             }
-            if (i == 1 && opcode->operands > 1 && !is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
+            if (i == 1 && !is_addressing_mode_allowed(opcode->dest_modes, addressing_mode)) {
                 printf("Error: Invalid addressing mode for destination operand\n");
-                return;
+                return 0;
             }
-            add_operand_value(&parsed_line->content.inst, token_arr, current_token, i);
+
+            if (!add_operand_value(&parsed_line->content.inst, token_arr, current_token, i)) {
+                printf("Error: Invalid operand value\n");
+                return 0;
+            }
+
             (*current_token)++;
         }
+        break;
+
+    case ZERO_OPERAND:
+
+        break;
     }
+    if (token_arr[*current_token].type != UNKNOWN) {
+        printf("Error in line %d: Too many operands for instruction '%s'"
+               "\n", parsed_line->line_number, opcode->mnemonic);
+        return 0;
+    }
+
+    printf("No Errors\n");
+    return 1;
 }
 
-void add_operand_value(Instruction *inst, Token *token_arr, int *current_index, int op_index) {
+int add_operand_value(Instruction *inst, Token *token_arr, int *current_index, int op_index) {
     AddressingMode mode;
+    int immediate;
+
+    op_index = 0;
+    immediate = 0;
 
     switch (token_arr[*current_index].type) {
     case IMMEDIATE:
         mode = ADD_IMMEDIATE;
-        inst->operands[op_index].immediate = atoi(token_arr[*current_index].value + 1);
+        immediate = atoi(token_arr[*current_index].value + 1);
+        if (immediate > MAX_IMMEDIATE_VALUE || immediate < MIN_IMMEDIATE_VALUE) {
+            printf("Error: Immediate value '%s' out of range (must be between -2048 and 2047)\n", token_arr[*current_index].value);
+            return 0;
+        } else
+            inst->operands[op_index].immediate = immediate;
         break;
 
     case DIRECET:
@@ -239,15 +277,17 @@ void add_operand_value(Instruction *inst, Token *token_arr, int *current_index, 
         break;
 
     case REGISTER:
-    mode = ADD_REGISTER;
-    inst->operands[op_index].reg = token_arr[*current_index].value[1] - '0';
-    break;
+        mode = ADD_REGISTER;
+        inst->operands[op_index].reg = token_arr[*current_index].value[1] - '0';
+        break;
     default:
         printf("Error: Invalid operand %s\n", token_arr[*current_index].value);
-        return;
+        return 0;
     }
 
     inst->operand_types[op_index] = mode;
+    
+    return 1;
 }
 
 int get_addressing_type(Token token) {

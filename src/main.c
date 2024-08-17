@@ -1,52 +1,76 @@
-#include "tokenizer.h"
-#include "symbolTable.h"
-#include "opcodeTable.h"
-#include "parser.h"
-#include "parsed_program.h"
-#include "memory_manager.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "preprocessor.h"
+#include "firstPass.h"
+#include "secondPass.h"
 
-void first_pass(FILE *input_file, ParsedProgram *parsed_program);
-void print_token_arr(Token *token_arr, int token_count);
+#define MAX_FILENAME 100
+
+int main(int argc, char *argv[])
+{
+    int i;
+    /* Variables to store filenames and flags */
+    char input_filename[MAX_FILENAME];
+    char am_filename[MAX_FILENAME];
+    char ob_filename[MAX_FILENAME];
+    char ent_filename[MAX_FILENAME];
+    char ext_filename[MAX_FILENAME];
+    /* flags for file existence */
+    int has_entries;
+    int has_externals;
+
+    has_entries = 0;
+    has_externals = 0;
+
+    /* Check if at least one input file is provided */
+    if (argc < 2) {
+        fprintf(stderr, "Error: No input files provided.\n");
+        return 1;
+    }
+
+    /* Process each input file */
+    for (i = 1; i < argc; i++) {
+        /* Construct filenames */
 
 
-/* ----------------------TODO----------------------- */
-/*
-   Make sure macro names arn't declared as a label //add them to symbol table
-   Make sure to fix the parser's addressing mode bugs, and comma handeling
-   
-   secondPass:
-   Write data to binary
-   Binary to octal
-   Entry and extern files 
-   Make sure instruction to binary is correct
-   Make sure writeLine is correct
-   Make sure to build an ob file, and possibly ext and ent if needed.
-   
-     */
-    int main() {
-    FILE *input_file;
-    ParsedProgram *parsed_program;
+        /* Replace .as extension with appropriate extensions */
 
-    
-    /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("../input/reserved_words.am", "r");
-    TRY(input_file); /* TRY macro checks for errors while opening file */
+        /* Preprocess (macro expansion) */
+        if (!preprocess(input_filename, am_filename)) {
+            fprintf(stderr, "Error in preprocessing %s\n", input_filename);
+            continue;  /* Move to next file */
+        }
 
-    init_memory_counters();
-    parsed_program = init_parsed_program(); 
-    init_symbol_table(); /* Initialize symbol table */
-    
-    first_pass(input_file, parsed_program);
+        /* First pass */
+        if (!first_pass(am_filename)) {
+            fprintf(stderr, "Error in first pass for %s\n", am_filename);
+            continue;  /* Move to next file */
+        }
 
-    update_data_symbols(get_IC());
+        /* Second pass */
+        if (!second_pass()) {
+            fprintf(stderr, "Error in second pass for %s\n", am_filename);
+            continue;  /* Move to next file */
+        }
 
-    update_data_lines(get_IC(), parsed_program);
+        /* Generate output files */
+        generate_object_file(ob_filename);
 
-    print_parsed_program(parsed_program);
-    print_symbol_table();
+        has_entries = check_entries();
+        has_externals = check_externals();
 
-    free_symbol_table();
-    free_parsed_program(parsed_program);
-    fclose(input_file);
+        if (has_entries) {
+            generate_entries_file(ent_filename);
+        }
+
+        if (has_externals) {
+            generate_externals_file(ext_filename);
+        }
+
+        /* Reset for next file */
+        reset_assembler_state();
+    }
+
     return 0;
 }

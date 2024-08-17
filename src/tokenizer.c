@@ -31,20 +31,22 @@ Token *tokenize_line(const char *line, int *tokens_count , int current_line) {
         }
         tokens[i].type = LABEL_DEF;
         (i)++;
+    }else{
+        tokens[i].type = get_token_type(tokens[i].value);
+        (i)++;
     }
 
     while (my_getword(tokens[i].value, MAX_LINE, &line_ptr) != EOF) {
-        printf("Token value: %s\n", tokens[i].value);
         tokens[i].type = get_token_type(tokens[i].value);
         if ((tokens[i].type) == ERROR) {
             printf("Error: Invalid token '%s'\n", tokens[i].value);
             free(tokens);
             return NULL;
         }
-
         i++;
     }
-    *tokens_count = i;
+    printf("Reached end of while\n");
+    (*tokens_count) = i;
 
     return tokens;
 }
@@ -226,7 +228,7 @@ static int my_getword(char *word, int lim, const char **line) {
 
     case '#':
         *w++ = c; /* Store the '#' */
-        while (--lim > 1 && *l != '\0' && !isspace(*l)) {
+        while ((--lim > 1 && *l != '\0') && (*l != ',' && !isspace(*l))) {
             *w++ = *l++;
         }
         break;
@@ -252,10 +254,14 @@ static int my_getword(char *word, int lim, const char **line) {
         }
         break;
 
-    case '.': /* Handle directives */
+    case '.': /* Handle potential directives */
         *w++ = c;
-        while (--lim > 1 && isalpha(*l)) {
+        while (--lim > 1 && !isspace(*l) && (*l != ':')) {
             *w++ = *l++;
+        }
+        if (*l == ':') { /* For Error reporting later */
+            is_label = 1;
+            l++; /* Skip the colon */
         }
         break;
 
@@ -270,7 +276,7 @@ static int my_getword(char *word, int lim, const char **line) {
         /* Handle potential register or label */
         if (isalpha(c)) {
             *w++ = c;
-            while (--lim > 1 && (*l != ':' && *l != ',' && !isspace(*l))) {
+            while ((--lim > 1) && (*l != ':') && isalnum(*l)) {
                 *w++ = *l++;
             }
             if (*l == ':') {

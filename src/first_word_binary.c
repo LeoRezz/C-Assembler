@@ -249,9 +249,12 @@ void print_parsed_line(Line *parsed_line) {
         printf("String: %s\n", parsed_line->content.data.content.char_values);
         break;
 
-    case LINE_DIRECTIVE:
-        printf("Directive\n");
+    case LINE_ENTRY:
+        printf("Entry\n");
         break;
+    
+    case LINE_EXTERN:
+        printf("Extern\n");
 
     default:
         printf("Invalid line type\n");
@@ -270,8 +273,10 @@ const char *line_type_to_string(LineType line_type) {
     return "DATA";
   case LINE_STRING:
     return "STRING";
-  case LINE_DIRECTIVE:
-    return "DIRECTIVE";
+  case LINE_ENTRY:
+    return "ENTRY";
+  case LINE_EXTERN:
+    return "EXTERN";
   default:
     /* Handle unexpected line type */
     return "UNKNOWN";
