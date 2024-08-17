@@ -12,6 +12,7 @@
 
 
 /*---------------------------TODO-----------------------*/
+/*binary to octal*/
 /*extren and entry tables*/
 /*fix order in secondpass() first all instructions*/
 /*write first line before translating...*/
@@ -32,8 +33,8 @@ void externFile();
 
 
 /* draft */
-void generate_ob_file(const char* filename) {
-    FILE* file = fopen(filename, "w");
+void generate_ob_file(const char* filename, FILE* file) {
+    file = fopen(filename, "w");
     if (file == NULL) {
         /* Handle error */
         return;
@@ -47,43 +48,37 @@ void generate_ob_file(const char* filename) {
     fclose(file);
 }
 
-
 void secondPass(ParsedProgram *program, int numOfLines) {
 
     char filename[] = "test.ob";   //add correct file name
     FILE* testfile;
-    Line temp;
-    testfile = fopen(filename, "w"); /*create object file*/ 
-    fclose(testfile);
+    generate_ob_file(filename, testfile);
+
+    char data_name[] = "data.ob";   //add correct file name
+    FILE* datafile;
+
+    entryFile(); /*creates and write to .ent file*/
 
     int i = 0;
-    char binaryCode[15] = "";
+    char binaryCode[20] = "";
 
-    for (; i < numOfLines; i++) /*TODO change order, first all instructions*/
+    for (; i < numOfLines; i++) 
     {   
         Line *current = &(program->lines[i]);
 
-        if ( current->type == 0) /*instruction line*/
+        if ( current->type == LINE_INSTRUCTION) /*instruction line*/
         {
             InstructionToBinary(current, testfile, filename);  /*lines of instruction*/
         }
-        else if (current->type == 1 || current->type== 2) //line_data, line_string
+        else if (current->type == LINE_DATA || current->type== LINE_STRING) //line_data, line_string
         {
-            DataToBinary(current, testfile, filename); /*lines of data*/
+            DataToBinary(current, datafile, data_name); /*lines of data*/
         }
                       
     }
 
-    entryFile(); /*creates and write to .ent file*/
-
-
 }
     
-
-
-
-
-
 
 int InstructionToBinary(Line *line, FILE* testfile, char* filename)
 { 
@@ -96,30 +91,31 @@ int InstructionToBinary(Line *line, FILE* testfile, char* filename)
     symbolCount = get_symbol_count(); /* get the symbol count */
 
 
-    char binaryCode[15] = "";
-    //FirstTokenToBinary(line, testfile, filename); //TODO: int or void with writeline?
-    binaryCode[15] = "";
+    char binaryCode[20] = ""; 
+    FirstTokenToBinary(line, testfile, filename); 
     if (line->content.inst.operands_count != 0)
     {
-        switch (line->content.inst.operand_types[i])
+
+        
+        switch (line->content.inst.operand_types[0]) 
         {
-        case 1: //ADD_IMMEDIATE
-            strcat(binaryCode, CodeToBinary(line->content.inst.operands[0].immediate,12)); //משלים ל2
+        case ADD_IMMEDIATE: //ADD_IMMEDIATE
+            strcat(binaryCode, CodeToBinary(line->content.inst.operands[0].immediate,12) ); //משלים ל2
             strcat(binaryCode, CodeToBinary(4,3)); /* A=1, R,E=0 */ 
             WriteLine(binaryCode, testfile, filename); /* writes the first word,TODO: write function that appends line as address and octal value of binary*/
 
-        case 2: //ADD_DIRECT  
+        case ADD_DIRECT: //ADD_DIRECT  
             for (j = 0; j < symbolCount; j++) { 
                 if (strcmp(symbol_table[j].name, line->content.inst.operands[i].symbol) == 0) {
-                    strcat(binaryCode, CodeToBinary(symbol_table[j].value,12)); /* bits 14-3 are for label address */
-                    if (symbol_table[j].type==3) /*extren label*/
+                    strcat(binaryCode, CodeToBinary(symbol_table[j].value,12) ); /* bits 14-3 are for label address */
+                    if (symbol_table[j].type == SYMBOL_EXTERNAL) /*extren label*/
                     {
-                     strcat(binaryCode, CodeToBinary(1,3)); /*  A,R=0  E=1 */   
+                     strcat(binaryCode, CodeToBinary(1,3) ); /*  A,R=0  E=1 */   
                      externFile(symbol_table[j]);             
-                    } /*TODOOOO*/
+                    } 
                     else
                     {
-                     strcat(binaryCode, CodeToBinary(2,3)); /*  A=0  R=1  E=0 */
+                     strcat(binaryCode, CodeToBinary(2,3) ); /*  A=0  R=1  E=0 */
                     }
                     WriteLine(binaryCode, testfile, filename);
                     
@@ -145,23 +141,20 @@ int InstructionToBinary(Line *line, FILE* testfile, char* filename)
 
         default:
             break;
+        }
     }
-    }
-    
-    
-    
+        
 }
 
 
 int DataToBinary(Line *line, FILE* testfile, char* filename){ /*extrenFile()*/
     int i;
     int j;
-    char binaryCode[15] = "";
-    int lines_of_data =0;
+    char binaryCode[20] = "";
 
     switch (line->content.data.type)
     {
-    case 0: /* DATA_INT */
+    case DATA_INT: 
         for (i=0;i < line->content.data.value_count; i++)
         {
             strcat(binaryCode, CodeToBinary(line->content.data.content.int_values[i],15));
@@ -171,21 +164,21 @@ int DataToBinary(Line *line, FILE* testfile, char* filename){ /*extrenFile()*/
             }
         }
         
-        return lines_of_data;
 
-    case 1: /*DATA_STRING*/
+    case DATA_STRING: 
+        char temp[20] = "";
         for (i=0;i<sizeof(line->content.data.content.char_values); i++)
         {
             char c = line->content.data.content.char_values[i];
             strcat(binaryCode, CodeToBinary(0,7)); /*ascii only takes 8 bits, so bits 14-8 are set to o*/
                 for (j = 7; j >= 0; --j) {
-                binaryCode[7-i] = ((c >> i) & 1) + '0'; /*adding '0' is like adding '48' to get the right ascii value*/
+                temp[7-i] = ((c >> i) & 1) + '0'; /*adding '0' is like adding '48' to get the right ascii value*/
                 }
+            strcat(binaryCode, temp);
             WriteLine(binaryCode, testfile, filename);
         }
-        strcat(binaryCode, CodeToBinary(0,15)); /*print /0 to end string*/ //lines_of_data++?
+        strcat(binaryCode, CodeToBinary(0,15)); /*print /0 to end string*/ 
         WriteLine(binaryCode, testfile, filename);
-        return lines_of_data;
 
     default:
         break;
@@ -193,12 +186,11 @@ int DataToBinary(Line *line, FILE* testfile, char* filename){ /*extrenFile()*/
 }
 
 
-
 /*function writes to object file the first word*/
+
 void FirstTokenToBinary(Line *line, FILE* testfile, char* filename ) //only if instruction line
 { 
-    int lines_writen = 0;
-    char binaryCode[16] = "";
+    char binaryCode[20] = "";
     strcat(binaryCode, CodeToBinary(line->content.inst.opcode,4)); //bits 11-14 are opcode
     switch (line->content.inst.operands_count) 
     {
@@ -216,7 +208,6 @@ void FirstTokenToBinary(Line *line, FILE* testfile, char* filename ) //only if i
             break;
 
 
-
         case 2:
             strcat(binaryCode, CodeToBinary(line->content.inst.operand_types[0],4)); //source operand adressing type to binary
             strcat(binaryCode, CodeToBinary(line->content.inst.operand_types[1],4)); //dest operand adressing type to binary
@@ -225,10 +216,12 @@ void FirstTokenToBinary(Line *line, FILE* testfile, char* filename ) //only if i
             break;
 
         default:
+        printf("error with first token switch case");
             break; //error message?
     }
     
 }
+
 
 
 /*The function gets a decimal integer and covert it to binary for the amount of specified bits*/
@@ -236,13 +229,17 @@ char* CodeToBinary(int input, int numberOfBits)
 {
     int i = numberOfBits - 1;
     int value = input;
-    char *binary = (char *)malloc(numberOfBits); ////free
+    char *binary = (char *)calloc(numberOfBits+1,sizeof(char)); ////free
     for (; i >= 0; i--) 
     {
+ 
         binary[i] = (value & 1) ? '1' : '0';
         value >>= 1;
     }
+
+        fprintf(stderr,"%s\n\n", binary);
     return binary;
+
 }
 
 int BinaryToOctal(char binarycode[]){
@@ -264,19 +261,15 @@ int BinaryToOctal(char binarycode[]){
     return oct;
 }
 
-void WriteLine(char binarycode[15], FILE* testfile, char* filename) /*should be void?*/
+void WriteLine(char binarycode[20], FILE* testfile, char* filename) /*should be void?*/
 {
 
 /* 4 digits for address, 1 space, 5 digits to octal */  
-    int octal = BinaryToOctal(binarycode);
+    int octal;
+    octal = BinaryToOctal(binarycode);
     FILE* file = fopen(filename, "a");
-    if (file != NULL) {
-
-        fprintf(file, "%04d %05d\n", 1, octal); 
-        fclose(file);
-    } else {
-        printf("Could not open file %s\n", filename); //
-    }
+    fprintf(file, "%04d %05d\n", address, octal); 
+    fclose(file);
     address++;
 }
 
@@ -294,23 +287,22 @@ void entryFile()
     FILE* entry_file;
     for (i = 0; i < symbolCount; i++)
     {
-        if (symbol_table->type == 2) /*SYMBOL_ENTRY*/
+
+
+        if (symbol_table[i].type, SYMBOL_ENTRY) 
         {
+            if(access("test.ent", F_OK) != -1) { /*checks if file already exists*/           
+                entry_file = fopen(entry_name, "a");
+                fprintf(entry_file, "%s %d\n", symbol_table->name , symbol_table->value ); 
+                fclose(entry_file);
 
-        if(access("test.ent", F_OK) != -1) { /*checks if file already exists*/
-            
-            entry_file = fopen(entry_name, "a");
-            fprintf(entry_file, "%s %d\n", symbol_table->name , symbol_table->value ); 
-            fclose(entry_file);
-
-        } else {
-
-            entry_file = fopen(entry_name, "w"); /*create entry file*/ 
-            fclose(entry_file);
-            entry_file = fopen(entry_name, "a");
-            fprintf(entry_file, "%s %d\n", symbol_table->name , symbol_table->value ); 
-            fclose(entry_file);
-        }
+            } else {
+                entry_file = fopen(entry_name, "w"); /*create entry file*/ 
+                fclose(entry_file);
+                entry_file = fopen(entry_name, "a");
+                fprintf(entry_file, "%s %d\n", symbol_table->name , symbol_table->value ); 
+                fclose(entry_file);
+            }
         }
     }
 }
