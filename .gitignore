@@ -66,10 +66,7 @@ dkms.conf
 diff.txt
 launch.json
 settings.json
-<<<<<<< HEAD
-=======
 first_word_binary
 build.sh
 launch.json
 input/test-error.txt
->>>>>>> sandbox
