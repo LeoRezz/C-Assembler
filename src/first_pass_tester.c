@@ -29,7 +29,7 @@ void print_token_arr(Token *token_arr, int token_count);
 
     
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("mix_errors.am", "r");
+    input_file = fopen("ps.am", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
 
     init_memory_counters();
@@ -43,7 +43,9 @@ void print_token_arr(Token *token_arr, int token_count);
     update_data_lines(get_IC(), parsed_program);
 
     print_parsed_program(parsed_program);
+    resolve_entrys();
     print_symbol_table();
+
 
     free_symbol_table();
     free_parsed_program(parsed_program);

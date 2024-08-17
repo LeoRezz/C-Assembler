@@ -69,9 +69,11 @@ int calculate_word_count(const Opcode *op, AddressingMode src_mode, AddressingMo
             return count + 1;
         
         case 2:
-            /* For two operand instructions */
-            if ((src_mode == ADD_REGISTER) && (dest_mode == ADD_REGISTER)) {
-                return count + 1;  /* Instruction word + one word for both registers */
+        printf("src_mode: %d, dest_mode: %d\n", src_mode, dest_mode);
+        printf("Condition result: %d\n", (src_mode & (ADD_REGISTER | ADD_INDIRECT_REGISTER)) && (dest_mode & (ADD_REGISTER | ADD_INDIRECT_REGISTER)));
+        /* For two operand instructions */
+        if ((src_mode & (ADD_REGISTER | ADD_INDIRECT_REGISTER)) && (dest_mode & (ADD_REGISTER | ADD_INDIRECT_REGISTER))) { /* (1000 & 1100) != 0 */
+            return count + 1; /* Instruction word + one word for both registers */
             } else {
                 /* Add a word for each operand */
                 count += 1;  /* For source operand */

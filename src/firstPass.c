@@ -47,7 +47,6 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program ) {
         printf("\n\n");
         free(token_arr); /* Free the token array, no need for him*/
         free(parsed_line); /* Free the parsed line, because it was added to parsed_program */
-        current_line++;
     }
     
 }

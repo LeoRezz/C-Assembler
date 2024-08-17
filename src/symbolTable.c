@@ -24,36 +24,35 @@ void init_symbol_table(void) {
     symbol_capacity = INITIAL_SYMBOL_TABLE_SIZE;
 }
 
-static int is_duplicate_symbol(char *name, SymbolType type) {
+static int is_duplicate_symbol(char *name, int value, SymbolType type) {
     symbol *symbol_duplicate = find_symbol(name);
 
     /* Checks if the symbol already exists */
     if (symbol_duplicate != NULL) {
+        /* if the symbol is an entry, update it's value to current IC */
+        if (symbol_duplicate->type == SYMBOL_ENTRY) {
+            return 0;
+        }
+
         /* Checks if the symbol is of the same type */
         if (symbol_duplicate->type == type) {
             return 1;
         }
-        if (symbol_duplicate->type == SYMBOL_ENTRY && type == SYMBOL_EXTERNAL) {
-            return 1;
-        }
     }
+
     return 0;
 }
 
 /* Add a symbol to the table */
 int add_symbol(char *name, int value, SymbolType type) {
 
-    if (is_duplicate_symbol(name, type)) {
+    if (is_duplicate_symbol(name,value, type)) {
         return 0;
     }
-
-
 
     if (symbol_count >= symbol_capacity) {
         grow_symbol_table();
     }
-
-
 
     strncpy(symbol_table[symbol_count].name, name, MAX_LABEL_LENGTH);
     symbol_table[symbol_count].name[MAX_LABEL_LENGTH] = '\0'; /* Ensure null-termination */
@@ -125,6 +124,32 @@ void update_data_symbols(int IC) {
 
 static int compare_symbols(const void *a, const void *b) {
     return ((symbol*)a)->value - ((symbol*)b)->value;
+}
+
+int resolve_entrys() {
+    int i;
+    symbol *entry_refrence;
+    for (i = 0; i < symbol_count; i++) {
+        if (symbol_table[i].type == SYMBOL_ENTRY) {
+            entry_refrence = find_entry_refrence(symbol_table[i].name);
+            if (entry_refrence == NULL) {
+                printf("Error: Entry symbol value not found\n");
+                return 0;
+            }
+            symbol_table[i].value = entry_refrence->value;
+        }
+    }
+}
+
+/* Look up an entry symbol's refrence address in the table */
+symbol *find_entry_refrence(char *name) {
+    int i;
+    for (i = 0; i < symbol_count; i++) {
+        if ((strcmp(symbol_table[i].name, name) == 0) && (symbol_table[i].type != SYMBOL_ENTRY)) {
+            return &symbol_table[i];
+        }
+    }
+    return NULL;
 }
 
 void print_symbol_table() {

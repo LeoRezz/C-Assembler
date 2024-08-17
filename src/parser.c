@@ -178,6 +178,7 @@ int parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_tok
     Instruction *inst;
     enum{ZERO_OPERAND = 0 ,ONE_OPERAND = 1, TWO_OPERAND = 2 };
 
+    i = 0;
     inst = &(parsed_line->content.inst);
     parsed_line->type = LINE_INSTRUCTION;
     inst->opcode = opcode->opcode;
@@ -253,7 +254,6 @@ int add_operand_value(Instruction *inst, Token *token_arr, int *current_index, i
     AddressingMode mode;
     int immediate;
 
-    op_index = 0;
     immediate = 0;
 
     switch (token_arr[*current_index].type) {

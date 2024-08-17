@@ -5,6 +5,7 @@
 #include "firstPass.h"
 #include "secondPass.h"
 
+
 #define MAX_FILENAME 100
 
 int main(int argc, char *argv[])
@@ -25,7 +26,7 @@ int main(int argc, char *argv[])
 
     /* Check if at least one input file is provided */
     if (argc < 2) {
-        fprintf(stderr, "Error: No input files provided.\n");
+        printf("Error: No input files provided.\n");
         return 1;
     }
 
@@ -35,22 +36,25 @@ int main(int argc, char *argv[])
 
 
         /* Replace .as extension with appropriate extensions */
+        /*TODO: Trim the .as */
+        trim_extention(argv[i]); /* To Implement */
+        strncpy(am_filename,argv[i],MAX_FILENAME);
 
         /* Preprocess (macro expansion) */
         if (!preprocess(input_filename, am_filename)) {
-            fprintf(stderr, "Error in preprocessing %s\n", input_filename);
+            printf("Error in preprocessing %s\n", input_filename);
             continue;  /* Move to next file */
         }
 
         /* First pass */
         if (!first_pass(am_filename)) {
-            fprintf(stderr, "Error in first pass for %s\n", am_filename);
+            printf("Error in first pass for %s\n", am_filename);
             continue;  /* Move to next file */
         }
 
         /* Second pass */
         if (!second_pass()) {
-            fprintf(stderr, "Error in second pass for %s\n", am_filename);
+            printf("Error in second pass for %s\n", am_filename);
             continue;  /* Move to next file */
         }
 
