@@ -36,7 +36,7 @@ int main() {
 
     
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("../input/test-error.txt", "r");
+    input_file = fopen("../input/ps.as", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
     init_memory_counters();
     parsed_program = init_parsed_program(); 
@@ -49,6 +49,8 @@ int main() {
 
     print_parsed_program(parsed_program);
     print_symbol_table();
+
+    secondPass(parsed_program, parsed_program->count);
 
     free_symbol_table();
     free_parsed_program(parsed_program);

@@ -20,6 +20,9 @@ typedef struct {
     SymbolType type;
 } symbol;
 
+
+symbol* get_symbol_table();
+int get_symbol_count();
 void init_symbol_table(void);
 int add_symbol(char *name, int value, SymbolType type);
 symbol *find_symbol(char *name);
