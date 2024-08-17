@@ -60,7 +60,6 @@ void update_data_lines(int IC, ParsedProgram *ParsedProgram) {
 }
 
 
-ParsedProgram *get_line_
 
 void free_parsed_program(ParsedProgram *program) {
     

@@ -45,10 +45,13 @@ int main() {
   
     update_data_symbols(get_IC());
 
+   
     update_data_lines(get_IC(), parsed_program);
-    secondPass( parsed_program, parsed_program->count);
-    print_parsed_program(parsed_program);
-    print_symbol_table();
+    
+    secondPass(parsed_program, parsed_program->capacity);
+    
+    //print_parsed_program(parsed_program);
+    //print_symbol_table();
 
     free_symbol_table();
     free_parsed_program(parsed_program);
