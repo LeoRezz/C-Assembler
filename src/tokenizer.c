@@ -3,7 +3,10 @@ extern int current_line;
 /* my_getword seprates a given line to meaningful tokens,
    returns ':' when encounterd in label definition. */
 static int my_getword(char *word, int lim, const char **line);
+int is_valid_immediate(const char *token);
+int is_valid_indirect_register(const char *token);
 int is_reserved_word(const char *word);
+int is_valid_register(const char *token);
 void init_tokens(Token *tokens);
 /* Tokenizes a given line of assembly code into tokens with assigned type. */
 Token *tokenize_line(const char *line, int *tokens_count) {
@@ -20,8 +23,8 @@ Token *tokenize_line(const char *line, int *tokens_count) {
     while ((label_def_flag = my_getword(tokens[*tokens_count].value, MAX_LINE, &line_ptr)) != EOF) {
         if ((char)label_def_flag == ':') {
             if(is_reserved_word(tokens[*tokens_count].value)){
-                printf("ERROR: line [%d]: '%s'\n'%s' is a reserved word. ",
-                       current_line, tokens[0].value, line);
+                       printf("Error in line %d: '%s'\n", current_line, line);
+                       printf("'%s' is a reserved word\n", tokens[*tokens_count].value);
                 free(tokens);
                 return NULL;
             }
@@ -44,8 +47,6 @@ void init_tokens(Token *tokens) {
 }
 
 static const char *reserved_words[] = {
-    /* Registers */
-    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
 
     /* Opcodes (Instructions) */
     "mov", "cmp", "add", "sub", "lea", "clr", "not",
@@ -53,9 +54,6 @@ static const char *reserved_words[] = {
 
     /* Directives */
     ".data", ".string", ".entry", ".extern",
-
-    /* Special symbols */
-    "#","*", /* For immediate addressing */
 
     /* Null terminator to mark end of array */
     NULL};
@@ -73,15 +71,22 @@ TokenType get_token_type(const char *token) {
     }
 
     /* If not a reserved word, determine other token types */
-    if (token[0] == '#') {
-        return HASH;
+    if ((token[0] == '#') && is_valid_immediate(token)) {
+        return IMMEDIATE;
     }
+
+    if ((token[0] == '*') && is_valid_indirect_register(token)) {
+        return INDIRECT_REGISTER;
+    }
+
+    if ((token[0] == 'r') && is_valid_register(token)) {
+        return REGISTER;
+    }
+
     if (token[0] == ',') {
         return COMMA;
     }
-    if (token[0] == '*') {
-        return ASTERISK;
-    }
+
 
    if (isdigit((unsigned char)token[0]) || (((token[0] == '-') || (token[0] == '+')) && isdigit((unsigned char)token[1]))) {
        return INTEGER;
@@ -92,12 +97,7 @@ TokenType get_token_type(const char *token) {
     }
 
     if (isalpha((unsigned char)token[0])) {
-        if (is_reserved_word(token)) {
-            printf("Warning: '%s' is a reserved word.\n",token);
-            return ERROR;
-        }
-
-        return LABEL_USE;
+        return DIRECET;
     }
     /* If none of the above, it's a potential forward refrence */
     return ERROR;
@@ -111,6 +111,62 @@ int is_reserved_word(const char *word) {
         }
     }
     return 0;
+}
+
+int is_valid_immediate(const char *token) {
+    const char *num_part;
+
+    if (token[0] != '#')
+        return 0;
+
+    num_part = token + 1;
+
+    /* Check if it's empty after '#' */
+    if (*num_part == '\0')
+        return 0;
+
+    /* Check for optional sign */
+    if (*num_part == '+' || *num_part == '-') {
+        num_part++;
+    }
+
+    /* Must have at least one digit after sign */
+    if (*num_part == '\0')
+        return 0;
+
+    /* Check if all remaining characters are digits */
+    while (*num_part != '\0') {
+        if (!isdigit((unsigned char)*num_part))
+            return 0;
+        num_part++;
+    }
+
+    return 1;
+}
+
+int is_valid_indirect_register(const char *token) {
+    if (token[0] != '*')
+        return 0;
+
+    if (token[1] != 'r')
+        return 0;
+
+    if (token[2] < '0' || token[2] > '7')
+        return 0;
+
+    if (token[3] != '\0')
+        return 0;
+
+    return 1;
+}
+
+int is_valid_register(const char *token) {
+    if (token[0] != 'r')
+        return 0;
+    if (token[1] < '0' || token[1] > '7')
+        return 0;
+
+    return 1;
 }
 
 static int my_getword(char *word, int lim, const char **line) {
@@ -130,6 +186,21 @@ static int my_getword(char *word, int lim, const char **line) {
     c = *l++;
 
     switch (c) {
+
+    case '*':
+        *w++ = c; /* Store the '*' */
+        while ((--lim > 1 && *l != '\0') && (*l != ',' && !isspace(*l))) {
+            *w++ = *l++;
+        }
+        break;
+
+    case '#':
+        *w++ = c; /* Store the '#' */
+        while (--lim > 1 && *l != '\0' && !isspace(*l)) {
+            *w++ = *l++;
+        }
+        break;
+
     case ';': /* Skip comments */
         return EOF;
         break;
@@ -139,8 +210,6 @@ static int my_getword(char *word, int lim, const char **line) {
         while (--lim > 1 && *l != '\0' && isprint(*l)) {
             *w++ = *l++;
         }
-        *w = '\0';
-        *line = l;
         break;
 
     case '+': /* Handle positive numbers or standalone + */
@@ -168,18 +237,18 @@ static int my_getword(char *word, int lim, const char **line) {
             *line = l;
             return c;
         }
-        /* Handle potential label */
+        /* Handle potential register or label */
         if (isalpha(c)) {
             *w++ = c;
-            while (--lim > 1 && (isalnum(*l))) {
+            while (--lim > 1 && (*l != ':' && *l != ',' && !isspace(*l))) {
                 *w++ = *l++;
             }
             if (*l == ':') {
                 is_label = 1;
                 l++; /* Skip the colon */
-                *w = '\0';
-                *line = l;
             }
+            *w = '\0';
+            *line = l;
         } else if (isdigit(c)) { /* Handle numeric values */
             *w++ = c;
             while (--lim > 1 && isdigit(*l)) {
@@ -198,22 +267,8 @@ static int my_getword(char *word, int lim, const char **line) {
 
 const char *token_type_to_string(TokenType type) {
     switch (type) {
-    case R0:
-        return "R0";
-    case R1:
-        return "R1";
-    case R2:
-        return "R2";
-    case R3:
-        return "R3";
-    case R4:
-        return "R4";
-    case R5:
-        return "R5";
-    case R6:
-        return "R6";
-    case R7:
-        return "R7";
+    case REGISTER:
+        return "REGISTER";
     case MOV:
         return "MOV";
     case CMP:
@@ -254,8 +309,8 @@ const char *token_type_to_string(TokenType type) {
         return "ENTRY";
     case EXTERN:
         return "EXTERN";
-    case HASH:
-        return "HASH";
+    case IMMEDIATE:
+        return "IMMEDIATE";
     case INTEGER:
         return "INTEGER";
     case STRING_LITERAL:
@@ -264,12 +319,14 @@ const char *token_type_to_string(TokenType type) {
         return "ERROR";
     case LABEL_DEF:
         return "LABEL_DEF";
-    case LABEL_USE:
-        return "LABEL_USE";
+    case DIRECET:
+        return "DIRECET";
     case COMMA:
         return "COMMA";
-    case ASTERISK:
-        return "ASTERISK";
+    case INDIRECT_REGISTER:
+        return "INDIRECT_REGISTER";
+    case UNKNOWN:
+        return "UNKNOWN";
     default:
         return "UNDEFINED";
     }

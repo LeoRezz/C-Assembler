@@ -11,9 +11,7 @@
 
 
 typedef enum {
-    /* Registers */
-    R0, R1, R2, R3, R4, R5, R6, R7,
-    
+
     /* Opcodes (Instructions) */
     MOV, CMP, ADD, SUB, LEA, CLR, NOT,
     INC, DEC, JMP, BNE, RED, PRN, JSR, RTS, STOP,
@@ -22,12 +20,13 @@ typedef enum {
     DATA, STRING, ENTRY, EXTERN,
 
     /* Special symbols */
-    HASH,  /* For immediate addressing */
-    ASTERISK,   /* For indirect addressing */
+    IMMEDIATE,  /* Label use (without ':') */
+    DIRECET,  /* For immediate addressing */
+    INDIRECT_REGISTER,   /* For indirect addressing */
+    REGISTER,     /* For register operands, like: R0, R1 */
 
     /* Additional token types */
-    LABEL_DEF,      /* Label definition (ends with ':') */
-    LABEL_USE,      /* Label use (without ':') */
+    LABEL_DEF,      /* Label definition (ends with ':') */      
     COMMA,          /* ',' */
     INTEGER,
     STRING_LITERAL,
@@ -43,7 +42,7 @@ typedef enum {
     LINE_DATA,
     LINE_STRING,
     LINE_ENTRY,
-    LINE_EXTERN,
+    LINE_EXTERN
 } LineType;
 
 typedef struct {

@@ -4,7 +4,7 @@
 #include "parser.h"
 #include "parsed_program.h"
 
-extern int IC, DC, current_line;
+extern int current_line;
 
 /* prototypes: should be in header file*/
 void first_pass(FILE *input_file, ParsedProgram *parsed_program);
@@ -14,19 +14,19 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
     char *p;
     Token *token_arr;
     Line *parsed_line;
-
     int token_count;
     char line[MAX_LINE];
 
+
     /* Read each line from the source file */
     while (fgets(line, MAX_LINE, input_file)) {
+        current_line++;
         if ((p = strrchr(line, '\n')) != NULL) *p = '\0'; /* Remove the newline character at the end*/
-
         /* Tokenizes a given line of assembly code into an array of tokens with assigned type. */
         /* TODO: check reserved words for label defenitionssssssss */
         token_arr = tokenize_line(line, &token_count);
         if (token_arr == NULL) {
-            printf("Invalid line %d: %s\n", current_line, line);
+            printf("Invalid line %d: '%s'\n", current_line, line);
             continue;
         }
 
@@ -46,6 +46,7 @@ void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
         printf("\n\n");
         free(token_arr); /* Free the token array, no need for him*/
         free(parsed_line); /* Free the parsed line, because it was added to parsed_program */
+        current_line++;
     }
     
 }

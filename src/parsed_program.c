@@ -83,12 +83,13 @@ void print_parsed_program(const ParsedProgram* program)
 
     for (i = 0; i < program->count; i++)
     {
-        Line* line = &(program->lines[i]);
-        printf("Line %d (Address: %d):\n", line->line_number, line->address);
+        Line *line = &(program->lines[i]);
+        printf("Line %d (Address: %d):\n", i + 1, line->address);
         printf("  Type: ");
         
         switch(line->type)
         {
+            
             case LINE_INSTRUCTION:
                 printf("Instruction\n");
                 printf("  Opcode: %s ", opcode_to_string(line->content.inst.opcode));
