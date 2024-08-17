@@ -66,10 +66,12 @@ dkms.conf
 diff.txt
 launch.json
 settings.json
-<<<<<<< HEAD
-=======
 first_word_binary
 build.sh
 launch.json
 input/test-error.txt
->>>>>>> sandbox
+.vscode/launch.json
+.vscode/settings.json
+input/test-error.txt
+src/invalid_input.as
+tests/tokenizer_test
