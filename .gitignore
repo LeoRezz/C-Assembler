@@ -7,8 +7,18 @@
 # Unignore all dirs
 !*/
 
+!/.gitignore
+!makefile
+
 ### Above combination will ignore all files without extension ###
 
+# VSCode files
+.vscode/
+*.code-workspace
+.history/
+
+# Launch configuration
+launch.json
 
 # Prerequisites
 *.d
@@ -55,21 +65,26 @@
 *.pdb
 
 # Kernel Module Compile Results
+*.as
+*.am
+*.ob
+*.txt
 *.mod*
 *.cmd
 .tmp_versions/
 modules.order
 Module.symvers
-Mkfile.old
 dkms.conf
 .vscode/launch.json
 diff.txt
 launch.json
 settings.json
-<<<<<<< HEAD
-=======
 first_word_binary
 build.sh
 launch.json
 input/test-error.txt
->>>>>>> sandbox
+.vscode/launch.json
+.vscode/settings.json
+input/test-error.txt
+src/invalid_input.as
+tests/tokenizer_test

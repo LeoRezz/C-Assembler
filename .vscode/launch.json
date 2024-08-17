@@ -5,7 +5,7 @@
         "MIDebuggerPath": "/usr/bin/gdb",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/src/assembler",
+        "program": "${workspaceFolder}/src/secondPass",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",

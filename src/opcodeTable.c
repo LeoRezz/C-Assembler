@@ -70,7 +70,7 @@ int calculate_word_count(const Opcode *op, AddressingMode src_mode, AddressingMo
         
         case 2:
             /* For two operand instructions */
-            if (src_mode == ADD_REGISTER && dest_mode == ADD_REGISTER) {
+            if ((src_mode == ADD_REGISTER) && (dest_mode == ADD_REGISTER)) {
                 return count + 1;  /* Instruction word + one word for both registers */
             } else {
                 /* Add a word for each operand */

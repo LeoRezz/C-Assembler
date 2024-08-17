@@ -23,6 +23,8 @@ typedef struct {
 void init_symbol_table(void);
 int add_symbol(char *name, int value, SymbolType type);
 symbol *find_symbol(char *name);
+symbol* get_symbol_table();
+int get_symbol_count();
 void update_data_symbols(int IC);
 void print_symbol_table(void);
 void free_symbol_table(void);

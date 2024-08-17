@@ -97,7 +97,7 @@ int InstructionToBinary(Line *line, FILE* testfile, char* filename)
 
 
     char binaryCode[15] = "";
-    FirstTokenToBinary(line, testfile, filename); //TODO: int or void with writeline?
+    //FirstTokenToBinary(line, testfile, filename); //TODO: int or void with writeline?
     binaryCode[15] = "";
     if (line->content.inst.operands_count != 0)
     {
@@ -114,8 +114,9 @@ int InstructionToBinary(Line *line, FILE* testfile, char* filename)
                     strcat(binaryCode, CodeToBinary(symbol_table[j].value,12)); /* bits 14-3 are for label address */
                     if (symbol_table[j].type==3) /*extren label*/
                     {
-                     strcat(binaryCode, CodeToBinary(1,3)); /*  A,R=0  E=1 */                
-                    }
+                     strcat(binaryCode, CodeToBinary(1,3)); /*  A,R=0  E=1 */   
+                     externFile(symbol_table[j]);             
+                    } /*TODOOOO*/
                     else
                     {
                      strcat(binaryCode, CodeToBinary(2,3)); /*  A=0  R=1  E=0 */
@@ -152,7 +153,7 @@ int InstructionToBinary(Line *line, FILE* testfile, char* filename)
 }
 
 
-int DataToBinary(Line *line, FILE* testfile, char* filename){
+int DataToBinary(Line *line, FILE* testfile, char* filename){ /*extrenFile()*/
     int i;
     int j;
     char binaryCode[15] = "";
@@ -316,23 +317,16 @@ void entryFile()
 
 
 
-void externFile()
+void externFile(symbol symbol)
 {
-    int i;
-    symbol *symbol_table;
-    int symbolCount;
-    symbol_table = get_symbol_table(); /* get the symbol table */
-    symbolCount = get_symbol_count(); /* get the symbol count */
     
     char extern_name[] = "test.ext";   //add correct file name
     FILE* extern_file;
-    if (symbol_table->type == 3) /*SYMBOL_EXTERN*/
-    {
 
-    if(access("test.ent", F_OK) != -1) { /*checks if file already exists*/
+    if(access("test.ext", F_OK) != -1) { /*checks if file already exists*/
             
         extern_file = fopen(extern_name, "a");
-        fprintf(extern_file, "%s %d\n", symbol_table->name , address ); 
+        fprintf(extern_file, "%s %d\n", symbol.name, address ); 
         fclose(extern_file);
 
     } else {
@@ -340,9 +334,8 @@ void externFile()
         extern_file = fopen(extern_name, "w"); /*create entry file*/ 
         fclose(extern_file);
         extern_file = fopen(extern_name, "a");
-        fprintf(extern_file, "%s %d\n", symbol_table->name , symbol_table->value ); 
+        fprintf(extern_file, "%s %d\n", symbol.name , address ); 
         fclose(extern_file);
     }
 
-    } 
 }
