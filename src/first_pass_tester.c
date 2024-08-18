@@ -23,18 +23,15 @@ void print_token_arr(Token *token_arr, int token_count);
 
      */
 int main() {
-    FILE *input_file;
     ParsedProgram *parsed_program;
-
+    char filename[100] = "ps.am";
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("ps.am", "r");
-    TRY(input_file); /* TRY macro checks for errors while opening file */
-
+   
     init_memory_counters();
     parsed_program = init_parsed_program();
     init_symbol_table(); /* Initialize symbol table */
 
-    first_pass(input_file, parsed_program);
+    first_pass(filename, parsed_program);
 
     update_data_symbols(get_IC());
 
@@ -46,6 +43,5 @@ int main() {
 
     free_symbol_table();
     free_parsed_program(parsed_program);
-    fclose(input_file);
     return 0;
 }
