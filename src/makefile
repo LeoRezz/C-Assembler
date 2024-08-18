@@ -1,11 +1,15 @@
 CC= gcc
-CFLAGS= -ansi -Wall -pedantic -g
-SOURCES= main.c secondPass.c preprocessor.c macro_table.c firstPass.c memory_manager.c tokenizer.c opcodeTable.c symbolTable.c parser.c util.c parsed_program.c
+CFLAGS= -g -fsanitize=address -lm
+SOURCES= main.c firstPass.c memory_manager.c secondPass.c tokenizer.c opcodeTable.c symbolTable.c parser.c util.c parsed_program.c
 TARGET= assembler
-
+PREPROCESSOR_SOURCE= preprocessor.c util.c
+PREPROCESSOR_TARGET= preprocessor
 
 $(TARGET): $(SOURCES)
 	$(CC) $(CFLAGS) $(SOURCES) -o $(TARGET)
 
+prep: $(PREPROCESSOR_SOURCE)
+	$(CC) $(CFLAGS) $(PREPROCESSOR_SOURCE) -o $(PREPROCESSOR_TARGET)
+
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(PREPROCESSOR_TARGET)

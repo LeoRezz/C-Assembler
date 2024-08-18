@@ -21,7 +21,7 @@
  * This table is used to validate instructions, determine operand counts,
  * and check addressing mode validity during assembly or simulation.
  */
- const Opcode OPCODE_TABLE[NUM_OPCODES] = {
+static const Opcode OPCODE_TABLE[NUM_OPCODES] = {
     {"mov", 0, 2, ADD_IMMEDIATE | ADD_DIRECT | ADD_INDIRECT_REGISTER | ADD_REGISTER, ADD_DIRECT | ADD_INDIRECT_REGISTER | ADD_REGISTER},
     {"cmp", 1, 2, ADD_IMMEDIATE | ADD_DIRECT | ADD_INDIRECT_REGISTER | ADD_REGISTER, ADD_IMMEDIATE | ADD_DIRECT | ADD_INDIRECT_REGISTER | ADD_REGISTER},
     {"add", 2, 2, ADD_IMMEDIATE | ADD_DIRECT | ADD_INDIRECT_REGISTER | ADD_REGISTER, ADD_DIRECT | ADD_INDIRECT_REGISTER | ADD_REGISTER},
@@ -69,9 +69,9 @@ int calculate_word_count(const Opcode *op, AddressingMode src_mode, AddressingMo
             return count + 1;
         
         case 2:
-        /* For two operand instructions */
-        if ((src_mode & (ADD_REGISTER | ADD_INDIRECT_REGISTER)) && (dest_mode & (ADD_REGISTER | ADD_INDIRECT_REGISTER))) { /* (1000 & 1100) != 0 */
-            return count + 1; /* Instruction word + one word for both registers */
+            /* For two operand instructions */
+            if (src_mode == ADD_REGISTER && dest_mode == ADD_REGISTER) {
+                return count + 1;  /* Instruction word + one word for both registers */
             } else {
                 /* Add a word for each operand */
                 count += 1;  /* For source operand */
@@ -161,9 +161,4 @@ const char *opcode_to_string(int opcode) {
         }
     }
     return "Invalid opcode";
-}
-
-const Opcode* get_random_opcode() {
-    int random_index = rand() % NUM_OPCODES;
-    return &OPCODE_TABLE[random_index];
 }
