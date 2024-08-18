@@ -5,7 +5,6 @@
 #include "parsed_program.h"
 #include "memory_manager.h"
 
-
 void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
 
@@ -24,19 +23,20 @@ void print_token_arr(Token *token_arr, int token_count);
    Make sure to build an ob file, and possibly ext and ent if needed.
    
      */
+  
     int main() {
     FILE *input_file;
     ParsedProgram *parsed_program;
 
     
     /* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-    input_file = fopen("/home/viki/Mamman14/input/asm1.am", "r");
+    input_file = fopen("/home/viki/Mamman14/input/ps.am", "r");
     TRY(input_file); /* TRY macro checks for errors while opening file */
 
     init_memory_counters();
     parsed_program = init_parsed_program(); 
     init_symbol_table(); /* Initialize symbol table */
-    
+
     first_pass(input_file, parsed_program);
 
     update_data_symbols(get_IC());
@@ -44,10 +44,11 @@ void print_token_arr(Token *token_arr, int token_count);
     update_data_lines(get_IC(), parsed_program);
 
     print_parsed_program(parsed_program);
+    resolve_entrys();
     print_symbol_table();
 
     secondPass(parsed_program, parsed_program->count);
-
+    
     free_symbol_table();
     free_parsed_program(parsed_program);
     fclose(input_file);

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -ansi -pedantic -I../src
+CFLAGS = -g
 
 tokenizer_test: tokenizer_test.c ../src/tokenizer.c
 	$(CC) $(CFLAGS) -o $@ $^

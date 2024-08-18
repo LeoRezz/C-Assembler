@@ -1,4 +1,4 @@
-#include "tokenizer.h"
+#include "../src/tokenizer.h"
 
 /* Main for testing */
 int main() {
@@ -11,7 +11,7 @@ int main() {
 	
 
 	/* test of detecting diffrenet lexical errors, syntax errors will be detected in the parser */
-	input_file = fopen("valid_input.as","r"); 
+	input_file = fopen("invalid_input.as","r"); 
     TRY(input_file); /* TRY macro checks for errors while opening file */
     
 	/* Read each line from the source file */
@@ -20,7 +20,7 @@ int main() {
             *p = '\0'; /* Remove the newline character at the end*/
 
         /* Tokenizes a given line of assembly code into an array of tokens with assigned type. */
-		tokens_array = tokenize_line(line, &token_count);
+		tokens_array = tokenize_line(line, &token_count ,1);
         
         /* output printer */
 		for (i = 0; i < token_count; i++) {

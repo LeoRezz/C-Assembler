@@ -1,13 +1,13 @@
 {
     "files.associations": {
-        "tokenizer.h": "c",
+        "parsed_program.h": "c",
+        "unistd.h": "c",
+        "stdio.h": "c",
+        "write_file.h": "c",
         "parser.h": "c",
-        "util.h": "c",
-        "limits": "c",
-        "symboltable.h": "c",
-        "typeinfo": "c",
-        "opcodetable.h": "c",
-        "preprocessor.h": "c",
-        "parsed_program.h": "c"
+        "instruction_to_binary.h": "c",
+        "dataline_to_binary.h": "c",
+        "memory_manager.h": "c",
+        "tokenizer.h": "c"
     }
 }

@@ -4,38 +4,39 @@
 #include "parser.h"
 #include "parsed_program.h"
 
-extern int IC, DC, current_line;
 
 /* prototypes: should be in header file*/
 void first_pass(FILE *input_file, ParsedProgram *parsed_program);
 void print_token_arr(Token *token_arr, int token_count);
 
-void first_pass(FILE *input_file, ParsedProgram *parsed_program) {
+void first_pass(FILE *input_file, ParsedProgram *parsed_program ) {
+    int current_line;
     char *p;
     Token *token_arr;
     Line *parsed_line;
-
     int token_count;
     char line[MAX_LINE];
 
+    current_line = 0;
+    token_count = 0;
     /* Read each line from the source file */
     while (fgets(line, MAX_LINE, input_file)) {
-        if ((p = strrchr(line, '\n')) != NULL) *p = '\0'; /* Remove the newline character at the end*/
+        current_line++;
+        line[strcspn(line, "\r\n")] = '\0'; /* Remove the newline character at the end*/
 
         /* Tokenizes a given line of assembly code into an array of tokens with assigned type. */
         /* TODO: check reserved words for label defenitionssssssss */
-        token_arr = tokenize_line(line, &token_count);
+        token_arr = tokenize_line(line, &token_count, current_line);
         if (token_arr == NULL) {
-            printf("Invalid line %d: %s\n", current_line, line);
+            printf("Line %d: '%s'\n\n", current_line, line);
             continue;
         }
 
         print_token_arr(token_arr, token_count);
         /* Parse the tokens in the line */
-        if ((parsed_line = parse_line(token_arr, token_count)) == NULL) {
+        if ((parsed_line = parse_line(token_arr, token_count, current_line)) == NULL) {
             printf("Invalid line %d: %s\n", current_line, line);
             free(token_arr);
-            free(parsed_line);
             continue;
         }
         add_line_to_program(parsed_program, parsed_line);
