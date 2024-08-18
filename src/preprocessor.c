@@ -9,45 +9,28 @@ typedef struct macro {
     int line_count;
 } macro;
 
-/* Reserved words */
-static const char *reserved_words[] = {
-    /* Registers */
-    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-
-    /* Opcodes (Instructions) */
-    "mov", "cmp", "add", "sub", "lea", "clr", "not",
-    "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop",
-
-    /* Directives */
-    ".data", ".string", ".entry", ".extern",
-
-    /* Special symbols */
-    "#", /* For immediate addressing */
-
-    /* Null terminator to mark end of array */
-    NULL};
-
 /* Global macro table */
 macro macro_table[MAX_MACROS]; /* TODO: change to dynamic allocation */
 int macro_count = 0;
-int macroIndex = -1;
 
 /* Global State mode */
-typedef enum { NORMAL,
-               DEFINITION,
-               EXPANSION } Mode;
+typedef enum { NORMAL, DEFINITION, EXPANSION } Mode;
 Mode current_mode = NORMAL;
+extern int error_flag;
 
 /* Function prototypes */
-int set_macro_name(char *macroName, macro *macro_table);
-int findMacroIndex(char *line);
+int set_macro_name(char *macroName, macro *macro_table, int current_line);
+int find_macro_usage(char *line);
 int addMacroLines(char *line);
-int is_valid_name(char *line);
+int is_valid_name(char *name , int current_line);
 int has_extra_chars(char *line);
 void cleanupMacros();
 void trim_trailing_whitespace(char *str);
 
 int preprocess(const char *input_filename, const char *am_filename) {
+    int macro_index;
+    int current_line;
+    char line[MAX_LINE];
     FILE *input_file = fopen(input_filename, "r");
     if (!input_file) {
         printf("Failed to open input file: %s\n", input_filename);
@@ -60,20 +43,27 @@ int preprocess(const char *input_filename, const char *am_filename) {
         fclose(input_file);
         return 0;
     }
-
-    char line[MAX_LINE];
-
+    init_symbol_table(); /* Initialize symbol table */
+    macro_index = 0;
+    current_line = 0;
     while (fgets(line, MAX_LINE, input_file) != NULL) {
+
+        current_line++;
+        if (strlen(line) == MAX_LINE - 1 && line[MAX_LINE - 2] != '\n') {
+          printf("Error: Line number %d is too long\n", current_line);
+          error_flag = 1;
+          continue;
+        }
         trim_trailing_whitespace(line);
         switch (current_mode) {
         case NORMAL:
-            handle_normal_mode(line, output_file);
-            break;
+          macro_index = handle_normal_mode(line, output_file, current_line);
+          break;
         case DEFINITION:
             handle_definition_mode(line, macro_table);
             break;
         case EXPANSION:
-            handle_expansion_mode(line, output_file);
+            handle_expansion_mode(line, output_file, macro_index);
             break;
         }
     }
@@ -83,7 +73,7 @@ int preprocess(const char *input_filename, const char *am_filename) {
 
     cleanupMacros();
 
-    return 1;
+    return (error_flag == 0);
 }
 
 void trim_trailing_whitespace(char *str) {
@@ -93,24 +83,27 @@ void trim_trailing_whitespace(char *str) {
     }
 }
 
-void handle_normal_mode(char *line, FILE *output_file) {
-    char *p;
-    p = skipSpaces(line);
-    if (*p == '\0' || *p == '\n' || *p == ';') {
-        return; /* Skip empty lines and comments */
+int handle_normal_mode(char *line, FILE *output_file,int current_line) {
+    char *line_ptr;
+    int index;
+    line_ptr = skipSpaces(line);
+    if (*line_ptr == '\0' || *line_ptr == '\n' || *line_ptr == ';') {
+        return -1; /* Skip empty lines and comments */
     }
 
-    if (strncmp(p, MACRO_KEYWORD, MACRO_KEYWORD_LENGTH) == 0) {
+    if (strncmp(line_ptr, "macr", MACRO_KEYWORD_LENGTH) == 0) {
         current_mode = DEFINITION;
-        p += MACRO_KEYWORD_LENGTH;
-        set_macro_name(p, macro_table);
-        return;
+        line_ptr += MACRO_KEYWORD_LENGTH; /* Advance the pointer to the macro name */
+        line_ptr = skipSpaces(line_ptr);
+        set_macro_name(line_ptr, macro_table,current_line);
+        return -1;
     }
+    index = find_macro_usage(line);
 
-    if (findMacroIndex(line) != 0) {
+    if (index != -1) {
         current_mode = EXPANSION;
-        printf("EXPANSION mode at index %d activated for: %s\n", macroIndex, macro_table[macroIndex].name);
-        return;
+        printf("EXPANSION mode at index %d activated for: %s\n", index, macro_table[index].name);
+        return index;
     }
 
     printf("NORMAL fputs: %s\n", line);
@@ -127,60 +120,60 @@ void handle_definition_mode(char *line, macro *macro_table) {
         macro_count++;
         return;
     }
-
+    /* Assuming no Errors in endmacr directive */
     addMacroLines(line);
     printf("%s: line #%d %s\n", macro_table[macro_count].name, macro_table[macro_count].line_count, line);
 }
 
-void handle_expansion_mode(char *line, FILE *output_file) {
+void handle_expansion_mode(char *line, FILE *output_file , int macro_index) {
     int i;
     /* Handle macro expansion mode */
-    for (i = 0; i < macro_table[macroIndex].line_count; i++) {
-        fputs(macro_table[macroIndex].body[i], output_file);
+    for (i = 0; i < macro_table[macro_index].line_count; i++) {
+        fputs(macro_table[macro_index].body[i], output_file);
         fputc('\n', output_file);  /* Add newline after each line */
     }
     current_mode = NORMAL;
-    handle_normal_mode(line, output_file);
+    handle_normal_mode(line, output_file, 0);
 }
 
-int set_macro_name(char *macroName, macro *macro_table) {
-    macroName[strlen(macroName) - 1] = '\0';
-    if (!is_valid_name(macroName)) {
-        return -1; /* Error code */
-    }
-    strncpy(macro_table[macro_count].name, macroName, MAX_MACRO_NAME - 1);
-    macro_table[macro_count].name[MAX_MACRO_NAME - 1] = '\0'; /* Ensure null-termination */
-    
-    /* Add the macro name to the symbol table for cross refrence later */
-    if (!add_symbol(macroName, 0, SYMBOL_MACRO)) {
-        printf("Error: Failed to add macro '%s' to symbol table\n", macroName);
-        return -1;
-    }
-    
-    printf("Macro name is: %s\n", macro_table[macro_count].name);
-    return 0; /* Success */
+int set_macro_name(char *macroName, macro *macro_table, int current_line) {
+  if (!is_valid_name(macroName, current_line)) {
+    error_flag = 1;
+    return 0; /* Error code */
+  }
+  strncpy(macro_table[macro_count].name, macroName, MAX_MACRO_NAME - 1);
+  macro_table[macro_count].name[MAX_MACRO_NAME - 1] = '\0'; /* Ensure null-termination */
+
+  /* Add the macro name to the symbol table for cross refrence later */
+  if (!add_symbol(macroName, 0, SYMBOL_MACRO)) {
+    printf("Error at line %d: Failed to add macro '%s' to symbol table\n", current_line, macroName);
+    error_flag = 1;
+    return 0;
+  }
+
+  printf("Macro name is: %s\n", macro_table[macro_count].name);
+  return 0; /* Success */
 }
 
-/* Receives a char pointer of the name declaration after "macr " */
+/* Receives a char array of the name declaration after "macr " */
 /* Checks for extra characters on the macro definition line */
 /* Checks for Reserved words */
-int is_valid_name(char *line) {
+int is_valid_name(char *name, int current_line) {
     int i;
     /* Check for extra characters first */
-    if (has_extra_chars(line) == 0) {
-        printf("Invalid macro name: '%s' extra characters found\n", line);
+    if (has_extra_chars(name) == 0) {
+        printf("Error at line %d: Invalid macro name: '%s' extra characters found\n", current_line, name);
+        error_flag = 1;
         return 0;
     }
-
-    /* Check against reserved words */
-    for (i = 0; i < NUM_OF_RESERVED; i++) {
-        if (strncmp(line, reserved_words[i], strlen(reserved_words[i])) == 0) {
-            printf("Invalid macro name: '%s' is a reserved word\n", line);
-            return 0;
-        }
+    if (is_reserved_word(name)) {
+        printf("Error at line %d: Invalid macro name: '%s' is a reserved word\n", current_line, name);
+        error_flag = 1;
+        return 0;
     }
     return 1;
 }
+
 
 int addMacroLines(char *line) {
     int lineCount = macro_table[macro_count].line_count;
@@ -195,24 +188,14 @@ int addMacroLines(char *line) {
     return 1;
 }
 
-/* If name is found in macro table, returns index */
-int findMacroIndex(char *line) {
-    int i;
-    char *temp = line;
-    while (isspace((unsigned char)*temp)) {
-        temp++;
-    }
-    for (i = macro_count - 1; i >= 0; i--) {
-        if (strncmp(temp, macro_table[i].name, strlen(macro_table[i].name)) == 0) {
-            macroIndex = i;
-            return 1;
-        }
-    }
-    return 0;
-}
 
-int has_extra_chars(char *line) {
-    char *p = line;
+int has_extra_chars(char *name) {
+    char *p;
+    if (name == NULL) {
+        return 0; /* Null pointer reference */
+    }
+    
+    p = skipSpaces(name);
     while (*p != '\0' && *p != '\n') {
         if (!isalnum((unsigned char)*p) && *p != '_') {
             return 0; /* Invalid character found */
@@ -225,6 +208,21 @@ int has_extra_chars(char *line) {
     }
 
     return 1; /* No extra characters found */
+}
+
+/* If name is found in macro table, returns index */
+int find_macro_usage(char *line) {
+    int i;
+    char *temp = line;
+    while (isspace((unsigned char)*temp)) {
+        temp++;
+    }
+    for (i = macro_count - 1; i >= 0; i--) {
+        if (strncmp(temp, macro_table[i].name, strlen(macro_table[i].name)) == 0) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 void cleanupMacros() {

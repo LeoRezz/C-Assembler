@@ -1,11 +1,11 @@
 #include "tokenizer.h"
+extern int error_flag;
 
 /* my_getword seprates a given line to meaningful tokens,
    returns ':' when encounterd in label definition. */
 static int my_getword(char *word, int lim, const char **line);
 int is_valid_immediate(const char *token);
 int is_valid_indirect_register(const char *token);
-int is_reserved_word(const char *word);
 int is_valid_register(const char *token);
 void init_tokens(Token *tokens);
 /* Tokenizes a given line of assembly code into tokens with assigned type. */
@@ -134,15 +134,7 @@ TokenType get_token_type(const char *token) {
     return ERROR;
 }
 
-int is_reserved_word(const char *word) {
-    int i;
-    for (i = 0; reserved_words[i] != NULL; i++) {
-        if (strcmp(word, reserved_words[i]) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
+
 
 int is_valid_immediate(const char *token) {
     const char *num_part;

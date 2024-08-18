@@ -51,3 +51,29 @@ void skip_spaces(char *s) {
     return;
 }
 
+/* Reserved words */
+static const char *reserved_words[] = {
+    /* Registers */
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+
+    /* Opcodes (Instructions) */
+    "mov", "cmp", "add", "sub", "lea", "clr", "not",
+    "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop",
+
+    /* Directives */
+    ".data", ".string", ".entry", ".extern",
+
+
+    /* Null terminator to mark end of array */
+    NULL};
+
+
+int is_reserved_word(const char *word) {
+    int i;
+    for (i = 0; reserved_words[i] != NULL; i++) {
+        if (strcmp(word, reserved_words[i]) == 0) {
+            return 1; /* TRUE, found a reserved word */
+        }
+    }
+    return 0; /* FALSE, not a reserved word */
+}

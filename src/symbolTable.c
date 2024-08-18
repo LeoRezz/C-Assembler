@@ -70,6 +70,10 @@ int add_symbol(char *name, int value, SymbolType type) {
     case SYMBOL_EXTERNAL:
         symbol_table[symbol_count].value = 0;
         break;
+    case SYMBOL_MACRO:
+        symbol_table[symbol_count].value = 0;
+        break;
+
     default:
         printf("Error: Unknown symbol type\n");
         return 0;
@@ -174,6 +178,10 @@ void print_symbol_table() {
 
         case SYMBOL_EXTERNAL:
             printf("EXTERNAL\n");
+            break;
+        
+        case SYMBOL_MACRO:
+            printf("MACRO\n");
             break;
 
         default:

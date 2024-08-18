@@ -2,6 +2,7 @@
 #include "preprocessor.h"
 // #include "secondPass.h"
 
+int error_count = 0;
 void reset_assembler_state();
 void reset_assembler_state(ParsedProgram *parsed_program);
 
@@ -45,7 +46,6 @@ int main(int argc, char *argv[]) {
 
         init_memory_counters();
         parsed_program = init_parsed_program();
-        init_symbol_table(); /* Initialize symbol table */
 
         /* First pass */
         if (!first_pass(am_filename, parsed_program)) {
