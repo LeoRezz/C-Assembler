@@ -11,8 +11,7 @@ typedef enum {
     SYMBOL_CODE,
     SYMBOL_DATA,
     SYMBOL_ENTRY,
-    SYMBOL_EXTERNAL,
-    SYMBOL_MACRO
+    SYMBOL_EXTERNAL
 } SymbolType;
 
 typedef struct {

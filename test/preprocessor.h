@@ -15,16 +15,16 @@
 #define ENDMACRO_KEYWORD_LENGTH 7
 
 /* Macro structure */
-typedef struct macro macro;
+typedef struct Macro Macro;
 
 int preprocess(const char *input_filename, const char *am_filename);
 void handle_normal_mode(char *line, FILE *output_file);
 
-void handle_definition_mode(char *line, macro *macro_table);
+void handle_definition_mode(char *line, Macro *macro_table);
 
 void handle_expansion_mode(char *line, FILE *output_file);
 
-int setMacroName(char *line, macro *macro_table);
+int setMacroName(char *line, Macro *macro_table);
 
 void cleanupMacros();
 
