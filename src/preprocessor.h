@@ -1,26 +1,17 @@
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef PREPROCESSOR_H
+#define PREPROCESSOR_H
 
-#define MAX_LABEL 33
+#include "util.h"
+
+/* Constants */
 #define MAX_LINE 82
-#define MAX_MACRO_NAME 77
-#define MAX_MACRO_LINES 50
-#define MAX_MACROS 50
-#define NUM_OF_RESERVED 20
-#define MACRO_KEYWORD "macr "
-#define MACRO_KEYWORD_LENGTH 5
+#define MACRO_KEYWORD "macr"
+#define MACRO_KEYWORD_LENGTH 4
 #define ENDMACRO_KEYWORD "endmacr"
 #define ENDMACRO_KEYWORD_LENGTH 7
 
-/* Macro structure */
-typedef struct macro macro;
+/* Function prototypes */
+/* TODO: Document the purpose, parameters, and return value of this function */
+int preprocess(const char *input_filename, const char *am_filename);
 
-void handle_normal_mode(char *line, FILE *output_file);
-
-void handle_definition_mode(char *line, macro *macro_table);
-
-void handle_expansion_mode(char *line, FILE *output_file);
-
-int setMacroName(char *line, macro *macro_table);
+#endif /* PREPROCESSOR_H */

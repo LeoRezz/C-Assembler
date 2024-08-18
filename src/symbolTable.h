@@ -4,14 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define INITIAL_ADDRESS 100
 #define MAX_SYMBOL_LENGTH 31
 
 typedef enum {
     SYMBOL_CODE,
     SYMBOL_DATA,
     SYMBOL_ENTRY,
-    SYMBOL_EXTERNAL
+    SYMBOL_EXTERNAL,
+    SYMBOL_MACRO
 } SymbolType;
 
 typedef struct {

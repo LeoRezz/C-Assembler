@@ -45,9 +45,11 @@ void add_line_to_program(ParsedProgram *program, Line *line) {
     if (program->count >= program->capacity) {
         grow_parsed_program(program);
     }
-   
+    if (line != NULL) {
+
         program->lines[program->count] = *line;
-        program->count++;   
+        program->count++;
+    }
 }
 
 void update_data_lines(int IC, ParsedProgram *ParsedProgram) {

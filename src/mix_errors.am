@@ -1,0 +1,25 @@
+mov: add r1, r2
+.data: sub r3, r4
+    mov *r8, r1
+    add r2, r9
+    mov #-2049, r1
+    add r2, #2048
+    lea #5, r1
+    mov r1, #100
+    add r1
+    sub r1, r2, r3
+    .data "hello"
+    .string 123
+    .data
+    .string
+    .extern EXTERNAL
+    bne EXTERNAL
+VALIDLABEL: mov r1, r2
+    add #1000, r3
+    lea VALIDLABEL, r4
+    .data 6, -7, 100
+    .string "This is a valid string"
+    cmp r0, #-2048
+    add r7, #2047
+    .entry VALIDLABEL
+    jmp VALIDLABEL
