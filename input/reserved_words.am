@@ -1,0 +1,29 @@
+.data: lea DATA_LABEL, r7
+.string: inc r0
+.entry: dec r1
+.extern: jmp ANOTHER_LOOP
+r0: mov r1, r2
+r1: cmp r3, #5
+r2: add r4, r5
+r3: sub r6, r7
+r4: lea STR, r0
+r5: clr r1
+r6: not r2
+r7: inc r3
+mov: dec r4
+cmp: jmp LOOP
+add: bne END
+sub: red r5
+lea: prn #100
+clr: jsr FUNC
+not: rts
+inc: stop
+dec: .data 6, 7, -8, 9
+jmp: .string "Test string"
+bne: .entry ENTRY_LABEL
+red: .extern EXTERN_LABEL
+prn: mov r0, r1
+jsr: add #5, r2
+rts: sub r3, r4
+stop: cmp r5, r6
+VALID_LABEL: mov r0, r2

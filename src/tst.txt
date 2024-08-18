@@ -1,0 +1,563 @@
+NORMAL fputs: .entry LIST
+NORMAL fputs: .extern fn1
+NORMAL fputs: MAIN:	add r3, LIST 
+NORMAL fputs: 	jsr fn1 
+NORMAL fputs: LOOP:	prn #48 
+NORMAL fputs: 	lea STR, r6 
+NORMAL fputs: 	inc r6 
+NORMAL fputs: 	mov *r6, L3 
+NORMAL fputs: 	sub r1, r4 
+NORMAL fputs: 	cmp r3, #-6 
+NORMAL fputs: 	bne END 
+NORMAL fputs: 	add r7, *r6 
+NORMAL fputs: 	clr K 
+NORMAL fputs: 	sub L3, L3 
+NORMAL fputs: .entry MAIN 
+NORMAL fputs: 	jmp LOOP 
+NORMAL fputs: END:	stop 
+NORMAL fputs: STR:	.string "abcd" 
+NORMAL fputs: LIST:	.data 6, -9 
+NORMAL fputs: 	.data -100 
+NORMAL fputs: K:	.data 31 
+NORMAL fputs: .extern L3--------------------Tokenized result:-----------------------
+.entry	ENTRY
+LIST	DIRECET
+------------------------------------------------------------
+
+
+
+--------------------parsed line-----------------------
+Line type: ENTRY
+Label: LIST
+Entry
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+.extern	EXTERN
+fn1	DIRECET
+------------------------------------------------------------
+
+
+
+--------------------parsed line-----------------------
+Line type: EXTERN
+Label: fn1
+Extern
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+MAIN	LABEL_DEF
+add	ADD
+r3	REGISTER
+,	COMMA
+LIST	DIRECET
+------------------------------------------------------------
+
+
+No Errors
+src_mode: 8, dest_mode: 2
+Condition result: 0
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: MAIN
+Instruction: add
+Operand 0 type: REGISTER
+Operand 0 register: 3
+Operand 1 type: DIRECT
+Operand 1 label: LIST
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+jsr	JSR
+fn1	DIRECET
+------------------------------------------------------------
+
+
+No Errors
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: jsr
+Operand 0 type: DIRECT
+Operand 0 label: fn1
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+LOOP	LABEL_DEF
+prn	PRN
+#48	IMMEDIATE
+------------------------------------------------------------
+
+
+No Errors
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: LOOP
+Instruction: prn
+Operand 0 type: IMMEDIATE
+Operand 0 immediate value: 48
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+lea	LEA
+STR	DIRECET
+,	COMMA
+r6	REGISTER
+------------------------------------------------------------
+
+
+No Errors
+src_mode: 2, dest_mode: 8
+Condition result: 0
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: lea
+Operand 0 type: DIRECT
+Operand 0 label: STR
+Operand 1 type: REGISTER
+Operand 1 register: 6
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+inc	INC
+r6	REGISTER
+------------------------------------------------------------
+
+
+No Errors
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: inc
+Operand 0 type: REGISTER
+Operand 0 register: 6
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+mov	MOV
+*r6	INDIRECT_REGISTER
+,	COMMA
+L3	DIRECET
+------------------------------------------------------------
+
+
+No Errors
+src_mode: 4, dest_mode: 2
+Condition result: 0
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: mov
+Operand 0 type: INDIRECT REGISTER
+Operand 1 type: DIRECT
+Operand 1 label: L3
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+sub	SUB
+r1	REGISTER
+,	COMMA
+r4	REGISTER
+------------------------------------------------------------
+
+
+No Errors
+src_mode: 8, dest_mode: 8
+Condition result: 1
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: sub
+Operand 0 type: REGISTER
+Operand 0 register: 1
+Operand 1 type: REGISTER
+Operand 1 register: 4
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+cmp	CMP
+r3	REGISTER
+,	COMMA
+#-6	IMMEDIATE
+------------------------------------------------------------
+
+
+No Errors
+src_mode: 8, dest_mode: 1
+Condition result: 0
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: cmp
+Operand 0 type: REGISTER
+Operand 0 register: 3
+Operand 1 type: IMMEDIATE
+Operand 1 immediate value: -6
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+bne	BNE
+END	DIRECET
+------------------------------------------------------------
+
+
+No Errors
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: bne
+Operand 0 type: DIRECT
+Operand 0 label: END
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+add	ADD
+r7	REGISTER
+,	COMMA
+*r6	INDIRECT_REGISTER
+------------------------------------------------------------
+
+
+No Errors
+src_mode: 8, dest_mode: 4
+Condition result: 1
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: add
+Operand 0 type: REGISTER
+Operand 0 register: 7
+Operand 1 type: INDIRECT REGISTER
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+clr	CLR
+K	DIRECET
+------------------------------------------------------------
+
+
+No Errors
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: clr
+Operand 0 type: DIRECT
+Operand 0 label: K
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+sub	SUB
+L3	DIRECET
+,	COMMA
+L3	DIRECET
+------------------------------------------------------------
+
+
+No Errors
+src_mode: 2, dest_mode: 2
+Condition result: 0
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: sub
+Operand 0 type: DIRECT
+Operand 0 label: L3
+Operand 1 type: DIRECT
+Operand 1 label: L3
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+.entry	ENTRY
+MAIN	DIRECET
+------------------------------------------------------------
+
+
+
+--------------------parsed line-----------------------
+Line type: ENTRY
+Label: MAIN
+Entry
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+jmp	JMP
+LOOP	DIRECET
+------------------------------------------------------------
+
+
+No Errors
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: 
+Instruction: jmp
+Operand 0 type: DIRECT
+Operand 0 label: LOOP
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+END	LABEL_DEF
+stop	STOP
+------------------------------------------------------------
+
+
+No Errors
+
+--------------------parsed line-----------------------
+Line type: INSTRUCTION
+Label: END
+Instruction: stop
+------------------------------------------------------
+
+
+
+Error: Invalid token '"abcd" '
+Line 18: 'STR:	.string "abcd" '
+
+--------------------Tokenized result:-----------------------
+LIST	LABEL_DEF
+.data	DATA
+6	INTEGER
+,	COMMA
+-9	INTEGER
+------------------------------------------------------------
+
+
+parsing data line
+
+--------------------parsed line-----------------------
+Line type: DATA
+Label: LIST
+Data type: INT
+Data value count: 2
+Data value: 6
+Data value: -9
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+.data	DATA
+-100	INTEGER
+------------------------------------------------------------
+
+
+parsing data line
+
+--------------------parsed line-----------------------
+Line type: DATA
+Label: 
+Data type: INT
+Data value count: 1
+Data value: -100
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+K	LABEL_DEF
+.data	DATA
+31	INTEGER
+------------------------------------------------------------
+
+
+parsing data line
+
+--------------------parsed line-----------------------
+Line type: DATA
+Label: K
+Data type: INT
+Data value count: 1
+Data value: 31
+------------------------------------------------------
+
+
+
+--------------------Tokenized result:-----------------------
+.extern	EXTERN
+L3	DIRECET
+------------------------------------------------------------
+
+
+
+--------------------parsed line-----------------------
+Line type: EXTERN
+Label: L3
+Extern
+------------------------------------------------------
+
+
+
+
+
+-------------------------------
+Parsed Program:
+Total lines: 21
+-------------------------------
+Line 1 (Address: 0):
+  Type: Entry
+  Label: LIST
+-------------------------------
+Line 2 (Address: 0):
+  Type: Extern
+  Label: fn1
+-------------------------------
+Line 3 (Address: 100):
+  Type: Instruction
+  Opcode: add 0010
+  Operands: 2
+  Label: MAIN
+-------------------------------
+Line 4 (Address: 103):
+  Type: Instruction
+  Opcode: jsr 1101
+  Operands: 1
+-------------------------------
+Line 5 (Address: 105):
+  Type: Instruction
+  Opcode: prn 1100
+  Operands: 1
+  Label: LOOP
+-------------------------------
+Line 6 (Address: 107):
+  Type: Instruction
+  Opcode: lea 0100
+  Operands: 2
+-------------------------------
+Line 7 (Address: 110):
+  Type: Instruction
+  Opcode: inc 0111
+  Operands: 1
+-------------------------------
+Line 8 (Address: 112):
+  Type: Instruction
+  Opcode: mov 0000
+  Operands: 2
+-------------------------------
+Line 9 (Address: 115):
+  Type: Instruction
+  Opcode: sub 0011
+  Operands: 2
+-------------------------------
+Line 10 (Address: 117):
+  Type: Instruction
+  Opcode: cmp 0001
+  Operands: 2
+-------------------------------
+Line 11 (Address: 120):
+  Type: Instruction
+  Opcode: bne 1010
+  Operands: 1
+-------------------------------
+Line 12 (Address: 122):
+  Type: Instruction
+  Opcode: add 0010
+  Operands: 2
+-------------------------------
+Line 13 (Address: 124):
+  Type: Instruction
+  Opcode: clr 0101
+  Operands: 1
+-------------------------------
+Line 14 (Address: 126):
+  Type: Instruction
+  Opcode: sub 0011
+  Operands: 2
+-------------------------------
+Line 15 (Address: 0):
+  Type: Entry
+  Label: MAIN
+-------------------------------
+Line 16 (Address: 129):
+  Type: Instruction
+  Opcode: jmp 1001
+  Operands: 1
+-------------------------------
+Line 17 (Address: 131):
+  Type: Instruction
+  Opcode: stop 1111
+  Operands: 0
+  Label: END
+-------------------------------
+Line 18 (Address: 132):
+  Type: Data
+  Type: Integer
+  Value count: 2
+  Label: LIST
+-------------------------------
+Line 19 (Address: 134):
+  Type: Data
+  Type: Integer
+  Value count: 1
+-------------------------------
+Line 20 (Address: 135):
+  Type: Data
+  Type: Integer
+  Value count: 1
+  Label: K
+-------------------------------
+Line 21 (Address: 0):
+  Type: Extern
+  Label: L3
+-------------------------------
+
+Symbol Table, Sorted by value (Sorted only at printing, table itself is by order of insertion)
+Name                             Value      Type      
+-------------------------------- ---------- ----------
+fn1                              0          EXTERNAL
+L3                               0          EXTERNAL
+MAIN                             100        CODE
+MAIN                             100        ENTRY
+LOOP                             105        CODE
+END                              131        CODE
+LIST                             132        ENTRY
+LIST                             132        DATA
+K                                135        DATA
+
+Total symbols: 9
+Error in first pass for ps.am
