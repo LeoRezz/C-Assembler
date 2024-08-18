@@ -3,11 +3,11 @@
 
 
 typedef enum {
-    ADD_NONE = 0b0000, /* 0000 */
-    ADD_IMMEDIATE = 0b0001, /* 0001 */
-    ADD_DIRECT = 0b0010, /* 0010 */
-    ADD_INDIRECT_REGISTER = 0b0100, /* 0100 */
-    ADD_REGISTER = 0b1000  /* 1000 */
+    ADD_NONE = 0, /* 0000 */
+    ADD_IMMEDIATE = 1, /* 0001 */
+    ADD_DIRECT = 2, /* 0010 */
+    ADD_INDIRECT_REGISTER = 4, /* 0100 */
+    ADD_REGISTER = 8  /* 1000 */
 } AddressingMode;
  
 

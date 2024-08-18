@@ -59,23 +59,6 @@ void init_tokens(Token *tokens) {
 }
 
 
-static const char *reserved_words[] = {
-    /* Registers */
-    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-
-    /* Opcodes (Instructions) */
-    "mov", "cmp", "add", "sub", "lea", "clr", "not",
-    "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop",
-
-    /* Directives */
-    ".data", ".string", ".entry", ".extern",
-
-    /* Special symbols */
-    "#", /* For immediate addressing */
-
-    /* Null terminator to mark end of array */
-    NULL};
-
 static const char *token_type[] = {
     
     /* Opcodes (Instructions) */

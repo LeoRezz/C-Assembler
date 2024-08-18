@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define INITIAL_ADDRESS 100
 #define MAX_SYMBOL_LENGTH 31
 
 typedef enum {

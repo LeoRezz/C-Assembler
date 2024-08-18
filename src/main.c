@@ -1,10 +1,12 @@
 #include "firstPass.h"
 #include "preprocessor.h"
-// #include "secondPass.h"
 
+/* global error flag */
 int error_count = 0;
+
 void reset_assembler_state();
 void reset_assembler_state(ParsedProgram *parsed_program);
+int secondPass( char *filename, ParsedProgram *program, int numOfLines);
 
 int main(int argc, char *argv[]) {
     int i;
@@ -12,6 +14,7 @@ int main(int argc, char *argv[]) {
     
     /* Variables to store filenames and flags */
     char input_filename[MAX_FILENAME];
+    char as_filename[MAX_FILENAME];
     char am_filename[MAX_FILENAME];
     char ob_filename[MAX_FILENAME];
     char ent_filename[MAX_FILENAME];
@@ -54,26 +57,10 @@ int main(int argc, char *argv[]) {
             continue; /* Move to next file */
         }
 
+        /* Second pass */
+        secondPass(argv[i],parsed_program,parsed_program->count);
+        
 
-        // /* Second pass */
-        // if (!second_pass()) {
-        //     printf("Error in second pass for %s\n", am_filename);
-        //     continue;  /* Move to next file */
-        // }
-
-        // /* Generate output files */
-        // generate_object_file(ob_filename);
-
-        // has_entries = check_entries();
-        // has_externals = check_externals();
-
-        // if (has_entries) {
-        //     generate_entries_file(ent_filename);
-        // }
-
-        // if (has_externals) {
-        //     generate_externals_file(ext_filename);
-        // }
 
         /* Reset for next file */
         reset_assembler_state(parsed_program);

@@ -24,23 +24,19 @@ void init_symbol_table(void) {
     symbol_capacity = INITIAL_SYMBOL_TABLE_SIZE;
 }
 
-static int is_duplicate_symbol(char *name, int value, SymbolType type) {
+static int is_duplicate_symbol(char *name, int value, SymbolType origin_type) {
     symbol *symbol_duplicate = find_symbol(name);
 
     /* Checks if the symbol already exists */
     if (symbol_duplicate != NULL) {
         /* if the symbol is an entry, update it's value to current IC */
-        if (symbol_duplicate->type == SYMBOL_ENTRY) {
-            return 0;
-        }
-
-        /* Checks if the symbol is of the same type */
-        if (symbol_duplicate->type == type) {
-            return 1;
-        }
+        if ((symbol_duplicate->type == SYMBOL_ENTRY) && (origin_type != SYMBOL_ENTRY)) {
+            return 0; /* FALSE: ACCCPTED SITUTATION */
+        } else
+        return 1; /* TRUE, it's a dup */
     }
 
-    return 0;
+    return 0; /*  FALSE: , not a dup */
 }
 
 /* Add a symbol to the table */
@@ -140,9 +136,14 @@ int resolve_entrys() {
                 printf("Error: Entry symbol value not found\n");
                 return 0;
             }
+            if (entry_refrence->type == SYMBOL_EXTERNAL) {
+                printf("Error: External symbol can't be used in entry directive\n");
+                return 0;
+            }
             symbol_table[i].value = entry_refrence->value;
         }
     }
+    return 1;
 }
 
 /* Look up an entry symbol's refrence address in the table */
@@ -159,7 +160,7 @@ symbol *find_entry_refrence(char *name) {
 void print_symbol_table() {
     int i;
     qsort(symbol_table, symbol_count, sizeof(symbol), compare_symbols);
-    printf("\nSymbol Table, Sorted by value (Sorted only at printing, table itself is by order of insertion)\n");
+    printf("\nSymbol Table, Sorted by value\n");
     printf("%-32s %-10s %-10s\n", "Name", "Value", "Type");
     printf("-------------------------------- ---------- ----------\n");
     for (i = 0; i < symbol_count; i++) {
