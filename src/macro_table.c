@@ -1,8 +1,11 @@
 #include "macro_table.h"
 
+/* Macro table for storing the macro's in an array */
+
 #define INITIAL_MACRO_CAPACITY 10
 #define INITIAL_MACRO_LINES_CAPACITY 10
 
+/* Initializes the macro table */
 MacroTable *init_macro_table(void) {
     MacroTable *table = malloc(sizeof(MacroTable));
     if (!table)
@@ -19,7 +22,7 @@ MacroTable *init_macro_table(void) {
     return table;
 }
 
-
+/* Frees the macro table */
 void free_macro_table(MacroTable *table) {
     int i, j;
     if (!table)
@@ -34,7 +37,7 @@ void free_macro_table(MacroTable *table) {
     free(table->macros);
     free(table);
 }
-
+/* Grows the macro table capacity to hold more macros */
 static int grow_macro_table(MacroTable *table) {
     int new_capacity = table->capacity * 2;
     Macro *new_macros = realloc(table->macros, new_capacity * sizeof(Macro));
@@ -46,6 +49,7 @@ static int grow_macro_table(MacroTable *table) {
     return 1;
 }
 
+/* Adds a new macro to the table */
 int add_macro(MacroTable *table, const char *name) {
     if (table->count >= table->capacity) {
         if (!grow_macro_table(table))
@@ -64,7 +68,7 @@ int add_macro(MacroTable *table, const char *name) {
 
     return table->count++;
 }
-
+/* Grows the macro lines capacity to store more content of a given macro */
 static int grow_macro_lines(Macro *m) {
     int new_capacity = m->capacity * 2;
     char **new_body = realloc(m->body, new_capacity * sizeof(char *));
@@ -100,15 +104,4 @@ Macro *get_macro(MacroTable *table, const char *name) {
         }
     }
     return NULL;
-}
-
-void print_macro_table(MacroTable *table) {
-    int i, j;
-    for (i = 0; i < table->count; i++) {
-        printf("Macro: %s\n", table->macros[i].name);
-        for (j = 0; j < table->macros[i].line_count; j++) {
-            printf("  Line %d: %s\n", j + 1, table->macros[i].body[j]);
-        }
-        printf("\n");
-    }
 }

@@ -10,5 +10,4 @@
 
 /* Function prototypes */
 int first_pass(char *am_filename, ParsedProgram *parsed_program);
-void print_token_arr(Token *token_arr, int token_count);
 #endif /* FIRST_PASS_H */

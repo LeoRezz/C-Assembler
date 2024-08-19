@@ -4,16 +4,17 @@
 #include "symbolTable.h"
 #include "tokenizer.h"
 #define BUFFER_SIZE 1024
+
 /* Preprocessor State */
 typedef enum { NORMAL = -1, DEFINITION, EXPANSION } Mode;
 static Mode current_mode = NORMAL;
 static MacroTable *macro_table;
 
 /* Function prototypes */
-static int handle_normal_mode(char *line, FILE *output_file, int current_line, int token_count, Token *tokens, int *error_flag);
-static void handle_definition_mode(char *line, int macro_index ,int token_count ,Token *tokens , int *error_flag);
-static void handle_expansion_mode(char *line, FILE *output_file,int current_line,int token_count ,Token *tokens ,int macro_index , int *error_flag);
-static int is_valid_macro_name(const char *name, int current_line, int *error_flag);
+int handle_normal_mode(char *line, FILE *output_file, int current_line, int token_count, Token *tokens, int *error_flag);
+void handle_definition_mode(char *line, int macro_index, int token_count, Token *tokens, int *error_flag);
+void handle_expansion_mode(char *line, FILE *output_file, int current_line, int token_count, Token *tokens, int macro_index, int *error_flag);
+int is_valid_macro_name(const char *name, int current_line, int *error_flag);
 
 int preprocess(const char *input_filename, const char *am_filename) {
     FILE *input_file, *output_file;
@@ -110,7 +111,7 @@ int preprocess(const char *input_filename, const char *am_filename) {
     return (error_flag == 0);
 }
 
-static int handle_normal_mode(char *line, FILE *output_file, int current_line, int token_count, Token *tokens , int *error_flag) {
+int handle_normal_mode(char *line, FILE *output_file, int current_line, int token_count, Token *tokens , int *error_flag) {
     Macro *m;
     int macro_index;
     char *line_ptr = skipSpaces(line);
@@ -175,7 +176,7 @@ static int handle_normal_mode(char *line, FILE *output_file, int current_line, i
     return NORMAL;
 }
 
-static void handle_definition_mode(char *line, int macro_index, int token_count , Token *tokens ,int *error_flag) {
+void handle_definition_mode(char *line, int macro_index, int token_count , Token *tokens ,int *error_flag) {
 
     /* Assuming each macr has a valid endmacr as per the assignment assumptions for macros */
     if (tokens[0].type == ENDMACRO_KEYWORD) {
@@ -193,7 +194,7 @@ static void handle_definition_mode(char *line, int macro_index, int token_count 
     }
 }
 
-static void handle_expansion_mode(char *line, FILE *output_file,int current_line,int token_count ,Token *tokens ,int macro_index , int *error_flag) {
+void handle_expansion_mode(char *line, FILE *output_file,int current_line,int token_count ,Token *tokens ,int macro_index , int *error_flag) {
     int i;
     Macro *m = &macro_table->macros[macro_index];
     
@@ -205,7 +206,7 @@ static void handle_expansion_mode(char *line, FILE *output_file,int current_line
     handle_normal_mode(line, output_file, current_line, token_count, tokens, error_flag);
 }
 
-static int is_valid_macro_name(const char *name, int current_line, int *error_flag) {
+int is_valid_macro_name(const char *name, int current_line, int *error_flag) {
     if (is_reserved_word(name)) {
         printf("Error at line %d: Invalid macro name: '%s' is a reserved word\n", current_line, name);
         *error_flag = 1;

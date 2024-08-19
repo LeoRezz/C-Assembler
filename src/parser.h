@@ -9,11 +9,13 @@
 #include "tokenizer.h"
 
 /* Function prototypes */
+
+/* Parses a tokenized array to store values in a parsed line sturct */
 Line *parse_line(Token *token_arr, int token_count, int current_line);
-void print_parsed_line(Line *parsed_line);
 int calculate_instruction_words(int opcode);
+/* Checks if a label is valid */
 int is_valid_label(char *label);
 
 /* TODO: Document each function prototype */
 
-#endif /* PARSER_H */
+#endif 

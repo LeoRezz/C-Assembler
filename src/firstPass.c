@@ -1,6 +1,11 @@
 #include "firstPass.h"
 
-extern int error_flag;
+/* This function is responsible for the first pass
+ * it takes the input file, tokenizes and parses each line
+ * it resposible of incrementing the IC and DC
+ * and adding symbols to the symbol table
+ * @return error_flag : 1 if an error occured, 0 otherwise
+ */
 
 int first_pass(char *am_filename, ParsedProgram *parsed_program) {
     int error_flag;

@@ -5,11 +5,7 @@
 
 static void grow_symbol_table(void);
 
-/* Global state, Instruction and Data count*/
-extern int IC;
-extern int DC;
-extern int current_line;
-
+/* Symbol table, current element number, and capacity */
 static symbol *symbol_table;
 static int symbol_count;
 static int symbol_capacity;
@@ -26,29 +22,30 @@ void init_symbol_table(void) {
     symbol_capacity = INITIAL_SYMBOL_TABLE_SIZE;
 }
 
+/* Checks if a symbol is already exists in the table */
 static int is_duplicate_symbol(char *name, int value, SymbolType origin_type) {
     symbol *symbol_duplicate = find_symbol(name);
     
-    /* Checks if the symbol already exists */
+    /* Checks if there is a duplicate symbol with the same name we want to add */
     if (symbol_duplicate != NULL) {
-        /* if the symbol is an entry, update it's value to current IC */
+        /* If the duplicate names are of the same type, we return true */
         if (symbol_duplicate->type == origin_type) {
             return 1; /* TRUE, it's a dup */
         }
         switch (origin_type) {
         case SYMBOL_CODE:
         case SYMBOL_DATA:
-            if (((symbol_duplicate->type == SYMBOL_CODE) || (symbol_duplicate->type == SYMBOL_DATA)) || ((symbol_duplicate->type == SYMBOL_MACRO))) {
+            if (((symbol_duplicate->type == SYMBOL_CODE) || (symbol_duplicate->type == SYMBOL_DATA)) ) {
                 return 1;
             }
             break;
         case SYMBOL_ENTRY:
-            if (((symbol_duplicate->type == SYMBOL_ENTRY) || (symbol_duplicate->type == SYMBOL_EXTERNAL)) || ((symbol_duplicate->type == SYMBOL_MACRO))) {
+            if (((symbol_duplicate->type == SYMBOL_ENTRY) || (symbol_duplicate->type == SYMBOL_EXTERNAL))) {
                 return 1;
             }
+            break;
 
         case SYMBOL_EXTERNAL:
-        case SYMBOL_MACRO:
             return 1;
             break;
         default:
@@ -99,6 +96,8 @@ int add_symbol(char *name, int value, SymbolType type) {
     return 1;
 }
 
+
+/* Reallocates memory to the symbol table to accommodate new symboles */
 static void grow_symbol_table(void) {
     int new_capacity;
     symbol *new_table;
@@ -114,10 +113,11 @@ static void grow_symbol_table(void) {
     symbol_capacity = new_capacity;
 }
 
+/* Getter for the symbol table */
 symbol* get_symbol_table() {
     return symbol_table;
 }
-
+/* Getter for the total number of symbols */
 int get_symbol_count() {
     return symbol_count;
 }
@@ -132,7 +132,7 @@ symbol *find_symbol(char *name) {
     }
     return NULL;
 }
-
+/* Updates the symbol table at the end of the first pass to ensure data is after code in memory */
 void update_data_symbols(int IC) {
     int i;
     for (i = 0; i < symbol_count; i++) {
@@ -141,11 +141,7 @@ void update_data_symbols(int IC) {
         }
     }
 }
-
-static int compare_symbols(const void *a, const void *b) {
-    return ((symbol*)a)->value - ((symbol*)b)->value;
-}
-
+/* Resolves addresses of entry labels declered in the source code */
 int resolve_entrys() {
     int i;
     symbol *entry_refrence;
@@ -177,40 +173,6 @@ symbol *find_entry_refrence(char *name) {
     return NULL;
 }
 
-void print_symbol_table() {
-    int i;
-    qsort(symbol_table, symbol_count, sizeof(symbol), compare_symbols);
-    printf("\nSymbol Table, Sorted by value\n");
-    printf("%-32s %-10s %-10s\n", "Name", "Value", "Type");
-    printf("-------------------------------- ---------- ----------\n");
-    for (i = 0; i < symbol_count; i++) {
-        printf("%-32s %-10d ", symbol_table[i].name, symbol_table[i].value);
-        switch (symbol_table[i].type) {
-        case SYMBOL_CODE:
-            printf("CODE\n");
-            break;
-        case SYMBOL_DATA:
-            printf("DATA\n");
-            break;
-
-        case SYMBOL_ENTRY:
-            printf("ENTRY\n");
-            break;
-
-        case SYMBOL_EXTERNAL:
-            printf("EXTERNAL\n");
-            break;
-        
-        case SYMBOL_MACRO:
-            printf("MACRO\n");
-            break;
-
-        default:
-            printf("UNKNOWN\n");
-        }
-    }
-    printf("\nTotal symbols: %d\n", symbol_count);
-}
 
 /* Clean up the symbol table */
 void free_symbol_table() {

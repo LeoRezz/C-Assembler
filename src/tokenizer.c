@@ -1,22 +1,15 @@
 #include "tokenizer.h"
 
-/* my_getword seprates a given line to meaningful tokens,
-   returns ':' when encounterd in label definition. */
-static int my_getword(char *word, int lim, const char **line, int is_preprocess);
-int is_valid_immediate(const char *token);
-TokenType get_token_type(const char *token, int is_preprocess);
-int is_valid_indirect_register(const char *token);
-int is_valid_register(const char *token);
-int is_valid_label(char *label);
-void init_tokens(Token *tokens);
+
 /* Tokenizes a given line of assembly code into tokens with assigned type. */
+/* This function is responsible of tokenizing and identifying special token types */
 Token *tokenize_line(const char *line, int *tokens_count, int current_line, int is_preprocess) {
     Token *tokens;
-    int label_def_flag;
+    int label_def_flag; /* Flag for a lable definition */
     const char *line_ptr;
     int i;
 
-    TRY(tokens = (Token *)calloc(MAX_TOKENS, sizeof(Token)));
+    TRY(tokens = (Token *)calloc(MAX_TOKENS, sizeof(Token))); /* Allocate memory for tokens */
     init_tokens(tokens);
 
     line_ptr = line; /* Use a pointer to traverse the line */
@@ -27,7 +20,9 @@ Token *tokenize_line(const char *line, int *tokens_count, int current_line, int 
     /* Check if it's a label definition */
     label_def_flag = my_getword(tokens[i].value, MAX_LINE, &line_ptr, is_preprocess);
 
-    if (label_def_flag == 1) {
+    /* If the first token is a potential label */
+    if (label_def_flag == 1) { 
+        /* Checks if it's a valid one */
         if (is_reserved_word(tokens[i].value)) {
             printf("Error in line %d: Label name '%s:' is a reserved word\n", current_line, tokens[i].value);
             free(tokens);
@@ -37,15 +32,17 @@ Token *tokenize_line(const char *line, int *tokens_count, int current_line, int 
             free(tokens);
             return NULL;
         } else {
+            /* It's a label definition */
             tokens[i].type = LABEL_DEF;
             (i)++;
         }
 
     } else {
+        /* Checks what is the type of the first token */
         tokens[i].type = get_token_type(tokens[i].value, is_preprocess);
         (i)++;
     }
-
+    /* Goes through the rest of the line and identifying token types */
     while (my_getword(tokens[i].value, MAX_LABEL_LENGTH, &line_ptr, is_preprocess) != EOF) {
         tokens[i].type = get_token_type(tokens[i].value, is_preprocess);
         if ((tokens[i].type) == ERROR) {
@@ -55,11 +52,11 @@ Token *tokenize_line(const char *line, int *tokens_count, int current_line, int 
         }
         i++;
     }
-    (*tokens_count) = i;
+    (*tokens_count) = i; /* Sets the token count in the tokens array */
 
-    return tokens;
+    return tokens; /* Returns for parsing */
 }
-
+/* Sets initial state to unknon */
 void init_tokens(Token *tokens) {
     int i;
     for (i = 0; i < MAX_TOKENS; i++) {
@@ -68,7 +65,7 @@ void init_tokens(Token *tokens) {
     }
 }
 
-
+/* For identifying token types */
 static const char *token_type[] = {
     
     /* Opcodes (Instructions) */
@@ -82,6 +79,7 @@ static const char *token_type[] = {
     /* Null terminator to mark end of array */
     NULL};
 
+/* Identifying token types */
 TokenType get_token_type(const char *token, int is_preprocess) {
     int i;
     int len;
@@ -133,7 +131,7 @@ TokenType get_token_type(const char *token, int is_preprocess) {
 }
 
 
-
+/* Checks if valid immediate */
 int is_valid_immediate(const char *token) {
     const char *num_part;
 
@@ -164,7 +162,7 @@ int is_valid_immediate(const char *token) {
 
     return 1;
 }
-
+/* Checks if the given token is a valid indirect register */
 int is_valid_indirect_register(const char *token) {
     if (token[0] != '*')
         return 0;
@@ -180,7 +178,7 @@ int is_valid_indirect_register(const char *token) {
 
     return 1;
 }
-
+/* Checks if the given token is a valid register */
 int is_valid_register(const char *token) {
     if (token[0] != 'r')
         return 0;
@@ -189,15 +187,15 @@ int is_valid_register(const char *token) {
 
     return 1;
 }
-
+/* Checks if the given token is a valid label */
 int is_valid_label(char *label) {
     if (isalpha((unsigned char)label[0]))
         return 1;
 
     return 0;
 }
-
-static int my_getword(char *word, int lim, const char **line, int is_preprocess) {
+/* my_getword seprates a given line to meaningful tokens */
+int my_getword(char *word, int lim, const char **line, int is_preprocess) {
     int c;
     char *w = word;
     const char *l = *line;
@@ -272,13 +270,8 @@ static int my_getword(char *word, int lim, const char **line, int is_preprocess)
                 *w++ = *l++;
             }
             if (*l == ':') {
-                if (is_preprocess) {
-                    is_label = 1;
-                } else {
-
-                    is_label = 1;
-                    l++; /* Skip the colon */
-                }
+                is_label = 1;
+                l++; /* Skip the colon */
             }
             *w = '\0';
             *line = l;
@@ -295,6 +288,5 @@ static int my_getword(char *word, int lim, const char **line, int is_preprocess)
 
     *w = '\0';
     *line = l;
-    return is_label ? 1 : 0; /* Return ':' if it's a label */
+    return is_label ? 1 : 0; /* Return 1 if it's a label */
 }
-

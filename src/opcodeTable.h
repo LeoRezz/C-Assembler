@@ -1,7 +1,7 @@
 #ifndef OPCODE_TABLE_H
 #define OPCODE_TABLE_H
 
-
+/* Addresing mode enum for each operand */
 typedef enum {
     ADD_NONE = 0, /* 0000 */
     ADD_IMMEDIATE = 1, /* 0001 */
@@ -19,13 +19,12 @@ typedef struct {
     int dest_modes; /* Addersing modes allowed for destination operand, if exists */
 } Opcode;
 
-const Opcode *find_opcode(const char *mnemonic);
-int calculate_word_count(const Opcode *op, AddressingMode src_mode, AddressingMode dest_mode);
-int is_addressing_mode_allowed(int allowed_modes, AddressingMode mode);
-const char *addressing_mode_to_string(AddressingMode mode);
-void print_allowed_modes(int modes);
-void print_opcode_info(const Opcode *op);
-void print_opcode_table();
-const char *opcode_to_string(int opcode);
+/* Function prototypes */
 
+/* Finds an opcode by its name given as a parameter */
+const Opcode *find_opcode(const char *mnemonic);
+/* Calculates the instruction count of a given opcode and addressing modes */
+int calculate_word_count(const Opcode *op, AddressingMode src_mode, AddressingMode dest_mode);
+/* Checks if given addressing mode combinations are allowed */
+int is_addressing_mode_allowed(int allowed_modes, AddressingMode mode);
 #endif

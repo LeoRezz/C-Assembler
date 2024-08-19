@@ -7,7 +7,7 @@
 /*
  * OPCODE_TABLE: A static constant array containing information about opcodes.
  *
- * Each entry in the array represents an opcode and consists of:
+ * Each entry in the array represents an opcode that consists of:
  * 1. Mnemonic (string): The name of the opcode.
  * 2. Opcode value (int): Numeric representation of the opcode.
  * 3. Number of operands (int): How many operands the instruction takes.
@@ -19,7 +19,7 @@
  *
  *
  * This table is used to validate instructions, determine operand counts,
- * and check addressing mode validity during assembly or simulation.
+ * and check addressing mode validity during the assembly process.
  */
  const Opcode OPCODE_TABLE[NUM_OPCODES] = {
     {"mov", 0, 2, ADD_IMMEDIATE | ADD_DIRECT | ADD_INDIRECT_REGISTER | ADD_REGISTER, ADD_DIRECT | ADD_INDIRECT_REGISTER | ADD_REGISTER},
@@ -39,6 +39,7 @@
     {"rts", 14, 0, 0, 0},
     {"stop", 15, 0, 0, 0}};
 
+/* Finds an opcode by its name given as a parameter */
 const Opcode *find_opcode(const char *mnemonic) {
     int i;
     for (i = 0; i < NUM_OPCODES; i++) {
@@ -48,13 +49,13 @@ const Opcode *find_opcode(const char *mnemonic) {
     }
     return NULL; /* Opcode not found */
 }
-
+/* Checks if an addressing mode is allowed */
 int is_addressing_mode_allowed(int allowed_modes, AddressingMode mode) {
     return (allowed_modes & mode) != 0;
 }
 
 
-/* calculate_word_count:
+/* Calculate_word_count:
  * Calculate the number of words required for an instruction.
  */
 int calculate_word_count(const Opcode *op, AddressingMode src_mode, AddressingMode dest_mode) {
@@ -84,86 +85,4 @@ int calculate_word_count(const Opcode *op, AddressingMode src_mode, AddressingMo
             printf ("Error: Invalid number of operands\n");
             return -1;  /* Indicate an error */
     }
-}
-
-
-const char *addressing_mode_to_string(AddressingMode mode) {
-    switch (mode) {
-    case ADD_IMMEDIATE:
-        return "Immediate";
-    case ADD_DIRECT:
-        return "Direct";
-    case ADD_INDIRECT_REGISTER:
-        return "Indirect Register";
-    case ADD_REGISTER:
-        return "Register";
-    default:
-        return "Unknown";
-    }
-}
-
-void print_allowed_modes(int modes) {
-    printf("Allowed modes: ");
-    if (modes & ADD_IMMEDIATE)
-        printf("Immediate ");
-    if (modes & ADD_DIRECT)
-        printf("Direct ");
-    if (modes & ADD_INDIRECT_REGISTER)
-        printf("Indirect Register ");
-    if (modes & ADD_REGISTER)
-        printf("Register ");
-    printf("\n");
-}
-
-void print_opcode_info(const Opcode *op) {
-    if (op == NULL) {
-        printf("Invalid opcode\n");
-        return;
-    }
-
-    printf("Mnemonic: %s\n", op->mnemonic);
-    printf("Opcode: %d\n", op->opcode);
-    printf("Number of operands: %d\n", op->operands);
-
-    if (op->operands > 0) {
-        printf("Source operand: ");
-        print_allowed_modes(op->src_modes);
-    }
-    if (op->operands > 1) {
-        printf("Destination operand: ");
-        print_allowed_modes(op->dest_modes);
-    }
-}
-
-void print_opcode_table() {
-    int i;
-    printf("Opcode Table:\n");
-    printf("%-6s %-5s %-8s %-20s %-20s\n", "Mnem.", "Code", "Operands", "Src Modes", "Dest Modes");
-    printf("------ ----- -------- -------------------- --------------------\n");
-
-    for (i = 0; i < NUM_OPCODES; i++) {
-        printf("%-6s %-5d %-8d ",
-               OPCODE_TABLE[i].mnemonic,
-               OPCODE_TABLE[i].opcode,
-               OPCODE_TABLE[i].operands);
-
-        print_allowed_modes(OPCODE_TABLE[i].src_modes);
-        print_allowed_modes(OPCODE_TABLE[i].dest_modes);
-        printf("\n");
-    }
-}
-
-const char *opcode_to_string(int opcode) {
-    int i;
-    for (i = 0; i < NUM_OPCODES; i++) {
-        if (OPCODE_TABLE[i].opcode == opcode) {
-            return OPCODE_TABLE[i].mnemonic;
-        }
-    }
-    return "Invalid opcode";
-}
-
-const Opcode* get_random_opcode() {
-    int random_index = rand() % NUM_OPCODES;
-    return &OPCODE_TABLE[random_index];
 }

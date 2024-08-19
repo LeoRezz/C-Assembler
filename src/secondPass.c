@@ -14,22 +14,22 @@ int address = STARTING_ADDRESS;
 int data_counter;
 int error_flag;
 
-/*responsible for the second pass */
 int secondPass( char *filename, ParsedProgram *program, int numOfLines);
 void generate_ob_file( char *filename, char *ins_name, char *data_name);
 char* CodeToBinary(int input, int numberOfBits);
 int BinaryToOctal(char binarycode[]);
-void DataToBinary(Line *line, char* filename);
+void DataToBinary(Line *line, char* data_name);
 void InstructionToBinary(Line *line, char *ins_name ,char *file_extern);
 void FirstTokenToBinary(Line *line, char *ins_name );
 int hasCommonWord(Line *line);
 void WriteLine(char *binarycode, char *filename);
 void entryFile( char *filename);
-void externFile(symbol symbol , char *filename, int type);
+void externFile(symbol symbol , char *filename);
 void error_accured(char *filename);
 
 
 
+/*this function is responsible for the second pass of the assembly*/
 int secondPass( char *origin_name, ParsedProgram *program, int numOfLines) {
     
     char ins_name[MAX_FILENAME]; 
@@ -45,76 +45,79 @@ int secondPass( char *origin_name, ParsedProgram *program, int numOfLines) {
 
 
     i = 0;
-    for (; i < numOfLines; i++) {
+    for (; i < numOfLines; i++) {   /*runs through the program line by line*/
         Line *current = &(program->lines[i]);
 
-        if (current->type == LINE_INSTRUCTION) /*instruction line*/
+        if (current->type == LINE_INSTRUCTION)    /*if instruction line*/
         {
-            InstructionToBinary(current, ins_name ,origin_name);        /*lines of instruction*/
-        } else if (current->type == LINE_DATA || current->type == 2)            /*line_data, line_string*/
+            InstructionToBinary(current, ins_name ,origin_name);        
+        } else if (current->type == LINE_DATA || current->type == LINE_STRING)    /*if line_data or line_string*/
         {
-            DataToBinary(current, data_name); /*lines of data*/
+            DataToBinary(current, data_name); 
         }
     }
 
-    generate_ob_file(origin_name, ins_name, data_name);
+
     
-    /*creates and write to .ent file*/
+    
+    /*creates and writes the .ob and .ent file*/
+    if (error_flag==0){
     entryFile(origin_name); 
-
-    return (error_flag == 0);
-
-    if (error_flag==1)
+    generate_ob_file(origin_name, ins_name, data_name); 
+    }
+    else  /*erase other files if created*/
     {
         error_accured(origin_name);
     }
     
     return (error_flag == 0);
-    
+
 }
 
+/*called at the end of the second pass and generates the .ob file*/
 void generate_ob_file( char* filename, char* ins_name, char* data_name) {
     
     char c;
     FILE *file, *ins, *data;
-    char ob_file[MAX_FILENAME]; /* entry file name */
+    char ob_file[MAX_FILENAME]; 
 
-    append_extension(ob_file, filename, ".ob");
+    append_extension(ob_file, filename, ".ob");  /*create the correct file name*/
     
-    if (error_flag == 0)
-    {    
-        file = fopen(ob_file, "w");
-        if (file == NULL) {
-        printf("error while openening object file.\n");
-        error_flag = 1;
-        return;
+    file = fopen(ob_file, "w");
+    if (file == NULL) {
+    printf("error while openening object file.\n");
+    error_flag = 1;
+    return;
     }
-        fprintf(file, "%d %d\n", get_IC() - INITIAL_ADDRESS, get_DC());
-        fclose(file);
+    fprintf(file, "%d %d\n", get_IC() - INITIAL_ADDRESS, get_DC());
+    fclose(file);
 
+    if (access(ins_name, F_OK) != -1)  /*first writes all instruction lines to .ob file if there are any*/
+    { /*checks if thare are any instruction is .as file*/
+        ins = fopen(ins_name, "r");
+        if (ins == NULL)
+        {
+            printf("Error while opening file\n");
+            error_flag = 1;
+            return;
+        }
 
-        if (access(ins_name, F_OK) != -1) { /*checks if thare are any instruction is .as file*/
-            ins = fopen(ins_name, "r");
-            if (ins == NULL) {
-                printf("Error while opening file\n");
-                error_flag = 1;
-                return;
-            }
-
-            file = fopen(ob_file, "a");
-            if (file == NULL) {
-                printf("Error while opening object file.\n");
-                fclose(ins);  /* Close the other file before returning */
-                return; 
-            }
-            while ((c = fgetc(ins)) != EOF){
+        file = fopen(ob_file, "a");
+        if (file == NULL)
+        {
+            printf("Error while opening object file.\n");
+            fclose(ins); /* Close the instruction file */
+            return;
+        }
+        while ((c = fgetc(ins)) != EOF)
+        {
             fputc(c, file);
             }
             fclose(ins);
             fclose(file);
-        }
+    }
        
-        if (access(data_name, F_OK) != -1) { /*checks if thare are any data is .as file*/
+        if (access(data_name, F_OK) != -1) {  /*writes all data lines to .ob file if there are any*/
             data = fopen(data_name, "r");
             if (data == NULL) {
                 printf("Error while opening file\n");
@@ -125,7 +128,7 @@ void generate_ob_file( char* filename, char* ins_name, char* data_name) {
             file = fopen(ob_file, "a");
             if (file == NULL) {
                 printf("Error while opening object file.\n");
-                fclose(data);  /* Close the other file before returning */
+                fclose(data);  /* Close the data file */
                 return; 
             }
             while ((c = fgetc(data)) != EOF){
@@ -134,15 +137,13 @@ void generate_ob_file( char* filename, char* ins_name, char* data_name) {
             fclose(data);
             fclose(file);
         }
-
         remove(ins_name);
         remove(data_name);
         
-    }
-    
-}
-
-void DataToBinary(Line *line, char* filename){ /*extrenFile()*/
+ }
+   
+/*this function is responsible for translating the data lines to binary code stored in binarycode[]*/
+void DataToBinary(Line *line, char* filename){ 
     int i;
     int j;
     char c;
@@ -153,12 +154,12 @@ void DataToBinary(Line *line, char* filename){ /*extrenFile()*/
     
     switch (line->content.data.type)
     {
-    case DATA_INT: 
+    case DATA_INT: /*if .data line, which means int variebles*/
         for (i=0;i < line->content.data.value_count; i++)
         {
             memset(binaryCode, 0, sizeof(binaryCode)); /*reset binarycode*/
             
-            temp = CodeToBinary(line->content.data.content.int_values[i],15);
+            temp = CodeToBinary(line->content.data.content.int_values[i],15); /*each int takes the whole 'word', 15 bits*/
             strcat(binaryCode, temp);
             free(temp);
             WriteLine(binaryCode,  filename);
@@ -170,8 +171,8 @@ void DataToBinary(Line *line, char* filename){ /*extrenFile()*/
     case DATA_STRING:
         i = 0;
         while (line->content.data.content.char_values[i] != '\0') {
-            memset(binaryCode, 0, sizeof(binaryCode)); /*reset binarycode*/
-            memset(str, 0, sizeof(str));               /*reset temp*/
+            memset(binaryCode, 0, sizeof(binaryCode));   /*reset binarycode*/
+            memset(str, 0, sizeof(str));                 /*reset temp*/
             c = line->content.data.content.char_values[i];
             temp = CodeToBinary(0, 7);
             strcat(binaryCode, temp); /*ascii only takes 8 bits, so bits 14-8 are set to o*/
@@ -197,6 +198,7 @@ void DataToBinary(Line *line, char* filename){ /*extrenFile()*/
     }
 }
 
+/*this function is responsible for translating the instruction lines to binary code stored in binarycode[], also uses FirstTokenToBinary*/
 void InstructionToBinary(Line *line, char *ins_name ,char *file_extern  ) {
     int i;
     int j;
@@ -208,9 +210,9 @@ void InstructionToBinary(Line *line, char *ins_name ,char *file_extern  ) {
     symbol_table = get_symbol_table(); /* get the symbol table */
     symbolCount = get_symbol_count();  /* get the symbol count */
 
-    FirstTokenToBinary(line, ins_name); 
+    FirstTokenToBinary(line, ins_name); /*generate and write the first 'word' for the instrauction line*/
 
-    if ((line->content.inst.operands_count == 2) && hasCommonWord(line))
+    if ((line->content.inst.operands_count == 2) && hasCommonWord(line)) /*if both operands are *reg or reg they have a common word*/
     {   
         temp = CodeToBinary(0,6);
         strcat(binaryCode, temp); /*bits 14-9 are not used*/
@@ -229,8 +231,8 @@ void InstructionToBinary(Line *line, char *ins_name ,char *file_extern  ) {
         free(temp);
         WriteLine(binaryCode, ins_name);
     }
-    else{    
-    for ( i = 0; i < line->content.inst.operands_count; i++)
+    else{ 
+    for ( i = 0; i < line->content.inst.operands_count; i++)  /*if create the 'extra-word' for each operand depanding on their AddressingMode */
     {
         memset(binaryCode, 0, sizeof(binaryCode)); /*reset binarycode*/
         switch (line->content.inst.operand_types[i]) 
@@ -243,7 +245,7 @@ void InstructionToBinary(Line *line, char *ins_name ,char *file_extern  ) {
                 temp =  CodeToBinary(4,3);
                 strcat(binaryCode,temp); /* A=1, R,E=0 */ 
                 free(temp);
-                WriteLine(binaryCode, ins_name); /* writes the first word,TODO: write function that appends line as address and octal value of binary*/
+                WriteLine(binaryCode, ins_name); 
             break;
 
             case ADD_DIRECT:  
@@ -258,7 +260,7 @@ void InstructionToBinary(Line *line, char *ins_name ,char *file_extern  ) {
                             temp = CodeToBinary(1,3);
                             strcat(binaryCode, temp ); /*  A,R=0  E=1 */   
                             free(temp);
-                            externFile(symbol_table[j], file_extern, 1);
+                            externFile(symbol_table[j], file_extern);
                         } 
                         else
                         {
@@ -316,13 +318,14 @@ void InstructionToBinary(Line *line, char *ins_name ,char *file_extern  ) {
             }
             break;
         default:
+            error_flag = 1;
             break;
         }
     }
     }
 }
 
-/*function writes to object file the first word for each instruction line*/
+/*function gets the instruction line and creates the first 'word' for the line*/
 void FirstTokenToBinary(Line *line, char *ins_name )
 { 
     char binaryCode[WORD_SIZE] = "";
@@ -348,7 +351,7 @@ void FirstTokenToBinary(Line *line, char *ins_name )
             strcat(binaryCode,temp); 
             free(temp);
 
-            temp =  CodeToBinary(line->content.inst.operand_types[0],4);/*dest operand adressing type to binary */
+            temp =  CodeToBinary(line->content.inst.operand_types[0],4); /*dest operand adressing type to binary */
             strcat(binaryCode,temp); 
             free(temp);
 
@@ -378,12 +381,14 @@ void FirstTokenToBinary(Line *line, char *ins_name )
             break;
 
         default:
-        printf("error with first token switch case");
+            printf("error with first token switch case");
+            error_flag = 1;
             break; /*error message? */
     }
     
 }
 
+/*function checks if instruction line uses a common word for both operands*/
 int hasCommonWord(Line *line) {
     if ((line->content.inst.operand_types[0] == ADD_INDIRECT_REGISTER || line->content.inst.operand_types[0] == ADD_REGISTER) && (line->content.inst.operand_types[1] == ADD_INDIRECT_REGISTER || line->content.inst.operand_types[1] == ADD_REGISTER)) {
         return 1;
@@ -392,11 +397,12 @@ int hasCommonWord(Line *line) {
     }
 }
 
+/*helper function, gets the value and the amount of bits it needs to be stored in and returns it an binary[] */
 char* CodeToBinary(int input, int numberOfBits) 
 {
     int i = numberOfBits - 1;
     int value = input;
-    char *binary = (char *)calloc(numberOfBits+1,sizeof(char)); /*/*free??? */
+    char *binary = (char *)calloc(numberOfBits+1,sizeof(char));  /*freed by calling function*/
     for (; i >= 0; i--) 
     {
  
@@ -408,6 +414,7 @@ char* CodeToBinary(int input, int numberOfBits)
 
 }
 
+/*helper function, recives the binarycode and translates it to octal*/
 int BinaryToOctal(char binarycode[]) {
     int j, i;
     int oct;
@@ -427,29 +434,29 @@ int BinaryToOctal(char binarycode[]) {
     return oct;
 }
 
+/*writes the formated line to data or instruction files*/
 void WriteLine(char *binarycode, char *filename) 
 {
-    
-/* 4 digits for address, 1 space, 5 digits to octal */  
     int octal;
     int adr;
     int data_adr;
     FILE *file;
 
-    data_adr = get_IC() + data_counter;
     octal = BinaryToOctal(binarycode);
     if (strcmp("ins.ob",filename)==0) { /*instruction*/
         adr = address;
     } else {
+        data_adr = get_IC() + data_counter;
         adr = data_adr;
     }
 
     file = fopen(filename, "a");
-    fprintf(file, "%04d %05d\n", adr, octal); 
+    fprintf(file, "%04d %05d\n", adr, octal); /* 4 digits for address, 1 space, 5 digits to octal */ 
     fclose(file);
     address++;
 }
 
+/*creates entry file if needed by passing through the symbol tables and looking for ENTRY_LABEL*/
 void entryFile( char *filename) { 
     int i;
     char entry_name[MAX_FILENAME]; /* entry file name */
@@ -465,13 +472,13 @@ void entryFile( char *filename) {
     for (i = 0; i < symbolCount; i++) {
 
         if (symbol_table[i].type == SYMBOL_ENTRY) {
-            if (access(entry_name, F_OK) != -1) { /*checks if file already exists*/
+            if (access(entry_name, F_OK) != -1) { /*if file exists no need to create it only append to it*/
                 entry_file = fopen(entry_name, "a");
                 fprintf(entry_file, "%s %d\n", symbol_table[i].name, symbol_table[i].value);
                 fclose(entry_file);
 
             } else {
-                entry_file = fopen(entry_name, "w"); /*create entry file*/
+                entry_file = fopen(entry_name, "w"); /*create entry file and append first line*/
                 fclose(entry_file);
                 entry_file = fopen(entry_name, "a");
                 fprintf(entry_file, "%s %d\n", symbol_table[i].name, symbol_table[i].value);
@@ -481,57 +488,52 @@ void entryFile( char *filename) {
     }
 }
 
-void externFile(symbol symbol , char *filename, int type) {
+/*creates extern file if needed, function is called in InstructionToBinary if EXTERN_TABLE is found as an operand*/
+void externFile(symbol symbol , char *filename) {
     FILE *extern_file;
-    int adr;
     char extern_name[MAX_FILENAME]; 
-    int data_adr;
 
-    append_extension(extern_name, filename, ".ext");
+    append_extension(extern_name, filename, ".ext"); /*create correct file name for .ext file*/
 
-    data_adr = get_IC() + data_counter;
-    if (type == 1) { /*instruction*/
-        adr = address;
-    } else {
-        adr = data_adr;
-    }
 
-    if (access(extern_name, F_OK) != -1) { /*checks if file already exists*/
+    if (access(extern_name, F_OK) != -1) { /*if file exists no need to create it only append to it*/
 
         extern_file = fopen(extern_name, "a");
-        fprintf(extern_file, "%s %d\n", symbol.name, adr);
+        fprintf(extern_file, "%s %d\n", symbol.name, address);
         fclose(extern_file);
 
     } else {
 
-        extern_file = fopen(extern_name, "w"); /*create entry file*/
+        extern_file = fopen(extern_name, "w"); /*create extren file and append first line*/
         fclose(extern_file);
         extern_file = fopen(extern_name, "a");
-        fprintf(extern_file, "%s %d\n", symbol.name, adr);
+        fprintf(extern_file, "%s %d\n", symbol.name, address);
         fclose(extern_file);
     }
 }
 
+/*if error accured during the second pass deletes the all the files created so far*/
 void error_accured(char *filename){
 
     char file[MAX_FILENAME]; 
-    append_extension(file, filename, ".ob");
-    if (access(file, F_OK) != -1) {
-        remove(file); 
-    }
+    char data_name[MAX_FILENAME]; 
+    char ins_name[MAX_FILENAME]; 
+
     strcpy(file, "");
+    strcpy(data_name, "data.ob");
+    strcpy(ins_name, "ins.ob");
 
-    append_extension(file, filename, ".ent");
-    if (access(file, F_OK) != -1) {
-            remove(file);
-
-    }
-    strcpy(file, "");
-
-        append_extension(file, filename, ".ext");
+    append_extension(file, filename, ".ext");
     if (access(file, F_OK) != -1) {
         remove(file);
+    }
 
+    if (access(data_name, F_OK) != -1) {
+        remove(data_name); 
+    }
+
+    if (access(ins_name, F_OK) != -1) {
+        remove(ins_name); 
     }
 }
 

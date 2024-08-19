@@ -5,8 +5,7 @@
 
 #define INITIAL_ADDRESS 100
 
-void print_binary(int num, int bits);
-
+/* Initilzzes space for the lines array */
 ParsedProgram *init_parsed_program() {
 
     ParsedProgram *program;

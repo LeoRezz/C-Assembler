@@ -52,6 +52,5 @@ typedef struct Line {
     } content;
 } Line;
 
-/* TODO: Add any Line-related function prototypes here */
 
 #endif 
