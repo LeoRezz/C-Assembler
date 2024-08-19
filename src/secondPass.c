@@ -1,11 +1,10 @@
 
 #include <unistd.h>
 
-
+#include "secondPass.h"
 #include "memory_manager.h"
 #include "parser.h"
-#include "parsed_program.h"
-#include "util.h"
+#include "tokenizer.h"
 
 #define STARTING_ADDRESS 100
 #define WORD_SIZE 20
@@ -15,6 +14,7 @@ int address = STARTING_ADDRESS;
 int data_counter;
 int error_flag;
 
+/*responsible for the second pass */
 int secondPass( char *filename, ParsedProgram *program, int numOfLines);
 void generate_ob_file( char *filename, char *ins_name, char *data_name);
 char* CodeToBinary(int input, int numberOfBits);
@@ -27,7 +27,7 @@ void WriteLine(char *binarycode, char *filename);
 void entryFile( char *filename);
 void externFile(symbol symbol , char *filename, int type);
 
-/*TODO:: correct file names!!!*/
+
 
 int secondPass( char *origin_name, ParsedProgram *program, int numOfLines) {
     
@@ -62,19 +62,27 @@ int secondPass( char *origin_name, ParsedProgram *program, int numOfLines) {
     entryFile(origin_name); 
 
     return (error_flag == 0);
+
+    if (error_flag==1)
+    {
+        error_accured(origin_name);
+    }
+    
+    return (error_flag == 0);
+    
 }
 
 void generate_ob_file( char* filename, char* ins_name, char* data_name) {
     
     char c;
     FILE *file, *ins, *data;
-    char entry_name[MAX_FILENAME]; /* entry file name */
+    char ob_file[MAX_FILENAME]; /* entry file name */
 
-    append_extension(entry_name, filename, ".ob");
+    append_extension(ob_file, filename, ".ob");
     
     if (error_flag == 0)
     {    
-        file = fopen(entry_name, "w");
+        file = fopen(ob_file, "w");
         if (file == NULL) {
         printf("error while openening object file.\n");
         error_flag = 1;
@@ -90,7 +98,7 @@ void generate_ob_file( char* filename, char* ins_name, char* data_name) {
             return;
         }
 
-        file = fopen(entry_name, "a");
+        file = fopen(ob_file, "a");
         if (file == NULL) {
             printf("Error while opening object file.\n");
             fclose(ins);  /* Close the other file before returning */
@@ -490,3 +498,27 @@ void externFile(symbol symbol , char *filename, int type) {
         fclose(extern_file);
     }
 }
+
+error_accured(char *filename){
+
+    char file[MAX_FILENAME]; 
+    append_extension(file, filename, ".ob");
+    if (access(file, F_OK) != -1) {
+        remove(file); 
+    }
+    strcpy(file, "");
+
+    append_extension(file, filename, ".ent");
+    if (access(file, F_OK) != -1) {
+            remove(file);
+
+    }
+    strcpy(file, "");
+
+        append_extension(file, filename, ".ext");
+    if (access(file, F_OK) != -1) {
+        remove(file);
+
+    }
+}
+
