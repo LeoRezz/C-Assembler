@@ -106,6 +106,12 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
                 return parsed_line;
             }
             break;
+        default:
+            printf("Error in line %d: Invalid directive '%s'\n", parsed_line->line_number, token_arr[current_token].value);
+            error_flag = 1;
+            parsed_line->type = ERROR;
+            return parsed_line;
+        
         }
         return parsed_line;
     }

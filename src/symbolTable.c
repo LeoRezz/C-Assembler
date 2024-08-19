@@ -30,10 +30,28 @@ static int is_duplicate_symbol(char *name, int value, SymbolType origin_type) {
     /* Checks if the symbol already exists */
     if (symbol_duplicate != NULL) {
         /* if the symbol is an entry, update it's value to current IC */
-        if ((symbol_duplicate->type == SYMBOL_ENTRY) && (origin_type != SYMBOL_ENTRY)) {
-            return 0; /* FALSE: ACCCPTED SITUTATION */
-        } else
-        return 1; /* TRUE, it's a dup */
+        if (symbol_duplicate->type == origin_type) {
+            return 1; /* TRUE, it's a dup */
+        }
+        switch (origin_type) {
+        case SYMBOL_CODE:
+        case SYMBOL_DATA:
+            if ((symbol_duplicate->type == SYMBOL_CODE) || (symbol_duplicate->type == SYMBOL_DATA)) {
+                return 1;
+            }
+            break;
+        case SYMBOL_ENTRY:
+            if ((symbol_duplicate->type == SYMBOL_ENTRY) || (symbol_duplicate->type == SYMBOL_EXTERNAL)) {
+                return 1;
+            }
+
+            break;
+        case SYMBOL_EXTERNAL:
+            return 1;
+            break;
+        default:
+            break;
+        }
     }
 
     return 0; /*  FALSE: , not a dup */

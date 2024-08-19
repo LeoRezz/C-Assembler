@@ -4,10 +4,10 @@
 #include "symbolTable.h"
 
 /* Global State mode */
+extern int error_flag;
 typedef enum { NORMAL, DEFINITION, EXPANSION } Mode;
 static Mode current_mode = NORMAL;
 static MacroTable *macro_table;
-extern int error_flag;
 
 /* Function prototypes */
 static int handle_normal_mode(char *line, FILE *output_file, int current_line);
@@ -20,7 +20,9 @@ int preprocess(const char *input_filename, const char *am_filename) {
     char line[MAX_LINE];
     int current_line = 0;
     int macro_index = -1;
+    error_flag = 0;
 
+    /* Open input and output files */
     input_file = fopen(input_filename, "r");
     if (!input_file) {
         printf("Failed to open input file: %s\n", input_filename);
@@ -34,6 +36,7 @@ int preprocess(const char *input_filename, const char *am_filename) {
         return 0;
     }
 
+    /* Initialize symbol table and macro table */
     init_symbol_table();
     macro_table = init_macro_table();
     if (!macro_table) {

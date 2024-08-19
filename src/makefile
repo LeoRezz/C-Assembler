@@ -1,5 +1,5 @@
-CC= gcc
-CFLAGS= -ansi -Wall -pedantic -g
+CC= gcc 
+CFLAGS= -g -Wall -ansi -pedantic
 SOURCES= main.c secondPass.c preprocessor.c macro_table.c firstPass.c memory_manager.c tokenizer.c opcodeTable.c symbolTable.c parser.c util.c parsed_program.c
 TARGET= assembler
 
