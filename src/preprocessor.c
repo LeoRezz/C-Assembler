@@ -2,25 +2,35 @@
 #include "preprocessor.h"
 #include "macro_table.h"
 #include "symbolTable.h"
+#include "tokenizer.h"
 
-/* Global State mode */
-extern int error_flag;
-typedef enum { NORMAL, DEFINITION, EXPANSION } Mode;
+/* Preprocessor State */
+typedef enum { NORMAL = -1, DEFINITION, EXPANSION } Mode;
 static Mode current_mode = NORMAL;
 static MacroTable *macro_table;
 
 /* Function prototypes */
-static int handle_normal_mode(char *line, FILE *output_file, int current_line);
-static void handle_definition_mode(char *line, int macro_index);
-static void handle_expansion_mode(char *line, FILE *output_file, int macro_index);
-static int is_valid_macro_name(const char *name, int current_line);
+static int handle_normal_mode(char *line, FILE *output_file, int current_line, int token_count, Token *tokens, int *error_flag);
+static void handle_definition_mode(char *line, int macro_index ,int token_count ,Token *tokens , int *error_flag);
+static void handle_expansion_mode(char *line, FILE *output_file,int current_line,int token_count ,Token *tokens ,int macro_index , int *error_flag);
+static int is_valid_macro_name(const char *name, int current_line, int *error_flag);
 
 int preprocess(const char *input_filename, const char *am_filename) {
     FILE *input_file, *output_file;
+    Token *tokens;
+    const char *line_ptr;
     char line[MAX_LINE];
-    int current_line = 0;
-    int macro_index = -1;
+    int is_preprocess;
+    int current_line;
+    int token_count;
+    int macro_index;
+    int error_flag;
+
+
+    macro_index = -1;
     error_flag = 0;
+    current_line = 0;
+    is_preprocess = 1;
 
     /* Open input and output files */
     input_file = fopen(input_filename, "r");
@@ -48,7 +58,22 @@ int preprocess(const char *input_filename, const char *am_filename) {
 
     while (fgets(line, MAX_LINE, input_file) != NULL) {
         current_line++;
-         
+        line_ptr = line;
+        /* remove empty lines */
+        while (isspace(*line_ptr) && *line_ptr != '\0') {
+            line_ptr++;
+        }
+        if (*line_ptr == '\0' || *line_ptr == '\n') {
+            continue;
+        }
+        if (line[0] == ';') continue;
+        tokens = tokenize_line(line, &token_count, current_line, is_preprocess);
+        if (tokens == NULL) {
+            printf("Line %d: '%s'\n\n", current_line, line);
+            error_flag = 1;
+            continue;
+        }
+
         if (strlen(line) == MAX_LINE - 1 && line[MAX_LINE - 2] != '\n') {
             printf("Error: Line number %d is too long\n", current_line);
             error_flag = 1;
@@ -58,14 +83,19 @@ int preprocess(const char *input_filename, const char *am_filename) {
 
         switch (current_mode) {
             case NORMAL:
-                macro_index = handle_normal_mode(line, output_file, current_line);
+                macro_index = handle_normal_mode(line, output_file, current_line, token_count, tokens, &error_flag);
                 break;
             case DEFINITION:
-                handle_definition_mode(line, macro_index);
+                handle_definition_mode(line, macro_index,token_count, tokens, &error_flag);
                 break;
             case EXPANSION:
-                handle_expansion_mode(line, output_file, macro_index);
+                handle_expansion_mode(line, output_file, current_line,  token_count, tokens, macro_index, &error_flag);
                 break;
+        }
+
+        if (tokens != NULL) {
+            free(tokens);
+            tokens = NULL;
         }
     }
 
@@ -76,61 +106,86 @@ int preprocess(const char *input_filename, const char *am_filename) {
     return (error_flag == 0);
 }
 
-static int handle_normal_mode(char *line, FILE *output_file, int current_line) {
+static int handle_normal_mode(char *line, FILE *output_file, int current_line, int token_count, Token *tokens , int *error_flag) {
     Macro *m;
     int macro_index;
     char *line_ptr = skipSpaces(line);
-    if (*line_ptr == '\0' || *line_ptr == '\n' || *line_ptr == ';') {
-        return -1; /* Skip empty lines and comments */
+    if (token_count == 0) {
+        return NORMAL; /* Skip empty lines and comments */
     }
-    
-    /* Searching for macro usage first */
-    m = get_macro(macro_table, line_ptr); 
-    if (m) {
+
+    /* Searching for macro usage */
+    m = get_macro(macro_table, tokens[0].value);
+    if (m != NULL) {
+        if(token_count > 1) {
+            printf("Error at line %d: macro usage with extra arguments: '%s' contains invalid character\n", current_line, tokens[1].value);
+            *error_flag = 1;
+            return NORMAL;
+        }
         current_mode = EXPANSION;
         return m - macro_table->macros; /* Return the index of the macro */
+    } else if (tokens[0].type == ENDMACRO_KEYWORD) {
+        current_mode = NORMAL;
+        printf("Error at line %d: endmacr without definition\n", current_line);
+        *error_flag = 1;
+        return NORMAL;
     }
 
     /* Searching for macro definition */
-    if (strncmp(line_ptr, MACRO_KEYWORD, MACRO_KEYWORD_LENGTH) == 0) {
+    if ((tokens[0].type == MACRO_KEYWORD)) { /* macr <identifier> */
+        if (token_count > 2) {
+            printf("Error at line %d: macro definition with extra arguments: '%s' contains invalid character\n", current_line, tokens[1].value);
+            *error_flag = 1;
+            return NORMAL;
+        }
+
+        if (!is_valid_macro_name(tokens[1].value, current_line , error_flag)) {
+            current_mode = NORMAL;
+            *error_flag = 1;
+            return NORMAL;
+        }
         current_mode = DEFINITION;
         line_ptr += MACRO_KEYWORD_LENGTH;
         line_ptr = skipSpaces(line_ptr);
-        
-        if (!is_valid_macro_name(line_ptr, current_line)) {
+
+        if (!is_valid_macro_name(line_ptr, current_line, error_flag)) {
             current_mode = NORMAL;
-            return -1;
+            return NORMAL;
         }
-        
+
         macro_index = add_macro(macro_table, line_ptr);
         if (macro_index == -1) {
             printf("Error: Failed to add macro '%s'\n", line_ptr);
-            error_flag = 1;
-            return -1;
+            *error_flag = 1;
+            
         }
         return macro_index;
     }
 
     fputs(line, output_file);
-    fputc('\n', output_file);
-    return -1;
+    fputs("\n", output_file);
+    return NORMAL;
 }
 
-static void handle_definition_mode(char *line, int macro_index) {
-    char *p = skipSpaces(line);
+static void handle_definition_mode(char *line, int macro_index, int token_count , Token *tokens ,int *error_flag) {
 
-    if (strncmp(p, ENDMACRO_KEYWORD, ENDMACRO_KEYWORD_LENGTH) == 0) {
+    /* Assuming each macr has a valid endmacr as per the assignment assumptions for macros */
+    if (tokens[0].type == ENDMACRO_KEYWORD) {
+        if (token_count > 1) {
+            printf("Error: endmacr definition with extra arguments: '%s' contains invalid character\n", tokens[1].value);
+            *error_flag = 1;
+        }
         current_mode = NORMAL;
         return;
     }
 
     if (!add_macro_line(macro_table, macro_index, line)) {
         printf("Error: Failed to add line to macro\n");
-        error_flag = 1;
+        *error_flag = 1;
     }
 }
 
-static void handle_expansion_mode(char *line, FILE *output_file, int macro_index) {
+static void handle_expansion_mode(char *line, FILE *output_file,int current_line,int token_count ,Token *tokens ,int macro_index , int *error_flag) {
     int i;
     Macro *m = &macro_table->macros[macro_index];
     
@@ -139,26 +194,26 @@ static void handle_expansion_mode(char *line, FILE *output_file, int macro_index
         fputc('\n', output_file);
     }
     current_mode = NORMAL;
-    handle_normal_mode(line, output_file, 0);
+    handle_normal_mode(line, output_file, current_line, token_count, tokens, error_flag);
 }
 
-static int is_valid_macro_name(const char *name, int current_line) {
+static int is_valid_macro_name(const char *name, int current_line, int *error_flag) {
     if (is_reserved_word(name)) {
         printf("Error at line %d: Invalid macro name: '%s' is a reserved word\n", current_line, name);
-        error_flag = 1;
+        *error_flag = 1;
         return 0;
     }
     
     if (!isalpha(*name)) {
         printf("Error at line %d: Invalid macro name: '%s' must start with a letter\n", current_line, name);
-        error_flag = 1;
+        *error_flag = 1;
         return 0;
     }
     
     while (*name) {
         if (!isalnum(*name) && *name != '_') {
             printf("Error at line %d: Invalid macro name: '%s' contains invalid character\n", current_line, name);
-            error_flag = 1;
+            *error_flag = 1;
             return 0;
         }
         name++;
@@ -166,3 +221,4 @@ static int is_valid_macro_name(const char *name, int current_line) {
     
     return 1;
 }
+

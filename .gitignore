@@ -65,9 +65,10 @@ launch.json
 *.pdb
 
 # Kernel Module Compile Results
-*.as
 *.am
 *.ob
+*.ent
+*.ext
 *.txt
 *.mod*
 *.cmd

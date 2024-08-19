@@ -1,13 +1,11 @@
 #include "parser.h"
 #include "memory_manager.h"
-#define PARSE(a)                  \
-    if (!(a)) {                   \
-        error_flag = 1;           \
+#define PARSE(a)                   \
+    if (!(a)) {                    \
         parsed_line->type = ERROR; \
-        return NULL;              \
+        return parsed_line;        \
     }
 
-extern int error_flag;
 /* Helper functions for parsing instructions and data */
 int get_addressing_type(Token token);
 int is_data(TokenType type);
@@ -45,7 +43,6 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
         if (label_def_flag) {
             if(!add_symbol(parsed_line->label, get_IC(), SYMBOL_CODE)){
                 printf("Error in line %d: Symbol '%s' already exists\n", parsed_line->line_number ,parsed_line->label);
-                error_flag = 1;
                 parsed_line->type = ERROR;
                 return parsed_line;
             }
@@ -56,7 +53,6 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
         increment_IC(word_count);
 
         /* TODO: Error checking */
-
         return parsed_line;
     }
 
@@ -69,7 +65,6 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
         if (label_def_flag) {
             if(!add_symbol(parsed_line->label, get_DC(), SYMBOL_DATA)){
                 printf("Error in line %d: Symbol '%s' already exists\n", parsed_line->line_number ,parsed_line->label);
-                error_flag = 1;
                 parsed_line->type = ERROR;
                 return parsed_line;
             }
@@ -90,7 +85,6 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
             strncpy(parsed_line->label, token_arr[current_token].value, MAX_LABEL_LENGTH);
             if(!add_symbol(token_arr[current_token].value, 0, SYMBOL_ENTRY)) {
                 printf("Error in line %d: Symbol '%s' already exists\n", parsed_line->line_number ,token_arr[current_token].value);
-                error_flag = 1;
                 parsed_line->type = ERROR;
                 return parsed_line;
             }
@@ -101,14 +95,12 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
             strncpy(parsed_line->label, token_arr[current_token].value, MAX_LABEL_LENGTH);
             if(!add_symbol(token_arr[current_token].value, 0, SYMBOL_EXTERNAL)){
                 printf("Error in line %d: Symbol '%s' already exists\n", parsed_line->line_number, token_arr[current_token].value);
-                error_flag = 1;
                 parsed_line->type = ERROR;
                 return parsed_line;
             }
             break;
         default:
             printf("Error in line %d: Invalid directive '%s'\n", parsed_line->line_number, token_arr[current_token].value);
-            error_flag = 1;
             parsed_line->type = ERROR;
             return parsed_line;
         
@@ -118,7 +110,7 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
 
     /* Error */
     printf("Error in line %d: Expected Opcode or directive instead of '%s'\n", parsed_line->line_number, token_arr[current_token].value);
-    error_flag = 1;
+    
     parsed_line->type = ERROR;
     return parsed_line;
 }

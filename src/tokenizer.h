@@ -18,6 +18,7 @@ typedef enum {
 
     /* Directives */
     DATA, STRING, ENTRY, EXTERN,
+    MACRO_KEYWORD, ENDMACRO_KEYWORD,
 
     /* Special symbols */
     IMMEDIATE,  /* Label use (without ':') */
@@ -100,8 +101,7 @@ typedef struct Line {
  * @return A dynamically allocated array of tokens. Each token contains its value and type.
  *         The caller is responsible for freeing this array.
  */
-Token *tokenize_line(const char *line, int *tokens_count, int current_line);
-TokenType get_token_type(const char *token);
+Token *tokenize_line(const char *line, int *tokens_count, int current_line, int is_preprocess);
 const char *token_type_to_string(TokenType type);
 int is_reserved_word(const char *word);
 #endif

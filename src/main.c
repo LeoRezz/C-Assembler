@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
         /* Preprocess (macro expansion) */
         if (!preprocess(as_filename, am_filename)) {
-            printf("Error in preprocessing %s\n", as_filename);
+            printf("\nError in preprocessing %s\n", as_filename);
             continue; /* Move to next file */
         }
 
@@ -49,14 +49,14 @@ int main(int argc, char *argv[]) {
 
         /* First pass */
         if (!first_pass(am_filename, parsed_program)) {
-            printf("Error in first pass for %s\n", am_filename);
+            printf("\nError in first pass for %s\n", am_filename);
             reset_assembler_state(parsed_program);
             continue; /* Move to next file */
         }
 
         /* Second pass */
-        if (!secondPass(argv[i], parsed_program, parsed_program->count)) { /* ps */
-            printf("Error in second pass for %s\n", am_filename);
+        if (!secondPass(argv[i], parsed_program, parsed_program->count)) { 
+            printf("\nError in second pass for %s\n", am_filename);
             reset_assembler_state(parsed_program);
             continue; /* Move to next file */
         }

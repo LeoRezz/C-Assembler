@@ -55,6 +55,9 @@ static const char *reserved_words[] = {
     /* Directives */
     ".data", ".string", ".entry", ".extern",
 
+    /* Preprocessor */
+    "macr", "endmacr",
+
 
     /* Null terminator to mark end of array */
     NULL};

@@ -3,27 +3,31 @@ extern int error_flag;
 
 /* my_getword seprates a given line to meaningful tokens,
    returns ':' when encounterd in label definition. */
-static int my_getword(char *word, int lim, const char **line);
+static int my_getword(char *word, int lim, const char **line, int is_preprocess);
 int is_valid_immediate(const char *token);
+TokenType get_token_type(const char *token, int is_preprocess);
 int is_valid_indirect_register(const char *token);
 int is_valid_register(const char *token);
 void init_tokens(Token *tokens);
 /* Tokenizes a given line of assembly code into tokens with assigned type. */
-Token *tokenize_line(const char *line, int *tokens_count , int current_line) {
+Token *tokenize_line(const char *line, int *tokens_count, int current_line, int is_preprocess) {
     Token *tokens;
     int label_def_flag;
     const char *line_ptr;
     int i;
-    
+
     TRY(tokens = (Token *)calloc(MAX_TOKENS, sizeof(Token)));
     init_tokens(tokens);
+
     line_ptr = line; /* Use a pointer to traverse the line */
     i = 0;
     label_def_flag = 0;
 
-    label_def_flag = my_getword(tokens[i].value, MAX_LINE, &line_ptr);
-    
-    if (label_def_flag) {
+
+    /* Check if it's a label definition */
+    label_def_flag = my_getword(tokens[i].value, MAX_LINE, &line_ptr, is_preprocess);
+
+    if (label_def_flag == 1 ) {
         if (is_reserved_word(tokens[i].value)) {
             printf("Error in line %d: Label name '%s:' is a reserved word\n", current_line, tokens[i].value);
             free(tokens);
@@ -31,13 +35,13 @@ Token *tokenize_line(const char *line, int *tokens_count , int current_line) {
         }
         tokens[i].type = LABEL_DEF;
         (i)++;
-    }else{
-        tokens[i].type = get_token_type(tokens[i].value);
+    } else {
+        tokens[i].type = get_token_type(tokens[i].value, is_preprocess);
         (i)++;
     }
 
-    while (my_getword(tokens[i].value, MAX_LINE, &line_ptr) != EOF) {
-        tokens[i].type = get_token_type(tokens[i].value);
+    while (my_getword(tokens[i].value, MAX_LINE, &line_ptr, is_preprocess) != EOF) {
+        tokens[i].type = get_token_type(tokens[i].value, is_preprocess);
         if ((tokens[i].type) == ERROR) {
             printf("Error: Invalid token '%s'\n", tokens[i].value);
             free(tokens);
@@ -67,11 +71,12 @@ static const char *token_type[] = {
 
     /* Directives */
     ".data", ".string", ".entry", ".extern",
+    "macr", "endmacr",
 
     /* Null terminator to mark end of array */
     NULL};
 
-TokenType get_token_type(const char *token) {
+TokenType get_token_type(const char *token, int is_preprocess) {
     int i;
     int len;
     len = strlen(token);
@@ -110,9 +115,13 @@ TokenType get_token_type(const char *token) {
     }
 
     /* If none of the above, it's a potential label refrence */
-    if (isalpha((unsigned char)token[0])) {
+    if (isalpha((unsigned char)token[0]) || isalpha((unsigned char)token[0]) ) {
         return DIRECET;
     }
+    if (is_preprocess) {
+        return UNKNOWN;
+    }
+
     /* else it's an error */
     return ERROR;
 }
@@ -175,7 +184,7 @@ int is_valid_register(const char *token) {
     return 1;
 }
 
-static int my_getword(char *word, int lim, const char **line) {
+static int my_getword(char *word, int lim, const char **line, int is_preprocess) {
     int c;
     char *w = word;
     const char *l = *line;
@@ -240,17 +249,11 @@ static int my_getword(char *word, int lim, const char **line) {
         break;
 
     default:
-        /* If not alphanumeric, return the character */
-        if (!isalnum(c)) {
+
+        /* Handle potential register, label, or macro definition */
+        if (isalnum(c)) {
             *w++ = c;
-            *w = '\0';
-            *line = l;
-            return c;
-        }
-        /* Handle potential register or label */
-        if (isalpha(c)) {
-            *w++ = c;
-            while ((--lim > 1) && (*l != ':') && isalnum(*l)) {
+            while ((--lim > 1) && (*l != ':') && (isalnum(*l) || (is_preprocess && *l == '_'))) {
                 *w++ = *l++;
             }
             if (*l == ':') {
