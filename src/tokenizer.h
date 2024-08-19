@@ -2,8 +2,7 @@
 #define TOKENIZER_H
 
 #include "util.h"
-#define MAX_LINE 82
-#define MAX_TOKENS 40
+#define MAX_TOKENS 60
 #define MAX_TOKEN_LENGTH 70
 #define MAX_LABEL_LENGTH 31
 #define MAX_DATA_VALUES 70

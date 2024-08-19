@@ -9,7 +9,7 @@
 
 /* Constants */
 #define MAX_FILENAME 50
-#define MAX_LINE 82
+#define MAX_LINE 81
 #define MAX_LABEL_LENGTH 31
 #define MAX_SYMBOL_LENGTH 31
 #define MAX_MACRO_NAME 31

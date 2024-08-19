@@ -3,7 +3,7 @@
 #include "macro_table.h"
 #include "symbolTable.h"
 #include "tokenizer.h"
-
+#define BUFFER_SIZE 1024
 /* Preprocessor State */
 typedef enum { NORMAL = -1, DEFINITION, EXPANSION } Mode;
 static Mode current_mode = NORMAL;
@@ -19,13 +19,13 @@ int preprocess(const char *input_filename, const char *am_filename) {
     FILE *input_file, *output_file;
     Token *tokens;
     const char *line_ptr;
-    char line[MAX_LINE];
+    char line[BUFFER_SIZE];
     int is_preprocess;
     int current_line;
     int token_count;
     int macro_index;
     int error_flag;
-
+    int len;
 
     macro_index = -1;
     error_flag = 0;
@@ -55,9 +55,16 @@ int preprocess(const char *input_filename, const char *am_filename) {
         fclose(output_file);
         return 0;
     }
-
-    while (fgets(line, MAX_LINE, input_file) != NULL) {
+    printf("Preprocessing %s\n", input_filename);
+    while (fgets(line, BUFFER_SIZE, input_file) != NULL) {
         current_line++;
+        len = strlen(line);
+        if (len >= MAX_LINE) {
+            printf("Error: line %d is too long (max length is %d)\n", current_line, MAX_LINE - 1);
+            error_flag = 1;
+            continue;
+        }
+        line[strcspn(line, "\n")] = 0;
         line_ptr = line;
         /* remove empty lines */
         while (isspace(*line_ptr) && *line_ptr != '\0') {
@@ -66,11 +73,12 @@ int preprocess(const char *input_filename, const char *am_filename) {
         if (*line_ptr == '\0' || *line_ptr == '\n') {
             continue;
         }
-        if (line[0] == ';') continue;
+        if (line[0] == ';')
+            continue;
         tokens = tokenize_line(line, &token_count, current_line, is_preprocess);
         if (tokens == NULL) {
-            printf("Line %d: '%s'\n\n", current_line, line);
-            error_flag = 1;
+          /*  printf("Line %d: '%s'\n\n", current_line, line);
+            error_flag = 1; */
             continue;
         }
 
@@ -82,21 +90,17 @@ int preprocess(const char *input_filename, const char *am_filename) {
         trim_trailing_whitespace(line);
 
         switch (current_mode) {
-            case NORMAL:
-                macro_index = handle_normal_mode(line, output_file, current_line, token_count, tokens, &error_flag);
-                break;
-            case DEFINITION:
-                handle_definition_mode(line, macro_index,token_count, tokens, &error_flag);
-                break;
-            case EXPANSION:
-                handle_expansion_mode(line, output_file, current_line,  token_count, tokens, macro_index, &error_flag);
-                break;
+        case NORMAL:
+            macro_index = handle_normal_mode(line, output_file, current_line, token_count, tokens, &error_flag);
+            break;
+        case DEFINITION:
+            handle_definition_mode(line, macro_index, token_count, tokens, &error_flag);
+            break;
+        case EXPANSION:
+            handle_expansion_mode(line, output_file, current_line, token_count, tokens, macro_index, &error_flag);
+            break;
         }
-
-        if (tokens != NULL) {
-            free(tokens);
-            tokens = NULL;
-        }
+        free(tokens);
     }
 
     fclose(input_file);
@@ -162,6 +166,7 @@ static int handle_normal_mode(char *line, FILE *output_file, int current_line, i
         return macro_index;
     }
 
+    /* Write the line to the output file */
     fputs(line, output_file);
     fputs("\n", output_file);
     return NORMAL;

@@ -44,6 +44,10 @@ int main(int argc, char *argv[]) {
             continue; /* Move to next file */
         }
 
+        printf("Assembling %s\n", am_filename);
+        
+        /* Initialize assembler state */
+
         init_memory_counters();
         parsed_program = init_parsed_program();
 
@@ -54,12 +58,17 @@ int main(int argc, char *argv[]) {
             continue; /* Move to next file */
         }
 
+        printf("First pass complete\n");
+
         /* Second pass */
         if (!secondPass(argv[i], parsed_program, parsed_program->count)) { 
             printf("\nError in second pass for %s\n", am_filename);
             reset_assembler_state(parsed_program);
             continue; /* Move to next file */
         }
+
+        printf("Second pass complete\n");
+        printf("Assembly of %s successful\n", argv[i]);
 
         /* Reset for next file */
         reset_assembler_state(parsed_program);

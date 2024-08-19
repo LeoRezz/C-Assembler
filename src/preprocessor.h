@@ -4,7 +4,6 @@
 #include "util.h"
 
 /* Constants */
-#define MAX_LINE 82
 #define MACRO_KEYWORD_LENGTH 4
 #define ENDMACRO_KEYWORD_LENGTH 7
 

@@ -3,7 +3,7 @@
 
 ; Error: Duplicate label definition
 DUPLICATE: sub r5, r6
-DUPLICATE: mul r7, r8
+DUPLICATE: add r7, r8
 
 ; Error: Invalid characters in label
 INVALID@LABEL: div r1, r2
@@ -52,7 +52,7 @@ invalidinstruction r1, r2
 .data 100, -42, 75
 .string "This is a valid string"
 
-
-; Error: Label starts with a reserved word
-movLABEL: cmp r1, r2
+; Error: entry and extern at the same file
+.entry MAIN
+.extern MAIN
 

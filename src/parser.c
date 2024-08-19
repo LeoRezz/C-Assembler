@@ -20,15 +20,22 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
     int current_token;
     int label_def_flag;
     Line *parsed_line;
+    int tok_len;
 
     TRY(parsed_line = calloc(1, sizeof(Line)));
     parsed_line->line_number = current_line;
-    data_count = 0; /* NOT IN USE */
+    data_count = 0;
     current_token = 0;
     label_def_flag = 0;
 
     /* Check for label */
     if (token_arr[current_token].type == LABEL_DEF) {
+        tok_len = strlen(token_arr[current_token].value);
+        if(tok_len >= MAX_LABEL_LENGTH) {
+            printf("Error in line %d: Label too long\n", parsed_line->line_number);
+            parsed_line->type = ERROR;
+            return parsed_line;
+        }
         token_count--;
         strcpy(parsed_line->label, token_arr[current_token].value);
         label_def_flag = 1;
@@ -78,16 +85,22 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
     }
     /* Check for entry or extern line */
     if (token_arr[current_token].type == ENTRY || token_arr[current_token].type == EXTERN) {
+        if (!is_valid_label(token_arr[current_token + 1].value)) {
+            printf("Error in line %d: Invalid label '%s'\n", parsed_line->line_number, token_arr[current_token + 1].value);
+            parsed_line->type = ERROR;
+            return parsed_line;
+        }
         switch (token_arr[current_token].type) {
         case ENTRY:
             parsed_line->type = LINE_ENTRY;
             current_token++;
-            strncpy(parsed_line->label, token_arr[current_token].value, MAX_LABEL_LENGTH);
-            if(!add_symbol(token_arr[current_token].value, 0, SYMBOL_ENTRY)) {
-                printf("Error in line %d: Symbol '%s' already exists\n", parsed_line->line_number ,token_arr[current_token].value);
-                parsed_line->type = ERROR;
-                return parsed_line;
-            }
+                strncpy(parsed_line->label, token_arr[current_token].value, MAX_LABEL_LENGTH);
+                if (!add_symbol(token_arr[current_token].value, 0, SYMBOL_ENTRY)) {
+                    printf("Error in line %d: Symbol '%s' already exists\n", parsed_line->line_number, token_arr[current_token].value);
+                    parsed_line->type = ERROR;
+                    return parsed_line;
+                }
+            
             break;
         case EXTERN:
             parsed_line->type = LINE_EXTERN;
@@ -108,8 +121,8 @@ Line *parse_line(Token *token_arr, int token_count, int current_line) {
         return parsed_line;
     }
 
-    /* Error */
-    printf("Error in line %d: Expected Opcode or directive instead of '%s'\n", parsed_line->line_number, token_arr[current_token].value);
+    /* Not a valid label definition */
+    printf("Error in line %d: Missing colon '%s'\n", parsed_line->line_number, token_arr[current_token].value);
     
     parsed_line->type = ERROR;
     return parsed_line;
@@ -130,7 +143,11 @@ int parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int
         data->type = DATA_INT; 
         (*current_token)++;    /* Advancing to first integer */
         comma = 0;
-        /* TODO: figure a way to handle missing or extranouse commas errors */
+        if (token_arr[*current_token].type != INTEGER) {
+            printf("Error in line %d: .data directive requires an integer\n", parsed_line->line_number);
+            return 0;
+        }
+
         for (; (token_arr[*current_token].type != UNKNOWN); (*current_token)++) {
             if ((token_arr[*current_token].type == COMMA) && (token_arr[(*current_token) + 1].type != UNKNOWN)) {
                 comma++;
@@ -142,7 +159,7 @@ int parse_data_line(Line *parsed_line, Token *token_arr, int *current_token, int
                 (*data_count)++;
                 comma--;
             } else {
-                printf("Error in line %d: Invalid comma usage or missing comma between integer values near '%s'\n", parsed_line->line_number, token_arr[*current_token].value);
+                printf("Error in line %d: Invalid comma usage near '%s'\n", parsed_line->line_number, token_arr[*current_token].value);
                 return 0;
             }
         }
@@ -209,7 +226,10 @@ int parse_instruction_line(Line *parsed_line, Token *token_arr, int *current_tok
         break;
 
     case TWO_OPERAND:
-
+        if(token_count < 2){
+            printf("Error in line %d: Missing operandsfor instruction '%s' \n", parsed_line->line_number, opcode->mnemonic);
+            return 0;
+        }
         for (i = 0; i < opcode->operands; i++) {
             /* Skip Comma */
             if (i == 1) {
