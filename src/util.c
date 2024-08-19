@@ -1,9 +1,9 @@
 #include "util.h"
 
 void append_extension(char *destination, const char *source, const char *extension) {
-
+    /* Append extension to destination */
     strncpy(destination, source, MAX_FILENAME);
-    destination[MAX_FILENAME] = '\0';
+    destination[MAX_FILENAME - 1] = '\0';
     strcat(destination, extension);
 }
 
