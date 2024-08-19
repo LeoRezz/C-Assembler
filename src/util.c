@@ -29,7 +29,7 @@ char *my_strdup(const char *s) {
 char *skipSpaces(char *s) {
     char *ptr = s;
     /* Skip whitespace and tabs characters */
-    while (isspace(*ptr)) {
+    while (isspace(*ptr) && *ptr != '\0') {
         ptr++;
     }
     return ptr;

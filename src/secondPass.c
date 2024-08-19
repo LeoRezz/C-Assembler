@@ -444,7 +444,7 @@ void entryFile( char *filename) {
     for (i = 0; i < symbolCount; i++) {
 
         if (symbol_table[i].type == SYMBOL_ENTRY) {
-            if (access("test.ent", F_OK) != -1) { /*checks if file already exists*/
+            if (access(entry_name, F_OK) != -1) { /*checks if file already exists*/
                 entry_file = fopen(entry_name, "a");
                 fprintf(entry_file, "%s %d\n", symbol_table[i].name, symbol_table[i].value);
                 fclose(entry_file);
@@ -475,7 +475,7 @@ void externFile(symbol symbol , char *filename, int type) {
         adr = data_adr;
     }
 
-    if (access("test.ext", F_OK) != -1) { /*checks if file already exists*/
+    if (access(extern_name, F_OK) != -1) { /*checks if file already exists*/
 
         extern_file = fopen(extern_name, "a");
         fprintf(extern_file, "%s %d\n", symbol.name, adr);
