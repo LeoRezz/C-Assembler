@@ -26,6 +26,7 @@ int hasCommonWord(Line *line);
 void WriteLine(char *binarycode, char *filename);
 void entryFile( char *filename);
 void externFile(symbol symbol , char *filename, int type);
+void error_accured(char *filename);
 
 
 
@@ -499,7 +500,7 @@ void externFile(symbol symbol , char *filename, int type) {
     }
 }
 
-error_accured(char *filename){
+void error_accured(char *filename){
 
     char file[MAX_FILENAME]; 
     append_extension(file, filename, ".ob");

@@ -15,5 +15,6 @@ int hasCommonWord(Line *line);
 void WriteLine(char *binarycode, char *filename);
 void entryFile(char *filename);
 void externFile(symbol symbol , char *filename, int type);
+void error_accured(char *filename);
 
 #endif 
