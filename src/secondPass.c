@@ -92,42 +92,54 @@ void generate_ob_file( char* filename, char* ins_name, char* data_name) {
         fprintf(file, "%d %d\n", get_IC() - INITIAL_ADDRESS, get_DC());
         fclose(file);
 
-        ins = fopen(ins_name, "r");
-        if (ins == NULL) {
-            printf("Error while opening file\n");
-            error_flag = 1;
-            return;
-        }
 
-        file = fopen(ob_file, "a");
-        if (file == NULL) {
-            printf("Error while opening object file.\n");
-            fclose(ins);  /* Close the other file before returning */
-            return; 
-        }
-        while ((c = fgetc(ins)) != EOF)
-        fputc(c, file);
-        fclose(ins);
+        if (access(ins_name, F_OK) != -1) { /*checks if thare are any instruction is .as file*/
+            ins = fopen(ins_name, "r");
+            if (ins == NULL) {
+                printf("Error while opening file\n");
+                error_flag = 1;
+                return;
+            }
 
-        data = fopen(data_name, "r");
-        if (data == NULL) {
-            printf("Error while opening file data.\n");
-            fclose(file); /*close ob file*/
-            return;
+            file = fopen(ob_file, "a");
+            if (file == NULL) {
+                printf("Error while opening object file.\n");
+                fclose(ins);  /* Close the other file before returning */
+                return; 
+            }
+            while ((c = fgetc(ins)) != EOF){
+            fputc(c, file);
+            }
+            fclose(ins);
+            fclose(file);
         }
-        while ((c = fgetc(data)) != EOF)
-        fputc(c, file);
-        fclose(data);
+       
+        if (access(data_name, F_OK) != -1) { /*checks if thare are any data is .as file*/
+            data = fopen(data_name, "r");
+            if (data == NULL) {
+                printf("Error while opening file\n");
+                error_flag = 1;
+                return;
+            }
 
-        fclose(file);
+            file = fopen(ob_file, "a");
+            if (file == NULL) {
+                printf("Error while opening object file.\n");
+                fclose(data);  /* Close the other file before returning */
+                return; 
+            }
+            while ((c = fgetc(data)) != EOF){
+            fputc(c, file);
+            }
+            fclose(data);
+            fclose(file);
+        }
 
         remove(ins_name);
         remove(data_name);
-
         
     }
     
-
 }
 
 void DataToBinary(Line *line, char* filename){ /*extrenFile()*/
