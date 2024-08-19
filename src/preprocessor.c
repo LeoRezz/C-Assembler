@@ -48,6 +48,7 @@ int preprocess(const char *input_filename, const char *am_filename) {
 
     while (fgets(line, MAX_LINE, input_file) != NULL) {
         current_line++;
+         
         if (strlen(line) == MAX_LINE - 1 && line[MAX_LINE - 2] != '\n') {
             printf("Error: Line number %d is too long\n", current_line);
             error_flag = 1;
@@ -79,11 +80,18 @@ static int handle_normal_mode(char *line, FILE *output_file, int current_line) {
     Macro *m;
     int macro_index;
     char *line_ptr = skipSpaces(line);
-    
     if (*line_ptr == '\0' || *line_ptr == '\n' || *line_ptr == ';') {
         return -1; /* Skip empty lines and comments */
     }
+    
+    /* Searching for macro usage first */
+    m = get_macro(macro_table, line_ptr); 
+    if (m) {
+        current_mode = EXPANSION;
+        return m - macro_table->macros; /* Return the index of the macro */
+    }
 
+    /* Searching for macro definition */
     if (strncmp(line_ptr, MACRO_KEYWORD, MACRO_KEYWORD_LENGTH) == 0) {
         current_mode = DEFINITION;
         line_ptr += MACRO_KEYWORD_LENGTH;
@@ -101,12 +109,6 @@ static int handle_normal_mode(char *line, FILE *output_file, int current_line) {
             return -1;
         }
         return macro_index;
-    }
-
-    m = get_macro(macro_table, line_ptr);
-    if (m) {
-        current_mode = EXPANSION;
-        return m - macro_table->macros;  /* Return the index of the macro */
     }
 
     fputs(line, output_file);
