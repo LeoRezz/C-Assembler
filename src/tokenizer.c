@@ -272,8 +272,13 @@ static int my_getword(char *word, int lim, const char **line, int is_preprocess)
                 *w++ = *l++;
             }
             if (*l == ':') {
-                is_label = 1;
-                l++; /* Skip the colon */
+                if (is_preprocess) {
+                    is_label = 1;
+                } else {
+
+                    is_label = 1;
+                    l++; /* Skip the colon */
+                }
             }
             *w = '\0';
             *line = l;
@@ -291,72 +296,5 @@ static int my_getword(char *word, int lim, const char **line, int is_preprocess)
     *w = '\0';
     *line = l;
     return is_label ? 1 : 0; /* Return ':' if it's a label */
-}
-
-const char *token_type_to_string(TokenType type) {
-    switch (type) {
-    case REGISTER:
-        return "REGISTER";
-    case MOV:
-        return "MOV";
-    case CMP:
-        return "CMP";
-    case ADD:
-        return "ADD";
-    case SUB:
-        return "SUB";
-    case NOT:
-        return "NOT";
-    case CLR:
-        return "CLR";
-    case LEA:
-        return "LEA";
-    case INC:
-        return "INC";
-    case DEC:
-        return "DEC";
-    case JMP:
-        return "JMP";
-    case BNE:
-        return "BNE";
-    case RED:
-        return "RED";
-    case PRN:
-        return "PRN";
-    case JSR:
-        return "JSR";
-    case RTS:
-        return "RTS";
-    case STOP:
-        return "STOP";
-    case DATA:
-        return "DATA";
-    case STRING:
-        return "STRING";
-    case ENTRY:
-        return "ENTRY";
-    case EXTERN:
-        return "EXTERN";
-    case IMMEDIATE:
-        return "IMMEDIATE";
-    case INTEGER:
-        return "INTEGER";
-    case STRING_LITERAL:
-        return "STRING_LITERAL";
-    case ERROR:
-        return "ERROR";
-    case LABEL_DEF:
-        return "LABEL_DEF";
-    case DIRECET:
-        return "DIRECET";
-    case COMMA:
-        return "COMMA";
-    case INDIRECT_REGISTER:
-        return "INDIRECT_REGISTER";
-    case UNKNOWN:
-        return "UNKNOWN";
-    default:
-        return "UNDEFINED";
-    }
 }
 

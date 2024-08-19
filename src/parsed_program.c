@@ -1,6 +1,8 @@
 #include "parsed_program.h"
 #include "opcodeTable.h"
+#include "line.h"
 #include <stdlib.h>
+
 #define INITIAL_ADDRESS 100
 
 void print_binary(int num, int bits);
@@ -66,74 +68,5 @@ void free_parsed_program(ParsedProgram *program) {
     if (program != NULL) {
         free(program->lines);
         free(program);
-    }
-}
-
-void print_parsed_program(const ParsedProgram* program)
-{
-    int i;
-    
-    if (program == NULL)
-    {
-        printf("Parsed program is NULL\n");
-        return;
-    }
-    printf("\n\n-------------------------------\n");
-    printf("Parsed Program:\n");
-    printf("Total lines: %d\n", program->count);
-    printf("-------------------------------\n");
-
-    for (i = 0; i < program->count; i++)
-    {
-        Line *line = &(program->lines[i]);
-        printf("Line %d (Address: %d):\n", i + 1, line->address);
-        printf("  Type: ");
-        
-        switch(line->type)
-        {
-            
-            case LINE_INSTRUCTION:
-                printf("Instruction\n");
-                printf("  Opcode: %s ", opcode_to_string(line->content.inst.opcode));
-                print_binary(line->content.inst.opcode, 4);
-                printf("\n");
-                printf("  Operands: %d\n", line->content.inst.operands_count);
-                /* Add more details about operands if needed */
-                break;
-            case LINE_DATA:
-                printf("Data\n");
-                printf("  Type: %s\n", line->content.data.type == DATA_INT ? "Integer" : "String");
-                printf("  Value count: %d\n", line->content.data.value_count);
-                /* Add more details about data values if needed */
-                break;
-            case LINE_STRING:
-                printf("String\n");
-                printf("  Value: %s\n", line->content.data.content.char_values);
-                break;
-            case LINE_ENTRY:
-                printf("Entry\n");
-                break;
-            case LINE_EXTERN:
-                printf("Extern\n");
-                break;
-            default:
-                printf("Unknown\n");
-        }
-
-        if (line->label[0] != '\0')
-        {
-            printf("  Label: %s\n", line->label);
-        }
-
-        printf("-------------------------------\n");
-    }
-
-    
-}
-
-void print_binary(int num, int bits) {
-    int i;
-    for (i = bits - 1; i >= 0; i--) {
-        printf("%d", (num >> i) & 1);
     }
 }

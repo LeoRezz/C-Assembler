@@ -121,13 +121,16 @@ static int handle_normal_mode(char *line, FILE *output_file, int current_line, i
     /* Searching for macro usage */
     m = get_macro(macro_table, tokens[0].value);
     if (m != NULL) {
-        if(token_count > 1) {
-            printf("Error at line %d: macro usage with extra arguments: '%s' contains invalid character\n", current_line, tokens[1].value);
-            *error_flag = 1;
-            return NORMAL;
+        if (tokens[1].value[0] != ':') {
+
+            if (token_count > 1) {
+                printf("Error at line %d: macro usage with extra arguments: '%s' contains invalid character\n", current_line, tokens[1].value);
+                *error_flag = 1;
+                return NORMAL;
+            }
+            current_mode = EXPANSION;
+            return m - macro_table->macros; /* Return the index of the macro */
         }
-        current_mode = EXPANSION;
-        return m - macro_table->macros; /* Return the index of the macro */
     } else if (tokens[0].type == ENDMACRO_KEYWORD) {
         current_mode = NORMAL;
         printf("Error at line %d: endmacr without definition\n", current_line);

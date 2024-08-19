@@ -1,6 +1,8 @@
 #ifndef PREPROCESSOR_H
 #define PREPROCESSOR_H
 
+/* TODO: Add brief description of this header file's purpose */
+
 #include "util.h"
 
 /* Constants */
@@ -8,7 +10,8 @@
 #define ENDMACRO_KEYWORD_LENGTH 7
 
 /* Function prototypes */
-/* TODO: Document the purpose, parameters, and return value of this function */
 int preprocess(const char *input_filename, const char *am_filename);
 
-#endif /* PREPROCESSOR_H */
+/* TODO: Document the preprocess function */
+
+#endif 

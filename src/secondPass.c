@@ -5,7 +5,7 @@
 #include "memory_manager.h"
 #include "parser.h"
 #include "parsed_program.h"
-#include "tokenizer.h"
+#include "util.h"
 
 #define STARTING_ADDRESS 100
 #define WORD_SIZE 20

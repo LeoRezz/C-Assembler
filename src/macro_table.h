@@ -16,11 +16,13 @@ typedef struct MacroTable {
     int capacity;
 } MacroTable;
 
+/* Function prototypes */
 MacroTable *init_macro_table(void);
 void free_macro_table(MacroTable *table);
 int add_macro(MacroTable *table, const char *name);
 int add_macro_line(MacroTable *table, int macro_index, const char *line);
 Macro *get_macro(MacroTable *table, const char *name);
 void print_macro_table(MacroTable *table);
+
 
 #endif 

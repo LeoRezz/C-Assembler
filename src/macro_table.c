@@ -19,6 +19,7 @@ MacroTable *init_macro_table(void) {
     return table;
 }
 
+
 void free_macro_table(MacroTable *table) {
     int i, j;
     if (!table)

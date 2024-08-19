@@ -1,6 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+/* TODO: Add brief description of this header file's purpose */
+
 /* Standard library includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,16 +19,14 @@
 #define MIN_IMMEDIATE_VALUE -2048
 #define INITIAL_ADDRESS 100
 
-
 /* Macro for error checking */
-#define TRY(a)       \
-    if (!(a)) {      \
-        perror(#a);  \
-        exit(1);     \
+#define TRY(a) \
+    if (!(a)) { \
+        perror(#a); \
+        exit(1); \
     }
 
 /* Function prototypes */
-/* TODO: Document each of these functions */
 void trim_trailing_whitespace(char *str);
 int is_reserved_word(const char *word);
 char *my_strdup(const char *s);
@@ -34,6 +34,6 @@ char *skipSpaces(char *s);
 void skip_spaces(char *s);
 void append_extension(char *destination, const char *source, const char *extension);
 
-/* Add any other utility functions you've defined */
+/* TODO: Document each function prototype */
 
 #endif 

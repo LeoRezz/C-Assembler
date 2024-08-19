@@ -1,4 +1,5 @@
 #include "symbolTable.h"
+#include "macro_table.h"
 #define MAX_LABEL_LENGTH 31
 #define INITIAL_SYMBOL_TABLE_SIZE 20
 
@@ -13,6 +14,7 @@ static symbol *symbol_table;
 static int symbol_count;
 static int symbol_capacity;
 
+
 /*Initialize the symbol table */
 void init_symbol_table(void) {
     symbol_table = calloc(INITIAL_SYMBOL_TABLE_SIZE , sizeof(symbol));
@@ -26,7 +28,7 @@ void init_symbol_table(void) {
 
 static int is_duplicate_symbol(char *name, int value, SymbolType origin_type) {
     symbol *symbol_duplicate = find_symbol(name);
-
+    
     /* Checks if the symbol already exists */
     if (symbol_duplicate != NULL) {
         /* if the symbol is an entry, update it's value to current IC */
@@ -36,17 +38,17 @@ static int is_duplicate_symbol(char *name, int value, SymbolType origin_type) {
         switch (origin_type) {
         case SYMBOL_CODE:
         case SYMBOL_DATA:
-            if ((symbol_duplicate->type == SYMBOL_CODE) || (symbol_duplicate->type == SYMBOL_DATA)) {
+            if (((symbol_duplicate->type == SYMBOL_CODE) || (symbol_duplicate->type == SYMBOL_DATA)) || ((symbol_duplicate->type == SYMBOL_MACRO))) {
                 return 1;
             }
             break;
         case SYMBOL_ENTRY:
-            if ((symbol_duplicate->type == SYMBOL_ENTRY) || (symbol_duplicate->type == SYMBOL_EXTERNAL)) {
+            if (((symbol_duplicate->type == SYMBOL_ENTRY) || (symbol_duplicate->type == SYMBOL_EXTERNAL)) || ((symbol_duplicate->type == SYMBOL_MACRO))) {
                 return 1;
             }
 
-            break;
         case SYMBOL_EXTERNAL:
+        case SYMBOL_MACRO:
             return 1;
             break;
         default:

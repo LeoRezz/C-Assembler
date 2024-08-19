@@ -1,9 +1,12 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
+/* TODO: Add brief description of this header file's purpose */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #define MAX_SYMBOL_LENGTH 31
 
 typedef enum {
@@ -20,6 +23,7 @@ typedef struct {
     SymbolType type;
 } symbol;
 
+/* Function prototypes */
 void init_symbol_table(void);
 int add_symbol(char *name, int value, SymbolType type);
 symbol *find_symbol(char *name);
@@ -28,6 +32,8 @@ symbol *find_entry_refrence(char *name);
 symbol* get_symbol_table();
 int get_symbol_count();
 void update_data_symbols(int IC);
-void print_symbol_table(void);
 void free_symbol_table(void);
-#endif /* SYMBOL_TABLE_H */
+
+/* TODO: Document each function prototype */
+
+#endif 

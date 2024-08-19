@@ -57,17 +57,6 @@ int first_pass(char *am_filename, ParsedProgram *parsed_program) {
 
     update_data_lines(get_IC(), parsed_program);
     resolve_entrys();
-    print_symbol_table();
     fclose(am_file);
     return (error_flag == 0);
-}
-
-void print_token_arr(Token *token_arr, int token_count) {
-    /* output printer */
-    int i;
-    printf("--------------------Tokenized result:-----------------------\n");
-    for (i = 0; i < token_count; i++) {
-        printf("%s\t%s\n", token_arr[i].value, token_type_to_string(token_arr[i].type));
-    }
-    printf("------------------------------------------------------------\n\n\n");
 }
