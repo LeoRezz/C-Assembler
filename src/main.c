@@ -1,8 +1,6 @@
 #include "firstPass.h"
 #include "preprocessor.h"
 
-/* global error flag */
-int error_flag = 0;
 
 void reset_assembler_state();
 void reset_assembler_state(ParsedProgram *parsed_program);
